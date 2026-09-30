@@ -132,3 +132,105 @@ test("修复2：原稿局部修改保留未变化Unit与未受影响窗口结果
   assert.equal(readFileSync(thirdPath, "utf8"), "third-window");
   s.close();
 });
+
+test("修复2：阶段二 REAL_SPEECH_PERFORMANCE_PLAN_V1 可直接导入无需旧导出上下文", () => {
+  const { s, t } = fixture();
+  const plan = {
+    schema: "REAL_SPEECH_PERFORMANCE_PLAN_V1",
+    protocolVersion: "1.0",
+    targetModel: "cosyvoice-v3.5-plus",
+    planId: "repair2-import-001",
+    sourceText: t.originalText,
+    globalDirection: "真人面对镜头，先自然说清，再逐步推动成交。",
+    phrases: [
+      { phraseId: "P001", text: "第一句。", salesAction: "强钩子", direction: "直接开场，短促有力", pace: "FAST", energy: "HIGH", emphasis: ["第一句"], pauseAfter: "SHORT" },
+      { phraseId: "P002", text: "第二句。", salesAction: "解释", direction: "回落到自然聊天", pace: "NORMAL", energy: "MEDIUM", emphasis: [], pauseAfter: "SHORT" },
+      { phraseId: "P003", text: "第三句。", salesAction: "收口", direction: "肯定落点，不喊", pace: "NORMAL", energy: "MEDIUM", emphasis: ["第三句"], pauseAfter: "NONE" },
+    ],
+    windows: [
+      { windowId: "GW001", phraseIds: ["P001", "P002"], instruction: "真人对镜头，开头有力，随后自然聊天。", rate: 1.08, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 120, pronunciation: [], rhythmBreaks: [{ afterPhraseId: "P001", pauseMs: 180 }] },
+      { windowId: "GW002", phraseIds: ["P003"], instruction: "自然肯定收口，不喊卖，重点清楚。", rate: 1, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 0, pronunciation: [], rhythmBreaks: [] },
+    ],
+    missingInputs: [],
+  };
+  const preview = s.preview({ taskId: t.taskId, text: JSON.stringify(plan) });
+  assert.equal(preview.plan.schema, "REAL_SPEECH_PERFORMANCE_PLAN_V1");
+  const next = s.apply({ taskId: t.taskId, text: JSON.stringify(plan) });
+  assert.deepEqual(next.units.map((u: any) => u.phraseId), ["P001", "P002", "P003"]);
+  assert.deepEqual(next.windows.map((w: any) => w.unitIds), [["U001", "U002"], ["U003"]]);
+  assert.equal(next.windows[0].directorMeta.phrases[0].salesAction, "强钩子");
+  assert.equal(next.windows[0].rhythmData[0].unitId, "U001");
+  s.close();
+});
+
+test("修复2：阶段二导入必须逐字覆盖当前原稿且严格锁定模型能力", () => {
+  const { s, t } = fixture();
+  const base: any = {
+    schema: "REAL_SPEECH_PERFORMANCE_PLAN_V1",
+    protocolVersion: "1.0",
+    targetModel: "cosyvoice-v3.5-plus",
+    planId: "repair2-import-bad",
+    sourceText: t.originalText,
+    globalDirection: "自然表达",
+    phrases: [
+      { phraseId: "P001", text: t.originalText, salesAction: "解释", direction: "自然", pace: "NORMAL", energy: "MEDIUM", emphasis: [], pauseAfter: "NONE" },
+    ],
+    windows: [
+      { windowId: "GW001", phraseIds: ["P001"], instruction: "自然面对镜头聊天。", rate: 1, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 0, pronunciation: [], rhythmBreaks: [] },
+    ],
+    missingInputs: [],
+  };
+  const wrongText = structuredClone(base);
+  wrongText.sourceText = "另一份原稿。";
+  wrongText.phrases[0].text = "另一份原稿。";
+  assert.throws(() => s.preview({ taskId: t.taskId, text: JSON.stringify(wrongText) }), /原稿/);
+  const tooLong = structuredClone(base);
+  tooLong.windows[0].instruction = "汉".repeat(41);
+  assert.throws(() => s.preview({ taskId: t.taskId, text: JSON.stringify(tooLong) }), /超限/);
+  const wrongModel = structuredClone(base);
+  wrongModel.targetModel = "other-model";
+  assert.throws(() => s.preview({ taskId: t.taskId, text: JSON.stringify(wrongModel) }), /CosyVoice/);
+  s.close();
+});
+
+
+test("修复2：Phrase导演标注可人工修改保存且不强制重生成", () => {
+  const { s, t } = fixture();
+  const plan: any = {
+    schema: "REAL_SPEECH_PERFORMANCE_PLAN_V1",
+    protocolVersion: "1.0",
+    targetModel: "cosyvoice-v3.5-plus",
+    planId: "repair2-phrase-edit",
+    sourceText: t.originalText,
+    globalDirection: "真人面对镜头自然表达",
+    phrases: [
+      { phraseId: "P001", text: "第一句。", salesAction: "钩子", direction: "直接说", pace: "FAST", energy: "HIGH", emphasis: ["第一句"], pauseAfter: "SHORT" },
+      { phraseId: "P002", text: "第二句。第三句。", salesAction: "解释", direction: "自然聊", pace: "NORMAL", energy: "MEDIUM", emphasis: [], pauseAfter: "NONE" },
+    ],
+    windows: [
+      { windowId: "GW001", phraseIds: ["P001", "P002"], instruction: "真人对镜头自然说，开头有力但不喊。", rate: 1, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 0, pronunciation: [], rhythmBreaks: [] },
+    ],
+    missingInputs: [],
+  };
+  let next = s.apply({ taskId: t.taskId, text: JSON.stringify(plan) });
+  const beforeStatus = next.windows[0].status;
+  next = s.update({
+    taskId: next.taskId,
+    taskRevision: next.taskRevision,
+    unit: {
+      unitId: next.units[0].id,
+      salesAction: "强反问钩子",
+      direction: "像熟人一样反问，带一点调侃",
+      pace: "FAST",
+      energy: "HIGH",
+      emphasis: ["第一句"],
+      pauseAfter: "MEDIUM",
+    },
+  });
+  assert.equal(next.units[0].salesAction, "强反问钩子");
+  assert.equal(next.units[0].direction, "像熟人一样反问，带一点调侃");
+  assert.equal(next.windows[0].directorMeta.phrases[0].pauseAfter, "MEDIUM");
+  assert.equal(next.windows[0].status, beforeStatus, "只改导演标注不应误判为模型参数已变化");
+  assert.throws(() => s.update({ taskId: next.taskId, taskRevision: next.taskRevision, unit: { unitId: next.units[0].id, pace: "SUPER_FAST" } }), /速度/);
+  s.close();
+});
