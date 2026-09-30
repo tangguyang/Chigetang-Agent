@@ -234,3 +234,23 @@ test("修复2：Phrase导演标注可人工修改保存且不强制重生成", (
   assert.throws(() => s.update({ taskId: next.taskId, taskRevision: next.taskRevision, unit: { unitId: next.units[0].id, pace: "SUPER_FAST" } }), /速度/);
   s.close();
 });
+
+
+test("修复2：同段多版本倒序可选，切换当前版本恢复对应快照且旧文件保留", async () => {
+  const { s, t } = fixture();
+  let next = await s.generate({ taskId: t.taskId, taskRevision: t.taskRevision, windowId: "GW001" }, fake("rev1"));
+  const rev1 = next.windows[0].results[0];
+  next = s.update({ taskId: next.taskId, taskRevision: next.taskRevision, window: { windowId: "GW001", instruction: "第二种演法，自然收住。", rate: 1.12 } });
+  next = await s.generate({ taskId: next.taskId, taskRevision: next.taskRevision, windowId: "GW001" }, fake("rev2"));
+  const rev2 = next.windows[0].results[1];
+  assert.ok(rev1.generatedAt && rev2.generatedAt);
+  assert.equal(next.windows[0].selectedRevision, 2);
+  next = s.feedback({ taskId: next.taskId, taskRevision: next.taskRevision, type: "select", windowId: "GW001", data: 1 });
+  assert.equal(next.windows[0].selectedRevision, 1);
+  assert.equal(next.windows[0].instruction, rev1.snapshot.instruction);
+  assert.equal(next.windows[0].rate, rev1.snapshot.rate);
+  assert.equal(readFileSync(rev1.path, "utf8"), "rev1");
+  assert.equal(readFileSync(rev2.path, "utf8"), "rev2");
+  assert.throws(() => s.feedback({ taskId: next.taskId, taskRevision: next.taskRevision, type: "select", windowId: "GW001", data: 999 }), /不存在/);
+  s.close();
+});
