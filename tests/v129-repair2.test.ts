@@ -254,3 +254,42 @@ test("修复2：同段多版本倒序可选，切换当前版本恢复对应快�
   assert.throws(() => s.feedback({ taskId: next.taskId, taskRevision: next.taskRevision, type: "select", windowId: "GW001", data: 999 }), /不存在/);
   s.close();
 });
+
+test("修复2：阶段二导入后改原稿保留未变化Phrase元数据，单句修改保留Phrase身份并升revision", () => {
+  const { s, t } = fixture();
+  const plan: any = {
+    schema: "REAL_SPEECH_PERFORMANCE_PLAN_V1",
+    protocolVersion: "1.0",
+    targetModel: "cosyvoice-v3.5-plus",
+    planId: "repair2-phrase-reconcile",
+    sourceText: t.originalText,
+    globalDirection: "自然带货",
+    phrases: [
+      { phraseId: "P001", text: "第一句。", salesAction: "钩子", direction: "快而直接", pace: "FAST", energy: "HIGH", emphasis: ["第一句"], pauseAfter: "SHORT" },
+      { phraseId: "P002", text: "第二句。", salesAction: "解释", direction: "自然聊天", pace: "NORMAL", energy: "MEDIUM", emphasis: [], pauseAfter: "SHORT" },
+      { phraseId: "P003", text: "第三句。", salesAction: "收口", direction: "坚定收住", pace: "NORMAL", energy: "MEDIUM", emphasis: ["第三句"], pauseAfter: "NONE" },
+    ],
+    windows: [
+      { windowId: "GW001", phraseIds: ["P001"], instruction: "真人对镜头，开头快而直接，不喊。", rate: 1, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 0, pronunciation: [], rhythmBreaks: [] },
+      { windowId: "GW002", phraseIds: ["P002"], instruction: "自然聊天解释，松弛可信。", rate: 1, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 0, pronunciation: [], rhythmBreaks: [] },
+      { windowId: "GW003", phraseIds: ["P003"], instruction: "自然肯定收口，重点清楚。", rate: 1, pitch: 1, volume: 50, seed: 0, transitionPauseMs: 0, pronunciation: [], rhythmBreaks: [] },
+    ],
+    missingInputs: [],
+  };
+  let next = s.apply({ taskId: t.taskId, text: JSON.stringify(plan) });
+  next = s.update({
+    taskId: next.taskId,
+    taskRevision: next.taskRevision,
+    originalText: "第一句。第二句改了。第三句。",
+  });
+  assert.equal(next.units[0].phraseId, "P001");
+  assert.equal(next.units[0].salesAction, "钩子");
+  assert.equal(next.units[0].phraseChanged, false);
+  assert.equal(next.units[1].phraseId, "P002");
+  assert.equal(next.units[1].phraseRevision, 2);
+  assert.equal(next.units[1].phraseChanged, true);
+  assert.equal(next.units[1].salesAction, "解释");
+  assert.equal(next.units[2].phraseId, "P003");
+  assert.equal(next.units[2].direction, "坚定收住");
+  s.close();
+});
