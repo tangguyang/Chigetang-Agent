@@ -302,7 +302,7 @@ else {
             case "feedback": data = realSpeech.feedback(p); break;
             case "export": { const out=realSpeech.exportTask(p,docs); clipboard.writeText(out.text); if(p.attachments) await shell.openPath(out.dir); data=out.task; break; }
             case "copy": clipboard.writeText(String(p.text)); data=true; break;
-            case "document": { const files: Record<string,string> = { manual:"真人口播表演生产系统_使用手册_V5.0.md",protocol:"ChatGPT_真人口播返回协议_V1.2.md",diagnosis:"真人口播小白听感诊断手册_V1.1.md" }; if(!files[p.kind])throw new Error("文档不存在"); data=readFileSync(join(docs,files[p.kind]),"utf8"); break; }
+            case "document": { const files: Record<string,string> = { stage1:"阶段1_真人带货口播导演对齐_V1.0.md",stage2:"阶段2_真人口播执行编译_V1.0.md",manual:"真人口播表演生产系统_使用手册_V5.0.md",protocol:"ChatGPT_真人口播返回协议_V1.2.md",diagnosis:"真人口播小白听感诊断手册_V1.1.md" }; if(!files[p.kind])throw new Error("文档不存在"); data=readFileSync(join(docs,files[p.kind]),"utf8"); break; }
             default: throw new Error("未知真人口播操作");
           }
           return {ok:true,data};
@@ -997,8 +997,7 @@ else {
                 break;
               case "tasks.refreshAll":
                 result = await service.tasks.refreshAll();
-                break;
-              case "tasks.remove": {
+                break;              case "tasks.remove": {
                 const task = service.tasks.get(String(p.id));
                 if (service.audio.active.has(task.id))
                   throw new Error(
