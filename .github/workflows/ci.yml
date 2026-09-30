@@ -1,0 +1,42 @@
+name: Chigetang Agent CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  core:
+    name: Core tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  build-ui:
+    name: Build and UI regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:ui
+      - run: npm run test:bundle
