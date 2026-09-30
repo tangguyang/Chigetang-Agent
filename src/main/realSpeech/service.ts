@@ -15,6 +15,7 @@ import { promisify } from "node:util";
 import {
   canonical,
   units,
+  reconcileUnits,
   checkInstruction,
   instructionCount,
   parsePlan,
@@ -23,6 +24,7 @@ import {
   ACTIONS,
   CASE_CHECKS,
   FIELDS,
+  COSYVOICE_35_PLUS,
   type Obj,
 } from "../../features/realSpeech/domain.ts";
 import { HttpClient, secureURL } from "../providers/http.ts";
@@ -280,29 +282,90 @@ export class RealSpeechService {
         [...p.originalText].length > 20000
       )
         throw Error("原稿无效");
-      t.archives = [
-        ...(t.archives || []),
-        {
-          windows: t.windows,
-          originalText: t.originalText,
-          revision: t.taskRevision,
-        },
-      ];
+      const previousUnits = structuredClone(t.units);
+      const previousWindows = structuredClone(t.windows);
+      const nextUnits = reconcileUnits(previousUnits, p.originalText);
+      const surviving = new Set(nextUnits.map((u: Obj) => u.id));
+      const preservedIds = new Set(
+        nextUnits
+          .filter((u: Obj) => previousUnits.some((old: Obj) => old.id === u.id))
+          .map((u: Obj) => u.id),
+      );
+      const oldWindowIndex = new Map<string, number>();
+      previousWindows.forEach((w: Obj, wi: number) =>
+        w.unitIds.forEach((id: string) => oldWindowIndex.set(id, wi)),
+      );
+      const oldPosition = new Map(previousUnits.map((u: Obj, i: number) => [u.id, i]));
+      const preservedOldPositions = new Set(
+        [...preservedIds].map((id) => oldPosition.get(id)).filter((v) => v !== undefined),
+      );
+      const assignment = nextUnits.map((u: Obj, i: number) => {
+        if (oldWindowIndex.has(u.id)) return oldWindowIndex.get(u.id)!;
+        // A one-for-one edited sentence keeps the old window at the same position.
+        const positional = previousUnits[i];
+        if (positional && !preservedOldPositions.has(i))
+          return oldWindowIndex.get(positional.id) ?? 0;
+        for (let j = i - 1; j >= 0; j--) {
+          const wi = oldWindowIndex.get(nextUnits[j].id);
+          if (wi !== undefined) return wi;
+        }
+        for (let j = i + 1; j < nextUnits.length; j++) {
+          const wi = oldWindowIndex.get(nextUnits[j].id);
+          if (wi !== undefined) return wi;
+        }
+        return 0;
+      });
+      // Keep assignment monotonic so inserts between windows cannot reorder the timeline.
+      for (let i = 1; i < assignment.length; i++)
+        assignment[i] = Math.max(assignment[i - 1], assignment[i]);
+      const groups: Array<{ wi: number; ids: string[] }> = [];
+      nextUnits.forEach((u: Obj, i: number) => {
+        const wi = Math.min(assignment[i], Math.max(0, previousWindows.length - 1));
+        const last = groups.at(-1);
+        if (last?.wi === wi) last.ids.push(u.id);
+        else groups.push({ wi, ids: [u.id] });
+      });
+      const changedOldWindows: Obj[] = [];
+      const nextWindows = groups.map((g, i) => {
+        const old = previousWindows[g.wi];
+        const same = old && canonical(old.unitIds) === canonical(g.ids) &&
+          g.ids.every((id) => surviving.has(id) && preservedIds.has(id));
+        if (same) return old;
+        if (old) changedOldWindows.push(old);
+        const base = old || previousWindows.at(-1) || this.window("GW001", []);
+        return this.window(old?.windowId || `GW${String(i + 1).padStart(3, "0")}`, g.ids, {
+          instruction: base.instruction,
+          synthesisText: "",
+          rhythmData: [],
+          pronunciation: structuredClone(base.pronunciation || []),
+          transitionPauseMs: base.transitionPauseMs || 0,
+          rate: base.rate,
+          pitch: base.pitch,
+          volume: base.volume,
+          seed: base.seed,
+          status: "dirty",
+          results: [],
+        });
+      });
+      if (changedOldWindows.length)
+        t.archives = [
+          ...(t.archives || []),
+          { windows: changedOldWindows, originalText: t.originalText, revision: t.taskRevision },
+        ];
       t.finalDirty = true;
-      if (t.rehearsal)
-        t.archives.push({ windows: [t.rehearsal], revision: t.taskRevision });
+      const rehearsalStillValid = t.rehearsal &&
+        t.rehearsal.unitIds?.every((id: string) => preservedIds.has(id));
+      if (t.rehearsal && !rehearsalStillValid)
+        t.archives = [...(t.archives || []), { windows: [t.rehearsal], revision: t.taskRevision }];
       t.originalText = p.originalText;
-      t.units = units(p.originalText);
-      t.windows = [
-        this.window(
-          "GW001",
-          t.units.map((v: Obj) => v.id),
-        ),
-      ];
-      t.rehearsalPassed = false;
+      t.units = nextUnits;
+      t.windows = nextWindows.length ? nextWindows : [this.window("GW001", nextUnits.map((v: Obj) => v.id))];
+      if (!rehearsalStillValid) {
+        t.rehearsalPassed = false;
+        t.rehearsal = null;
+        t.rehearsalUnitIds = null;
+      }
       t.director = null;
-      t.rehearsal = null;
-      t.rehearsalUnitIds = null;
       t.pendingAction = null;
     }
     if (p.voiceRef !== undefined && p.voiceRef !== t.voiceRef) {
@@ -330,7 +393,8 @@ export class RealSpeechService {
       }
       if (audioChanged) {
         w.status = "dirty";
-        t.rehearsalPassed = false;
+        // 局部参数修改只使当前窗口失效。试演是首轮方向验证，不再作为
+        // 后续单段重生成的全局门禁，避免“修改后必须重跑开头试演”的死锁。
       }
     }
     if (p.rehearsalUnitIds) {
@@ -421,7 +485,7 @@ export class RealSpeechService {
     if (p.attachments && t.final?.path && existsSync(t.final.path))
       copyFileSync(t.final.path, join(dir, "current-final.wav"));
     const voice = this.app?.audio.voices().find((v) => v.id === t.voiceRef);
-    const text = `# ChatGPT 真人口播 ${p.kind} Task\n软件版本1.2.9；不改原稿，不改音色。不猜发音“破平台食谱”。\n${count ? "音频附件包已准备；剪贴板不包含音频，需用户另行附上。" : "本次仅复制文字，未附音频；不得声称已听过音频。"}\n导演参考字段不会直接传入模型；关键表演要求须写入窗口instruction，整体rate不是句内速度。初始seed固定0。\n当前能力：${JSON.stringify({ actions: ACTIONS, fields: FIELDS, rate: [0.5, 2], pitch: [0.5, 2], volume: [0, 100], seed: [0, 65535], sampleRate: 48000, ssml: "仅unit后break，通过rhythmData；不接受任意XML", pronunciation: "hot_fix拼音", instruction: "Han<=40 weighted<=100" })}\n任务上下文：\n\`\`\`json\n${JSON.stringify(scrub({ ...safe, voiceName: voice?.name, windows: t.windows.map((w: Obj) => ({ ...w, instructionCounts: instructionCount(w.instruction) })) }), null, 2)}\n\`\`\`\n请返回 ${p.kind === "Director" ? "CHATGPT_DIRECTOR_PLAN_V1" : "CHATGPT_EXECUTION_PLAN_V1"}。\n${protocol}\n${detail}`;
+    const text = `# ChatGPT 真人口播 ${p.kind} Task\n软件版本1.2.9；不改原稿，不改音色。不猜发音“破平台食谱”。\n${count ? "音频附件包已准备；剪贴板不包含音频，需用户另行附上。" : "本次仅复制文字，未附音频；不得声称已听过音频。"}\n导演参考字段不会直接传入模型；关键表演要求须写入窗口instruction，整体rate不是句内速度。初始seed固定0。\n当前能力：${JSON.stringify({ actions: ACTIONS, fields: FIELDS, model: COSYVOICE_35_PLUS.model, region: COSYVOICE_35_PLUS.region, rate: COSYVOICE_35_PLUS.rate, pitch: COSYVOICE_35_PLUS.pitch, volume: COSYVOICE_35_PLUS.volume, seed: COSYVOICE_35_PLUS.seed, sampleRate: COSYVOICE_35_PLUS.sampleRate, format: COSYVOICE_35_PLUS.format, ssml: "仅真实支持的SSML；当前UI只编译Unit后break，不接受任意XML", pronunciation: "hot_fix拼音", instruction: `Han<=${COSYVOICE_35_PLUS.instructionHanSafetyMax} weighted<=${COSYVOICE_35_PLUS.providerInstructionWeightedMax}` })}\n任务上下文：\n\`\`\`json\n${JSON.stringify(scrub({ ...safe, voiceName: voice?.name, windows: t.windows.map((w: Obj) => ({ ...w, instructionCounts: instructionCount(w.instruction) })) }), null, 2)}\n\`\`\`\n请返回 ${p.kind === "Director" ? "CHATGPT_DIRECTOR_PLAN_V1" : "CHATGPT_EXECUTION_PLAN_V1"}。\n${protocol}\n${detail}`;
     writeFileSync(join(dir, "CHATGPT_TASK.md"), text, { flag: "wx" });
     return { text, dir, task: t };
   }
@@ -729,11 +793,9 @@ export class RealSpeechService {
         });
         w = t.rehearsal;
       } else {
-        if (
-          (!t.rehearsalPassed || (t.rehearsalApprovalHash && (!this.rehearsalMatches(t) || t.rehearsalApprovalHash!==t.rehearsal.bindingHash))) &&
-          !t.pendingAction?.windowIds.includes(p.windowId)
-        )
-          throw Error("请先生成当前参数的试演并确认听感通过");
+        // 正式窗口允许随时单段生成/重生成。试演仅用于首次快速校准方向，
+        // 不能成为人工修改后的全局 Gate；真正的安全门槛由未保存状态、
+        // Instruction/参数校验、请求幂等与 unknown_result 防重试承担。
         w = t.windows.find((w: Obj) => w.windowId === p.windowId);
       }
       if (!w) throw Error("Window不存在");
@@ -808,14 +870,14 @@ export class RealSpeechService {
         volume: w.volume,
         seed: w.seed,
         pronunciation: w.pronunciation,
-        format: "wav",
-        sample_rate: 48000,
+        format: COSYVOICE_35_PLUS.format,
+        sample_rate: COSYVOICE_35_PLUS.sampleRate,
         enable_ssml: w.rhythmData.length > 0,
         clientRequestId: randomUUID(),
       };
       const prepared = adapter ? undefined : this.prepare(snapshot);
       if (prepared) {
-        snapshot.model = "cosyvoice-v3.5-plus";
+        snapshot.model = COSYVOICE_35_PLUS.model;
         snapshot.accountRef = prepared.accountRef;
         snapshot.remoteVoice = prepared.voice;
         snapshot.endpoint = prepared.url;
@@ -835,8 +897,7 @@ export class RealSpeechService {
       const path = join(dir, "audio.wav");
       const result = adapter
         ? await adapter(snapshot, path)
-        : await this.synthesize(snapshot, path, prepared!);
-      w.results.push({ id: randomUUID(), revision, path, snapshot, ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
+        : await this.synthesize(snapshot, path, prepared!);      w.results.push({ id: randomUUID(), revision, path, snapshot, ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
       w.selectedRevision = revision;
       w.status = "generated";
       if (!p.rehearsal) {
@@ -884,12 +945,12 @@ export class RealSpeechService {
     const voice = app.audio.voices().find((v) => v.id === s.voiceRef);
     const model = app
       .models()
-      .find((m) => m.id === "cosyvoice-v3.5-plus" && m.enabled);
+      .find((m) => m.id === COSYVOICE_35_PLUS.model && m.enabled);
     const account = app.credentials
       .list()
       .find(
         (a) =>
-          a.id === voice?.accountId && a.enabled && a.region === "cn-beijing",
+          a.id === voice?.accountId && a.enabled && a.region === COSYVOICE_35_PLUS.region,
       );
     if (
       !voice?.voiceId ||
@@ -938,7 +999,7 @@ export class RealSpeechService {
       method: "POST",
       paidSubmit: true,
       body: {
-        model: "cosyvoice-v3.5-plus",
+        model: COSYVOICE_35_PLUS.model,
         input: {
           text,
           voice: c.voice,
@@ -950,7 +1011,7 @@ export class RealSpeechService {
           format,
           sample_rate,
           enable_ssml,
-          language_hints: ["zh"],
+          language_hints: [...COSYVOICE_35_PLUS.languageHints],
           ...(s.pronunciation.length
             ? {
                 hot_fix: {
