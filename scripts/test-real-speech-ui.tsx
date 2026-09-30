@@ -63,10 +63,16 @@ const click = async (text: string) => {
 };
 await click("UI口播");
 assert.equal(document.querySelectorAll(".rs-question").length, 10);
+const generateButton = [...document.querySelectorAll("button")].find((b) =>
+  b.textContent?.includes("生成本段"),
+);
+assert.ok(generateButton, "应显示单段生成按钮");
+assert.equal(generateButton.disabled, false, "首次生成不应被试演Gate锁死");
 assert.ok(
-  [...document.querySelectorAll("button")].find((b) =>
-    b.textContent?.includes("生成本段／完整口播"),
-  )?.disabled,
+  [...document.querySelectorAll("button")].some((b) =>
+    b.textContent?.includes("保存并复制优化请求给 ChatGPT"),
+  ),
+  "诊断区应有就地复制给ChatGPT入口",
 );
 await click("一键导出给ChatGPT");
 assert.ok(calls.includes("realSpeech:export"));
@@ -82,5 +88,5 @@ assert.ok(
 );
 await act(async () => second.unmount());
 console.log(
-  "PASS 真人口播UI：创建页、任务选择、10题、试演Gate、导出、文档、DB错误隔离",
+  "PASS 真人口播UI：创建页、任务选择、10题、单段生成无试演死锁、诊断就地ChatGPT入口、导出、文档、DB错误隔离",
 );
