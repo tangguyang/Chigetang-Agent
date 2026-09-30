@@ -789,6 +789,29 @@ export class RealSpeechService {
         t.finalDirty = true;
       }
       if (t.history.length) t.history.at(-1).ab = p.data;
+    } else if (p.type === "select") {
+      const w = t.windows.find((w: Obj) => w.windowId === p.windowId);
+      if (!w) throw Error("Window不存在");
+      if (!Number.isInteger(p.data)) throw Error("版本号无效");
+      const result = w.results.find((r: Obj) => r.revision === p.data);
+      if (!result) throw Error("音频版本不存在");
+      if (!result.path || !existsSync(result.path)) throw Error("音频文件不存在");
+      w.selectedRevision = result.revision;
+      const snapshot = result.snapshot;
+      if (snapshot)
+        for (const k of [
+          "instruction",
+          "synthesisText",
+          "rhythmData",
+          "pronunciation",
+          "rate",
+          "pitch",
+          "volume",
+          "seed",
+        ])
+          if (snapshot[k] !== undefined) w[k] = structuredClone(snapshot[k]);
+      w.status = result.confirmed ? "confirmed" : "generated";
+      t.finalDirty = true;
     } else if (p.type === "confirm") {
       const w = t.windows.find((w: Obj) => w.windowId === p.windowId);
       if (!w || w.status !== "generated") throw Error("只能确认已生成结果");
@@ -972,10 +995,9 @@ export class RealSpeechService {
       const result = adapter
         ? await adapter(snapshot, path)
         : await this.synthesize(snapshot, path, prepared!);
-      w.results.push({ id: randomUUID(), revision, path, snapshot, ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
+      w.results.push({ id: randomUUID(), revision, path, snapshot, generatedAt: new Date().toISOString(), ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
       w.selectedRevision = revision;
-      w.status = "generated";
-      if (!p.rehearsal) {
+      w.status = "generated";      if (!p.rehearsal) {
         t.finalDirty = true;
         if (t.pendingAction?.windowIds.includes(w.windowId)) {
           const history = t.history.at(-1);
@@ -997,7 +1019,8 @@ export class RealSpeechService {
       t.taskRevision++;
       this.save(t);
       try { await this.syncAssets(t); } catch(e) { t.assetSyncError=String(e); this.save(t); }
-      return t;    } catch (e) {
+      return t;
+    } catch (e) {
       if (w && sent) {
         w.status =
           (e as Obj).code === "SubmissionUnknown" ||
@@ -1295,6 +1318,7 @@ export class RealSpeechService {
         id: randomUUID(),
         revision,
         path,
+        generatedAt: new Date().toISOString(),
         snapshot: w.snapshot,
         requestId: result.request_id,
         usage: result.usage,
