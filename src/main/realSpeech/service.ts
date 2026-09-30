@@ -397,6 +397,30 @@ export class RealSpeechService {
         // 后续单段重生成的全局门禁，避免“修改后必须重跑开头试演”的死锁。
       }
     }
+    if (p.unit) {
+      const u = t.units.find((u: Obj) => u.id === p.unit.unitId);
+      if (!u) throw Error("Phrase不存在");
+      const allowed = new Set(["salesAction", "direction", "pace", "energy", "emphasis", "pauseAfter"]);
+      for (const [k, v] of Object.entries(p.unit)) {
+        if (k === "unitId") continue;
+        if (!allowed.has(k)) throw Error("不可修改Phrase字段：" + k);
+        if (["salesAction", "direction"].includes(k)) {
+          if (typeof v !== "string" || [...v].length > 2000) throw Error("Phrase文字字段无效");
+        } else if (k === "pace" && !["SLOW", "NORMAL", "FAST"].includes(String(v)))
+          throw Error("Phrase速度枚举无效");
+        else if (k === "energy" && !["LOW", "MEDIUM", "HIGH"].includes(String(v)))
+          throw Error("Phrase情绪枚举无效");
+        else if (k === "pauseAfter" && !["NONE", "SHORT", "MEDIUM", "LONG"].includes(String(v)))
+          throw Error("Phrase停顿枚举无效");
+        else if (k === "emphasis" && (!Array.isArray(v) || v.some((x) => typeof x !== "string")))
+          throw Error("Phrase重点词无效");
+        u[k] = structuredClone(v);
+        for (const w of t.windows) {
+          const meta = w.directorMeta?.phrases?.find((x: Obj) => x.phraseId === u.phraseId);
+          if (meta) meta[k] = structuredClone(v);
+        }
+      }
+    }
     if (p.rehearsalUnitIds) {
       if (!Array.isArray(p.rehearsalUnitIds) || !p.rehearsalUnitIds.length)
         throw Error("试演范围为空");
@@ -507,9 +531,11 @@ export class RealSpeechService {
       planHash: ph,
       before: t.windows,
       after:
-        plan.schema === "CHATGPT_DIRECTOR_PLAN_V1"
-          ? plan.generationWindows
-          : plan.changes,
+        plan.schema === "REAL_SPEECH_PERFORMANCE_PLAN_V1"
+          ? { phrases: plan.phrases, windows: plan.windows }
+          : plan.schema === "CHATGPT_DIRECTOR_PLAN_V1"
+            ? plan.generationWindows
+            : plan.changes,
     };
   }
   apply(p: Obj) {
@@ -517,7 +543,55 @@ export class RealSpeechService {
       plan = structuredClone(preview.plan),
       t = this.get(p.taskId);
     return this.tx(() => {
-      if (plan.schema === "CHATGPT_DIRECTOR_PLAN_V1") {
+      if (plan.schema === "REAL_SPEECH_PERFORMANCE_PLAN_V1") {
+        if (t.windows.some((w: Obj) => w.results?.length))
+          t.archives = [
+            ...(t.archives || []),
+            { windows: structuredClone(t.windows), originalText: t.originalText, revision: t.taskRevision },
+          ];
+        const phraseUnits = plan.phrases.map((phrase: Obj, i: number) => ({
+          id: `U${String(i + 1).padStart(3, "0")}`,
+          text: phrase.text,
+          phraseId: phrase.phraseId,
+          salesAction: phrase.salesAction,
+          direction: phrase.direction,
+          pace: phrase.pace,
+          energy: phrase.energy,
+          emphasis: structuredClone(phrase.emphasis),
+          pauseAfter: phrase.pauseAfter,
+        }));
+        const phraseToUnit = new Map(phraseUnits.map((u: Obj) => [u.phraseId, u.id]));
+        const phraseById = new Map(plan.phrases.map((phrase: Obj) => [phrase.phraseId, phrase]));
+        t.units = phraseUnits;
+        t.windows = plan.windows.map((w: Obj) => {
+          const unitIds = w.phraseIds.map((id: string) => phraseToUnit.get(id));
+          return this.window(w.windowId, unitIds, {
+            instruction: w.instruction,
+            rate: w.rate,
+            pitch: w.pitch,
+            volume: w.volume,
+            seed: w.seed,
+            transitionPauseMs: w.transitionPauseMs,
+            pronunciation: structuredClone(w.pronunciation),
+            rhythmData: w.rhythmBreaks.map((r: Obj) => ({
+              unitId: phraseToUnit.get(r.afterPhraseId),
+              pauseMs: r.pauseMs,
+            })),
+            directorMeta: {
+              globalDirection: plan.globalDirection,
+              phrases: w.phraseIds.map((id: string) => structuredClone(phraseById.get(id))),
+            },
+          });
+        });
+        t.director = plan;
+        t.performanceArc = [];
+        t.rehearsalPassed = false;
+        t.rehearsalApprovalHash = null;
+        t.rehearsal = null;
+        t.rehearsalUnitIds = null;
+        t.pendingAction = null;
+        t.finalDirty = true;
+      } else if (plan.schema === "CHATGPT_DIRECTOR_PLAN_V1") {
         t.archives = [
           ...(t.archives || []),
           { windows: t.windows, revision: t.taskRevision },
@@ -897,7 +971,8 @@ export class RealSpeechService {
       const path = join(dir, "audio.wav");
       const result = adapter
         ? await adapter(snapshot, path)
-        : await this.synthesize(snapshot, path, prepared!);      w.results.push({ id: randomUUID(), revision, path, snapshot, ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
+        : await this.synthesize(snapshot, path, prepared!);
+      w.results.push({ id: randomUUID(), revision, path, snapshot, ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
       w.selectedRevision = revision;
       w.status = "generated";
       if (!p.rehearsal) {
@@ -922,8 +997,7 @@ export class RealSpeechService {
       t.taskRevision++;
       this.save(t);
       try { await this.syncAssets(t); } catch(e) { t.assetSyncError=String(e); this.save(t); }
-      return t;
-    } catch (e) {
+      return t;    } catch (e) {
       if (w && sent) {
         w.status =
           (e as Obj).code === "SubmissionUnknown" ||
