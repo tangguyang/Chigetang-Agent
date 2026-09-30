@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+release/
+*.map
+
+# Runtime / generated data
+data/
+cache/
+tmp/
+temp/
+output/
+outputs/
+logs/
+*.log
+
+# Environment / credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+secrets.json
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Large local runtime binaries (not stored in normal Git)
+resources/ffmpeg.exe
+resources/ffprobe.exe
+resources/sherpa-onnx/*.exe
+
+# Generated packages and media
+*.zip
+*.mp4
+*.mov
+*.wav
+*.mp3
