@@ -10,6 +10,17 @@ import {
 import "./style.css";
 const api = <T,>(action: string, p?: unknown) =>
   window.aiVideo.invoke<T>("realSpeech:" + action, p);
+const blankDiagnosis = () => ({
+  answers: Array(10).fill("听不出来 / 不确定") as string[],
+  problem: "像念稿",
+  position: "开头",
+  description: "",
+  range: { start: "", end: "" },
+  pronunciationOk: false,
+  seamsOk: false,
+  caseName: "通用",
+  caseChecks: {} as Record<string, boolean>,
+});
 class Boundary extends React.Component<
   { children: React.ReactNode },
   { error: string }
@@ -70,15 +81,33 @@ function Workbench() {
     [seamsOk, setSeamsOk] = useState(false),
     [caseName, setCaseName] = useState("通用"),
     [caseChecks, setCaseChecks] = useState<Record<string, boolean>>({}),
+    [diagnosisSaved, setDiagnosisSaved] = useState<Obj>(() => blankDiagnosis()),
     [selectedWindowIds, setSelectedWindowIds] = useState<string[]>([]);
   const lock = useRef(false);
   const [unsaved,setUnsaved]=useState<Record<string,boolean>>({});
-  const hasUnsaved=Object.values(unsaved).some(Boolean);
+  const diagnosisDraft = { answers, problem, position, description, range, pronunciationOk, seamsOk, caseName, caseChecks };
+  const diagnosisDirty = JSON.stringify(diagnosisDraft) !== JSON.stringify(diagnosisSaved);
+  const hasUnsaved=Object.values(unsaved).some(Boolean) || diagnosisDirty;
   const markDirty=React.useCallback((key:string,value:boolean)=>setUnsaved(old=>old[key]===value?old:{...old,[key]:value}),[]);
   const noticeTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const copied=()=>{setNotice("已复制");if(noticeTimer.current)clearTimeout(noticeTimer.current);noticeTimer.current=setTimeout(()=>setNotice(""),2000);};
   useEffect(()=>()=>{if(noticeTimer.current)clearTimeout(noticeTimer.current);},[]);
-  useEffect(()=>setSelectedWindowIds([]),[t?.taskId]);
+  useEffect(()=>{
+    setSelectedWindowIds([]);
+    setPlanText("");
+    setPreview(null);
+    setMode("ChatGPT导演");
+    setAck(false);
+    setRepairConfirm(false);
+    setUnsaved({});
+    const d=blankDiagnosis();
+    setAnswers(d.answers);setProblem(d.problem);setPosition(d.position);setDescription(d.description);setRange(d.range);
+    setPronunciationOk(d.pronunciationOk);setSeamsOk(d.seamsOk);setCaseName(d.caseName);setCaseChecks(d.caseChecks);setDiagnosisSaved(d);
+  },[t?.taskId]);
+  useEffect(()=>{
+    if(t && !unsaved.manualGroups)
+      setGroups(t.windows.map((w:Obj)=>w.unitIds.join(",")).join("\n"));
+  },[t?.taskId,t?.taskRevision,unsaved.manualGroups]);
   const refresh = async (selected?: Obj) => {
     const out = await api<Obj>("list");
     setTasks(out.tasks);
@@ -141,17 +170,7 @@ function Workbench() {
     `aivideo://local/realSpeech/${t!.taskId}${r ? `?artifact=${encodeURIComponent(r.id)}` : ""}`;
   const feedback = (type: string, data: unknown, windowId?: string) =>
     mutate("feedback", { type, data, windowId });
-  const diagnosisData = () => ({
-    answers,
-    problem,
-    position,
-    description,
-    range,
-    pronunciationOk,
-    seamsOk,
-    caseName,
-    caseChecks,
-  });
+  const diagnosisData = () => structuredClone(diagnosisDraft);
   const saveDiagnosis = async (copyToChatGPT = false) => {
     const next = await api<Obj>("feedback", {
       taskId: t!.taskId,
@@ -168,6 +187,7 @@ function Workbench() {
         attachments: true,
       });
     }
+    setDiagnosisSaved(structuredClone(diagnosisDraft));
     await refresh(latest);
     setNotice(copyToChatGPT
       ? "诊断已保存，优化请求已复制；当前音频文件夹已打开"
@@ -321,7 +341,8 @@ function Workbench() {
         <aside>
           <h3>我的口播任务</h3>
           <button
-            disabled={busy}
+            disabled={busy || hasUnsaved}
+            title={hasUnsaved ? "当前任务有未保存修改，请先保存或取消" : "新建真人口播任务"}
             onClick={() => {
               setT(null);
               setUnsaved({});
@@ -333,6 +354,7 @@ function Workbench() {
           {tasks.map((x) => (
             <div className="rs-task-row" key={x.taskId}><button
               disabled={busy || hasUnsaved}
+              title={hasUnsaved ? "当前任务有未保存修改，请先保存或取消" : "切换任务"}
               className={t?.taskId === x.taskId ? "selected" : ""}
               key={x.taskId}
               onClick={() => {
@@ -344,7 +366,7 @@ function Workbench() {
               <small>
                 第{x.taskRevision}版 {x.golden ? "· Golden Sample" : ""}
               </small>
-            </button><button aria-label={"删除任务："+x.name} disabled={busy||hasUnsaved} onClick={()=>void deleteTask(x)}>删除</button></div>
+            </button><button aria-label={"删除任务："+x.name} disabled={busy||hasUnsaved} title={hasUnsaved?"请先保存或取消当前修改":"删除任务记录（音频文件保留）"} onClick={()=>void deleteTask(x)}>删除</button></div>
           ))}
 
         </aside>
@@ -395,6 +417,7 @@ function Workbench() {
               <button
                 className="primary"
                 disabled={busy || !draft.originalText.trim()}
+                title={busy ? "正在处理" : !draft.originalText.trim() ? "请先填写原稿" : "创建真人口播任务"}
                 onClick={() =>
                   void run(async () => {
                     const next = await api<Obj>("create", draft);
@@ -405,6 +428,7 @@ function Workbench() {
               >
                 创建任务
               </button>
+              {!draft.originalText.trim() && <p className="rs-help">填写口播原稿后即可创建任务；音色也可以创建后再选择。</p>}
             </section>
           ) : (
             <>
@@ -413,42 +437,57 @@ function Workbench() {
                   {t.name} <small>第{t.taskRevision}版</small>
                 </h2>
                 <TaskInfo key={t.taskId} task={t} voices={voices} busy={busy} onDirty={markDirty} save={changes=>run(()=>mutate("update",changes))}/>
-                <label>工作模式<select value={mode} onChange={e=>setMode(e.target.value)}><option>ChatGPT导演</option><option>连续一镜到底（手动）</option><option>导演分段（手动）</option></select></label>
-                {hasUnsaved && <p role="alert">有未保存修改，请先保存再生成、导出或应用方案。</p>}
-                {mode !== "ChatGPT导演" && (
-                  <div>
-                    <p>手动模式不依赖试演门禁。分段只按语义边界，优先连续生成；试演仅用于快速校准大方向。</p>
-                    {mode.includes("分段") && (
-                      <label>
-                        每行一个生成窗口，Unit以逗号分开
-                        <textarea
-                          value={groups}
-                          onChange={(e) => setGroups(e.target.value)}
-                          placeholder="U001,U002\nU003,U004"
-                        />
-                      </label>
-                    )}
-                    <button
-                      disabled={busy}
-                      onClick={() =>
-                        void run(() =>
-                          mutate("update", {
-                            manualGroups: mode.includes("分段")
-                              ? groups
-                                  .trim()
-                                  .split("\n")
-                                  .map((s) =>
-                                    s.split(/[,，\s]+/).filter(Boolean),
-                                  )
-                              : [t.units.map((u: Obj) => u.id)],
-                          }),
-                        )
-                      }
-                    >
-                      应用手动窗口
-                    </button>
-                  </div>
-                )}
+                {hasUnsaved && <p role="alert">有未保存修改，请先保存或取消，再生成、导出或应用方案。</p>}
+                <details>
+                  <summary>高级：手动重建 Generation Window</summary>
+                  <label>工作模式<select value={mode} onChange={e=>{
+                    const next=e.target.value;
+                    if(next==="ChatGPT导演"&&unsaved.manualGroups){
+                      if(!window.confirm("手动分段有未保存修改。切回 ChatGPT 导演将放弃这些修改，是否继续？"))return;
+                      setGroups(t.windows.map((w:Obj)=>w.unitIds.join(",")).join("\n"));
+                      markDirty("manualGroups",false);
+                    }
+                    setMode(next);
+                  }}><option>ChatGPT导演</option><option>连续一镜到底（手动）</option><option>导演分段（手动）</option></select></label>
+                  {mode !== "ChatGPT导演" && (
+                    <div>
+                      <p>手动模式不依赖试演门禁。分段只按语义边界，优先连续生成；试演仅用于快速校准大方向。</p>
+                      {mode.includes("分段") && (
+                        <label>
+                          每行一个生成窗口，Unit以逗号分开
+                          <textarea
+                            value={groups}
+                            onChange={(e) => {setGroups(e.target.value);markDirty("manualGroups",true);}}
+                            placeholder="U001,U002\nU003,U004"
+                          />
+                        </label>
+                      )}
+                      <div className="rs-actions">
+                        <button
+                          disabled={busy}
+                          title="会重建 Generation Window；历史音频仍保留"
+                          onClick={() =>
+                            void run(async () => {
+                              await mutate("update", {
+                                manualGroups: mode.includes("分段")
+                                  ? groups.trim().split("\n").map((x) => x.split(/[,，\s]+/).filter(Boolean))
+                                  : [t.units.map((u: Obj) => u.id)],
+                              });
+                              markDirty("manualGroups",false);
+                            })
+                          }
+                        >
+                          应用手动窗口
+                        </button>
+                        <button
+                          disabled={busy || !unsaved.manualGroups}
+                          title={!unsaved.manualGroups ? "没有未保存的手动分段修改" : "恢复当前已保存窗口结构"}
+                          onClick={() => {setGroups(t.windows.map((w:Obj)=>w.unitIds.join(",")).join("\n"));markDirty("manualGroups",false);}}
+                        >取消手动分段修改</button>
+                      </div>
+                    </div>
+                  )}
+                </details>
               </section>
               <section>
                 <h2>2. ChatGPT 两阶段协作</h2>
@@ -537,6 +576,7 @@ function Workbench() {
                     <p>实际执行：窗口instruction及模型支持参数。speakerProfile、performanceArc、performanceBeats为导演参考，不会直接发送；关键快慢与重音必须写入窗口instruction。初始seed固定0。</p>
                     <button
                       disabled={busy || hasUnsaved}
+                      title={busy ? "正在处理" : hasUnsaved ? "请先保存或取消当前修改" : "应用已通过校验的方案"}
                       onClick={() =>
                         void run(() => mutate("apply", { text: planText }))
                       }
@@ -588,6 +628,7 @@ function Workbench() {
                     {(t.rehearsal.results.at(-1).duration < 8 || t.rehearsal.results.at(-1).duration > 15) && <p>建议试演8～15秒；本次有效音频已足够判断时，可以确认通过，无需为了时长调慢。</p>}
                     <button
                       disabled={busy || hasUnsaved || t.rehearsal.status !== "generated"}
+                      title={busy ? "正在处理" : hasUnsaved ? "请先保存或取消当前修改" : t.rehearsal.status !== "generated" ? "请先成功生成试演" : "确认首轮基础方向"}
                       onClick={() =>
                         void run(() => feedback("rehearsal", true))
                       }
@@ -618,6 +659,7 @@ function Workbench() {
                     </label>
                     <button
                       disabled={busy || !repairConfirm}
+                      title={busy ? "正在处理" : !repairConfirm ? "请先勾选确认执行" : "执行已预览修复方案"}
                       onClick={() =>
                         void run(async () => {
                           if (t.pendingAction.action === "RECONCAT_ONLY") {
@@ -926,24 +968,36 @@ function Workbench() {
                 ))}
                 <div className="rs-actions">
                   <button
-                    disabled={busy}
+                    disabled={busy || !diagnosisDirty}
+                    title={!diagnosisDirty ? "诊断内容没有未保存变化" : "保存当前听感诊断"}
                     onClick={() => void run(() => saveDiagnosis(false))}
                   >
                     保存听感诊断
                   </button>
                   <button
                     className="primary"
-                    disabled={busy}
+                    disabled={busy || !diagnosisDirty}
+                    title={!diagnosisDirty ? "请先填写或修改诊断内容" : "先保存诊断，再复制优化请求并打开当前音频位置"}
                     onClick={() => void run(() => saveDiagnosis(true))}
                   >
                     保存并复制优化请求给 ChatGPT
                   </button>
+                  <button
+                    disabled={busy || !diagnosisDirty}
+                    title={!diagnosisDirty ? "没有未保存诊断" : "恢复到上次已保存诊断"}
+                    onClick={() => {
+                      const d=structuredClone(diagnosisSaved);
+                      setAnswers(d.answers);setProblem(d.problem);setPosition(d.position);setDescription(d.description);setRange(d.range);
+                      setPronunciationOk(d.pronunciationOk);setSeamsOk(d.seamsOk);setCaseName(d.caseName);setCaseChecks(d.caseChecks);
+                    }}
+                  >取消诊断修改</button>
                 </div>
+                {diagnosisDirty && <p className="rs-help">听感诊断有未保存修改；保存或取消后再切换任务/生成，避免诊断错绑到其他音频版本。</p>}
                 <p>同一窗口同类问题最多三轮，之后检查音色、窗口设计或原稿。</p>
                 <button
                   disabled={busy || !t.final}
-                  onClick={() => void run(() => feedback("golden", true))}
-                >
+                  title={busy ? "正在处理" : !t.final ? "请先拼接完整 WAV 并试听" : "设为 Golden 前仍会校验QC、发音、接缝和片段确认状态"}
+                  onClick={() => void run(() => feedback("golden", true))}                >
                   已完整试听，愿意发布 → 设为Golden Sample
                 </button>
                 {t.golden && <p>✓ 用户已确认Golden Sample</p>}
@@ -997,7 +1051,8 @@ function Window({
   update,
   generate,
   feedback,
-  recover,  reveal,
+  recover,
+  reveal,
   original,
   phrases,
   updatePhrase,
@@ -1332,8 +1387,9 @@ function TaskInfo({task,voices,busy,save,onDirty}:{task:Obj;voices:Obj[];busy:bo
   {keys.filter(k=>k!=="voiceRef").map(k=><label key={k}>{{name:"任务名称",goal:"任务目标",originalText:"原稿",description:"补充描述"}[k]}{k==="originalText"||k==="description"?<textarea rows={k==="originalText"?5:2} value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/>:<input value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/>}</label>)}
   <label>复刻音色<select value={draft.voiceRef} onChange={e=>setDraft({...draft,voiceRef:e.target.value})}><option value="">选择音色</option>{voices.map(v=><option key={v.id} value={v.id}>{v.name} · {v.status}</option>)}</select></label>
   {!draft.voiceRef && <p>尚未选择音色，可保存任务；生成前须选择可用音色。</p>}
-  <button disabled={!changed||!draft.originalText.trim()} onClick={()=>{if(originalChanged&&!window.confirm("确认保存原稿修改并重新解析？未变化 Phrase/窗口会尽量保留 ID、参数和音频；真正受影响的部分标记为待重新生成。"))return;void save(draft);}}>{originalChanged?"保存并重新解析原稿":"保存任务信息"}</button>
-  <button disabled={!changed} onClick={()=>setDraft(Object.fromEntries(keys.map(k=>[k,task[k]||""])))}>取消修改</button>
+  <button disabled={!changed||!draft.originalText.trim()} title={!draft.originalText.trim()?"原稿不能为空":!changed?"没有未保存修改":originalChanged?"保存原稿并局部重新解析":"保存任务信息"} onClick={()=>{if(originalChanged&&!window.confirm("确认保存原稿修改并重新解析？未变化 Phrase/窗口会尽量保留 ID、参数和音频；真正受影响的部分标记为待重新生成。"))return;void save(draft);}}>{originalChanged?"保存并重新解析原稿":"保存任务信息"}</button>
+  <button disabled={!changed} title={!changed?"没有未保存修改":"放弃任务信息修改"} onClick={()=>setDraft(Object.fromEntries(keys.map(k=>[k,task[k]||""])))}>取消修改</button>
+  {!draft.originalText.trim()&&<p className="rs-error">原稿不能为空；可以取消修改恢复已保存内容。</p>}
   {changed&&<p>有未保存修改</p>}
   </fieldset></details>;
 }
@@ -1343,7 +1399,15 @@ function TrialRange({task,busy,onDirty,save}:{task:Obj;busy:boolean;onDirty:(key
   const current={start:ids[0],end:ids.at(-1)};
   const [selection,setSelection]=useState(current),previous=useRef(current);
   const changed=selection.start!==current.start||selection.end!==current.end;
+  const a=task.units.findIndex((u:Obj)=>u.id===selection.start), b=task.units.findIndex((u:Obj)=>u.id===selection.end);
+  const selectedIds=a>=0&&b>=a?task.units.slice(a,b+1).map((u:Obj)=>u.id):[];
+  const sameWindow=selectedIds.length>0&&task.windows.some((w:Obj)=>selectedIds.every((id:string)=>w.unitIds.includes(id)));
+  const saveReason=busy?"正在处理，请稍候":!changed?"试演范围没有变化":a<0||b<a?"结束 Unit 不能早于起始 Unit":!sameWindow?"试演范围必须位于同一个 Generation Window":"";
   useEffect(()=>{if(selection.start===previous.current.start&&selection.end===previous.current.end)setSelection(current);previous.current=current;},[current.start,current.end]);
   useEffect(()=>{onDirty('range',changed);return()=>onDirty('range',false);},[changed,onDirty]);
-  return <details><summary>手动调整试演范围（同一窗口内连续Unit）</summary>{(['start','end'] as const).map(k=><label key={k}>{k==='start'?'起始Unit':'结束Unit'}<select disabled={busy} value={selection[k]} onChange={e=>setSelection({...selection,[k]:e.target.value})}>{task.units.map((u:Obj)=><option key={u.id} value={u.id}>{u.id} · {u.text.slice(0,30)}</option>)}</select></label>)}<button disabled={busy||!changed} onClick={()=>{const a=task.units.findIndex((u:Obj)=>u.id===selection.start),b=task.units.findIndex((u:Obj)=>u.id===selection.end);void save(task.units.slice(a,b+1).map((u:Obj)=>u.id));}}>保存试演范围</button>{changed&&<p>试演范围有未保存修改。</p>}</details>;
+  return <details><summary>手动调整试演范围（同一窗口内连续Unit）</summary>
+    {(['start','end'] as const).map(k=><label key={k}>{k==='start'?'起始Unit':'结束Unit'}<select disabled={busy} value={selection[k]} onChange={e=>setSelection({...selection,[k]:e.target.value})}>{task.units.map((u:Obj)=><option key={u.id} value={u.id}>{u.id} · {u.text.slice(0,30)}</option>)}</select></label>)}
+    <button disabled={!!saveReason} title={saveReason||"保存试演范围"} onClick={()=>void save(selectedIds)}>保存试演范围</button>
+    {changed&&<p>{saveReason?`暂不能保存：${saveReason}`:"试演范围有未保存修改。"}</p>}
+  </details>;
 }
