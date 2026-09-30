@@ -343,6 +343,17 @@ export class RealSpeechService {
           pitch: base.pitch,
           volume: base.volume,
           seed: base.seed,
+          directorMeta: base.directorMeta ? {
+            globalDirection: base.directorMeta.globalDirection,
+            phrases: g.ids
+              .map((id: string) => nextUnits.find((u: Obj) => u.id === id))
+              .filter((u: Obj | undefined) => u?.phraseId)
+              .map((u: Obj) => ({
+                phraseId: u.phraseId, text: u.text, salesAction: u.salesAction || "",
+                direction: u.direction || "", pace: u.pace || "NORMAL", energy: u.energy || "MEDIUM",
+                emphasis: structuredClone(u.emphasis || []), pauseAfter: u.pauseAfter || "NONE",
+              })),
+          } : undefined,
           status: "dirty",
           results: [],
         });
@@ -553,6 +564,8 @@ export class RealSpeechService {
           id: `U${String(i + 1).padStart(3, "0")}`,
           text: phrase.text,
           phraseId: phrase.phraseId,
+          phraseRevision: 1,
+          phraseChanged: false,
           salesAction: phrase.salesAction,
           direction: phrase.direction,
           pace: phrase.pace,
@@ -984,8 +997,7 @@ export class RealSpeechService {
         join(dir, "request.json"),
         JSON.stringify(snapshot, null, 2),
         { flag: "wx" },
-      );
-      w.previousStatus = w.status;
+      );      w.previousStatus = w.status;
       w.status = "generating";
       w.snapshot = { ...snapshot, outputPath: join(dir, "audio.wav") };
       t.taskRevision++;
@@ -997,7 +1009,8 @@ export class RealSpeechService {
         : await this.synthesize(snapshot, path, prepared!);
       w.results.push({ id: randomUUID(), revision, path, snapshot, generatedAt: new Date().toISOString(), ...result, fileHash: existsSync(path)?createHash("sha256").update(readFileSync(path)).digest("hex"):undefined });
       w.selectedRevision = revision;
-      w.status = "generated";      if (!p.rehearsal) {
+      w.status = "generated";
+      if (!p.rehearsal) {
         t.finalDirty = true;
         if (t.pendingAction?.windowIds.includes(w.windowId)) {
           const history = t.history.at(-1);
