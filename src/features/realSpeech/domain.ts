@@ -2,6 +2,25 @@ export const APP_VERSION = "1.2.9",
   MANUAL_VERSION = "5.0",
   PROTOCOL_VERSION = "1.2",
   CAPABILITIES_VERSION = 1;
+
+// CosyVoice 3.5 Plus 唯一执行能力表。
+// providerInstructionWeightedMax=100 为服务端硬限制；instructionHanSafetyMax=40
+// 是吃个糖为标点/数字/字母预留空间的项目安全门槛。所有 UI、协议和请求
+// 必须从这里取范围，禁止各处自行发明或漂移参数。
+export const COSYVOICE_35_PLUS = Object.freeze({
+  model: "cosyvoice-v3.5-plus",
+  region: "cn-beijing",
+  format: "wav",
+  sampleRate: 48000,
+  instructionHanSafetyMax: 40,
+  providerInstructionWeightedMax: 100,
+  rate: [0.5, 2] as const,
+  pitch: [0.5, 2] as const,
+  volume: [0, 100] as const,
+  seed: [0, 65535] as const,
+  transitionPauseMs: [0, 2000] as const,
+  languageHints: ["zh"] as const,
+});
 export const ACTIONS = [
   "UPDATE_ONLY",
   "REGENERATE_WINDOW",
@@ -53,7 +72,9 @@ export function instructionCount(s: string) {
   return {
     hanCount,
     weightedCount,
-    valid: hanCount <= 40 && weightedCount <= 100,
+    valid:
+      hanCount <= COSYVOICE_35_PLUS.instructionHanSafetyMax &&
+      weightedCount <= COSYVOICE_35_PLUS.providerInstructionWeightedMax,
   };
 }
 export function checkInstruction(s: string) {
@@ -64,6 +85,44 @@ export function units(text: string) {
   return (text.match(/[^。！？\n]+[。！？\n]*/gu) || []).map((text, i) => ({
     id: `U${String(i + 1).padStart(3, "0")}`,
     text,
+  }));
+}
+
+/**
+ * Reparse edited copy while preserving IDs of unchanged semantic units.
+ * Exact-text LCS keeps stable references for unchanged phrases; genuinely new/edited
+ * units receive monotonically increasing IDs so an old ChatGPT plan can never silently
+ * bind to different text.
+ */
+export function reconcileUnits(previous: Obj[], text: string) {
+  const fresh = units(text);
+  if (!previous.length) return fresh;
+  const a = previous.map((u) => String(u.text));
+  const b = fresh.map((u) => String(u.text));
+  const dp = Array.from({ length: a.length + 1 }, () =>
+    Array<number>(b.length + 1).fill(0),
+  );
+  for (let i = a.length - 1; i >= 0; i--)
+    for (let j = b.length - 1; j >= 0; j--)
+      dp[i][j] = a[i] === b[j]
+        ? dp[i + 1][j + 1] + 1
+        : Math.max(dp[i + 1][j], dp[i][j + 1]);
+  const preserved = new Map<number, string>();
+  let i = 0, j = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) {
+      preserved.set(j, String(previous[i].id));
+      i++; j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  let nextId = Math.max(0, ...previous.map((u) => {
+    const m = /^U(\d+)$/.exec(String(u.id));
+    return m ? Number(m[1]) : 0;
+  })) + 1;
+  return fresh.map((u, index) => ({
+    id: preserved.get(index) || `U${String(nextId++).padStart(3, "0")}`,
+    text: u.text,
   }));
 }
 export function canonical(x: unknown): string {
@@ -170,17 +229,19 @@ export function fieldValue(field: string, v: unknown) {
         throw Error("合成文本须为非空纯文本；精确停顿使用rhythmData");
       break;
     case "rate":
+      num(v, ...COSYVOICE_35_PLUS.rate);
+      break;
     case "pitch":
-      num(v, 0.5, 2);
+      num(v, ...COSYVOICE_35_PLUS.pitch);
       break;
     case "volume":
-      num(v, 0, 100, true);
+      num(v, ...COSYVOICE_35_PLUS.volume, true);
       break;
     case "seed":
-      num(v, 0, 65535, true);
+      num(v, ...COSYVOICE_35_PLUS.seed, true);
       break;
     case "transitionPauseMs":
-      num(v, 0, 2000, true);
+      num(v, ...COSYVOICE_35_PLUS.transitionPauseMs, true);
       break;
     case "speakerProfile":
       profile(v);
