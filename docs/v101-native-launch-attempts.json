@@ -1,0 +1,14 @@
+[
+  {
+    "test": "windows-portable",
+    "started_successfully": false,
+    "error": "[Errno 8] Exec format error: '/workspace/scratch/c432c600263a/ai-video-v101/release/AI Video-win32-x64/AI Video.exe'"
+  },
+  {
+    "test": "packaged-app-linux-headless",
+    "started_successfully": false,
+    "exit_code": -5,
+    "stdout": "",
+    "stderr": "[7:0916/174642.819224:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to open socket: Operation not permitted\n[7:0916/174642.819432:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are \"tcp\" and on UNIX \"unix\")\n[7:0916/174642.924464:FATAL:chrome/browser/process_singleton_posix.cc:319] Check failed: . socket() failed: Operation not permitted (1)\n"
+  }
+]

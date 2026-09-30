@@ -1,0 +1,21 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 pack:win
+> npm run build && node scripts/package-win.mjs
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 build
+> tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 1606 modules transformed.
+rendering chunks...
+computing gzip size...
+../../dist/renderer/index.html                   0.70 kB │ gzip:  0.41 kB
+../../dist/renderer/assets/index-BUlTP02r.css   35.71 kB │ gzip:  7.81 kB
+../../dist/renderer/assets/index-DBmQXXWb.js   318.08 kB │ gzip: 98.49 kB
+✓ built in 4.62s
+Packaging app for platform win32 x64 using electron v44.3.0
+Verified Windows package structure: release/吃个糖Agent-win32-x64

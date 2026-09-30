@@ -1,0 +1,24 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.2.9 test:repair
+> node --experimental-strip-types tests/v129-repair.test.ts && node scripts/run-repair-ui.mjs
+
+✔ 修复：7.8秒及范围外有效试演可确认，缺失文件与无效时长拒绝 (20.745812ms)
+✔ 修复：参数变化后旧試演不能放行；新试演失败撤销原通过 (11.219154ms)
+✔ 修复：第二窗口試演采用自己的参数；跨窗口拒绝且不调用模型 (6.053539ms)
+✔ 修复：新建与修改原稿保留历史结果；删除原稿变更前待修复动作 (3.601453ms)
+✔ 修复：音频幂等入库→删除任务→重启→独立资产与来源快照仍可访问 (21.787224ms)
+✔ 修复：资产同步失败禁止删除，文件缺失保留独立记录 (3.881376ms)
+✔ 修复：数据库升级重复打开不丢数据，旧无绑定通过状态撤销 (2.421349ms)
+✔ 统一资产库：类型、分组、搜索、分页、隐藏恢复与普通任务原详情 (63.973202ms)
+✔ 复制请求：默认文字导出不复制WAV，绑定更新且声明未附音频 (5.678456ms)
+✔ 相同音频多版本：首份文件丢失后改用仍存在的副本，保留全部来源 (20.159681ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 164.873903
+PASS 修复版UI：编辑保存、未保存阻止生成、创建清空、默认复制/2秒提醒、统一资产入口、标题手册

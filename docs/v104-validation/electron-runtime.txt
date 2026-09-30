@@ -1,0 +1,2 @@
+{"electron":"44.3.0","node":"24.20.0","sqlite":{"version":"3.53.4"}}
+Bundled MediaInfo reads real MP4 successfully.

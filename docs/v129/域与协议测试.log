@@ -1,0 +1,35 @@
+✔ Instruction 40汉字 (1.721632ms)
+✔ Instruction 41汉字 (0.245822ms)
+✔ Instruction 50汉字 (0.110868ms)
+✔ Instruction 39汉字标点 (0.117127ms)
+✔ Instruction 40汉字非汉超限 (0.218079ms)
+✔ Instruction 英文数字空格 (0.105249ms)
+✔ Instruction emoji (0.074051ms)
+✔ Instruction Han扩展 (0.058578ms)
+✔ 严格Director与Execution示例 (9.961451ms)
+✔ 拒绝旧/危险字段 taskId (1.421477ms)
+✔ 拒绝旧/危险字段 taskRevision (1.139782ms)
+✔ 拒绝旧/危险字段 exportId (1.506336ms)
+✔ 拒绝旧/危险字段 contextHash (2.271853ms)
+✔ 拒绝旧/危险字段 apiKey (1.259393ms)
+✔ 拒绝多协议、语法错、未知schema、嵌套未知字段、过长指令、未知Unit/Beat (2.498004ms)
+✔ 重复planId/planHash，事务不改变原稿 (3.790827ms)
+✔ 未知Window、越权、参数类型、NO_CHANGE和RECONCAT_ONLY (3.096569ms)
+✔ 双击只请求一次，confirmed不可覆盖，快照与新revision (5.722186ms)
+✔ ambiguous timeout不重试且unknown_result不可自动再发 (2.201776ms)
+✔ 崩溃恢复generating→interrupted，unknown_result保留 (1.547128ms)
+✔ 独立DB损坏不会修改旧库 (0.464312ms)
+✔ 数据库事务rollback (1.508289ms)
+✔ Unit稳定、纯文本长度和dangerous XML拦截 (1.524273ms)
+✔ 三篇真实台词协议E2E（模拟TTS；不代表真人听感） (10.323047ms)
+✔ JOINT_REPAIR必须相邻，合并后方案事务执行，三轮停止 (2.259103ms)
+✔ 手动超限在提交前拦截，原稿更新使旧方案失效，试演未知不补发 (1.839459ms)
+✔ 已应用修复只执行一次，成功后消耗pendingAction并记录After (2.148056ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 66.818179

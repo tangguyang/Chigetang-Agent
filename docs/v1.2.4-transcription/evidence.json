@@ -1,0 +1,308 @@
+[
+  {
+    "name": "missing-model",
+    "stage": "failed",
+    "detail": "本地识别模型未安装。请点击标题右侧 AI 图标打开模型目录，点击文档图标查看下载安装说明。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "incomplete-model",
+    "stage": "failed",
+    "detail": "本地识别模型文件不完整或版本不匹配。请点击文档图标，重新安装指定 INT8 模型的两个文件。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "real-wav",
+    "stage": "completed",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    },
+    "result": {
+      "taskId": "中文口播_20260924_230339_3824bfd6",
+      "source": {
+        "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+        "name": "中文口播.wav",
+        "size": 178988,
+        "duration": 5.592,
+        "kind": "audio"
+      },
+      "outputDir": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230339_3824bfd6",
+      "fullTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230339_3824bfd6/01_完整逐字稿.txt",
+      "timelineTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230339_3824bfd6/02_时间帧逐字稿.txt",
+      "fullText": "开饭时间早上9点至下午5点。",
+      "timelineText": "[00:00.720 --> 00:05.592]\n开饭时间早上9点至下午5点。",
+      "language": "<|zh|>",
+      "elapsedMs": 2556,
+      "segments": [
+        {
+          "startMs": 720,
+          "endMs": 5592,
+          "text": "开饭时间早上9点至下午5点。"
+        }
+      ]
+    }
+  },
+  {
+    "name": "real-mp3",
+    "stage": "completed",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.mp3",
+      "name": "中文口播.mp3",
+      "size": 17289,
+      "duration": 5.688,
+      "kind": "audio"
+    },
+    "result": {
+      "taskId": "中文口播_20260924_230342_04c046e4",
+      "source": {
+        "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.mp3",
+        "name": "中文口播.mp3",
+        "size": 17289,
+        "duration": 5.688,
+        "kind": "audio"
+      },
+      "outputDir": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230342_04c046e4",
+      "fullTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230342_04c046e4/01_完整逐字稿.txt",
+      "timelineTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230342_04c046e4/02_时间帧逐字稿.txt",
+      "fullText": "开饭时间早上9点至下午5点。",
+      "timelineText": "[00:00.720 --> 00:05.592]\n开饭时间早上9点至下午5点。",
+      "language": "<|zh|>",
+      "elapsedMs": 2189,
+      "segments": [
+        {
+          "startMs": 720,
+          "endMs": 5592,
+          "text": "开饭时间早上9点至下午5点。"
+        }
+      ]
+    }
+  },
+  {
+    "name": "real-mp4",
+    "stage": "completed",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/延迟音轨 中文.mp4",
+      "name": "延迟音轨 中文.mp4",
+      "size": 55706,
+      "duration": 8,
+      "kind": "video"
+    },
+    "result": {
+      "taskId": "延迟音轨 中文_20260924_230344_12738b0a",
+      "source": {
+        "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/延迟音轨 中文.mp4",
+        "name": "延迟音轨 中文.mp4",
+        "size": 55706,
+        "duration": 8,
+        "kind": "video"
+      },
+      "outputDir": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/延迟音轨 中文_20260924_230344_12738b0a",
+      "fullTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/延迟音轨 中文_20260924_230344_12738b0a/01_完整逐字稿.txt",
+      "timelineTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/延迟音轨 中文_20260924_230344_12738b0a/02_时间帧逐字稿.txt",
+      "fullText": "开饭时间早上9点至下午5点。",
+      "timelineText": "[00:01.980 --> 00:06.882]\n开饭时间早上9点至下午5点。",
+      "language": "<|zh|>",
+      "elapsedMs": 2146,
+      "segments": [
+        {
+          "startMs": 1980,
+          "endMs": 6882,
+          "text": "开饭时间早上9点至下午5点。"
+        }
+      ]
+    }
+  },
+  {
+    "name": "cancelled",
+    "stage": "cancelled",
+    "detail": "任务已取消，可以重新开始。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/长口播.wav",
+      "name": "长口播.wav",
+      "size": 1431630,
+      "duration": 44.736,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "restart-after-cancel",
+    "stage": "completed",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    },
+    "result": {
+      "taskId": "中文口播_20260924_230347_75c3baf2",
+      "source": {
+        "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+        "name": "中文口播.wav",
+        "size": 178988,
+        "duration": 5.592,
+        "kind": "audio"
+      },
+      "outputDir": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230347_75c3baf2",
+      "fullTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230347_75c3baf2/01_完整逐字稿.txt",
+      "timelineTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/中文口播_20260924_230347_75c3baf2/02_时间帧逐字稿.txt",
+      "fullText": "开饭时间早上9点至下午5点。",
+      "timelineText": "[00:00.720 --> 00:05.592]\n开饭时间早上9点至下午5点。",
+      "language": "<|zh|>",
+      "elapsedMs": 1888,
+      "segments": [
+        {
+          "startMs": 720,
+          "endMs": 5592,
+          "text": "开饭时间早上9点至下午5点。"
+        }
+      ]
+    }
+  },
+  {
+    "name": "real-long",
+    "stage": "completed",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/长口播.wav",
+      "name": "长口播.wav",
+      "size": 1431630,
+      "duration": 44.736,
+      "kind": "audio"
+    },
+    "result": {
+      "taskId": "长口播_20260924_230349_c1b79e37",
+      "source": {
+        "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/长口播.wav",
+        "name": "长口播.wav",
+        "size": 1431630,
+        "duration": 44.736,
+        "kind": "audio"
+      },
+      "outputDir": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/长口播_20260924_230349_c1b79e37",
+      "fullTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/长口播_20260924_230349_c1b79e37/01_完整逐字稿.txt",
+      "timelineTextPath": "/tmp/transcription-qa-k3COAP/用户数据 中文 空格/outputs/transcription/长口播_20260924_230349_c1b79e37/02_时间帧逐字稿.txt",
+      "fullText": "开放时间早上九点至下午五点开放时间至点开放时间九点至下午五点开放时间早九点至下午五点。\n\n开放时间早上九点至下午五点开放时间早上九点至下午五点开放时间早上九点至下午五点开放时间早上九点至下午五点。",
+      "timelineText": "[00:00.720 --> 00:05.107]\n开放时间早上九点至下午五点\n\n[00:06.360 --> 00:10.699]\n开放时间至点\n\n[00:11.940 --> 00:16.291]\n开放时间九点至下午五点\n\n[00:17.520 --> 00:22.033]\n开放时间早九点至下午五点。\n\n[00:23.113 --> 00:27.475]\n开放时间早上九点至下午五点\n\n[00:28.693 --> 00:33.067]\n开放时间早上九点至下午五点\n\n[00:34.333 --> 00:38.659]\n开放时间早上九点至下午五点\n\n[00:39.913 --> 00:44.736]\n开放时间早上九点至下午五点。",
+      "language": "<|yue|>",
+      "elapsedMs": 4719,
+      "segments": [
+        {
+          "startMs": 720,
+          "endMs": 5107,
+          "text": "开放时间早上九点至下午五点"
+        },
+        {
+          "startMs": 6360,
+          "endMs": 10699,
+          "text": "开放时间至点"
+        },
+        {
+          "startMs": 11940,
+          "endMs": 16291,
+          "text": "开放时间九点至下午五点"
+        },
+        {
+          "startMs": 17520,
+          "endMs": 22033,
+          "text": "开放时间早九点至下午五点。"
+        },
+        {
+          "startMs": 23113,
+          "endMs": 27475,
+          "text": "开放时间早上九点至下午五点"
+        },
+        {
+          "startMs": 28693,
+          "endMs": 33067,
+          "text": "开放时间早上九点至下午五点"
+        },
+        {
+          "startMs": 34333,
+          "endMs": 38659,
+          "text": "开放时间早上九点至下午五点"
+        },
+        {
+          "startMs": 39913,
+          "endMs": 44736,
+          "text": "开放时间早上九点至下午五点。"
+        }
+      ]
+    }
+  },
+  {
+    "name": "missing-ffmpeg",
+    "stage": "failed",
+    "detail": "FFmpeg 不可用，请恢复软件自带 FFmpeg 或检查设置中的 FFmpeg 路径。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "missing-runtime",
+    "stage": "failed",
+    "detail": "本地识别引擎缺失，请使用包含 sherpa-onnx 运行时的完整程序包。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "unlaunchable-runtime",
+    "stage": "failed",
+    "detail": "本地识别失败，请检查模型是否完整，或关闭其他占用内存的程序后重试。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "disk-full-injected",
+    "stage": "failed",
+    "detail": "磁盘空间不足，请清理用户数据所在磁盘后重试。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/中文口播.wav",
+      "name": "中文口播.wav",
+      "size": 178988,
+      "duration": 5.592,
+      "kind": "audio"
+    }
+  },
+  {
+    "name": "silent",
+    "stage": "failed",
+    "detail": "没有识别到可用的人声文字，请检查音频内容和音量。",
+    "source": {
+      "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/静音.wav",
+      "name": "静音.wav",
+      "size": 96078,
+      "duration": 3,
+      "kind": "audio"
+    }
+  }
+]

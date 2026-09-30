@@ -1,0 +1,65 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.8 test:ui
+> node scripts/run-ui-tests.mjs
+
+PASS generation page starts with real empty database
+PASS 11k editor draft autosaves through application to SQLite
+PASS 任务 page renders
+PASS 资产库 page renders
+PASS Prompt page renders
+PASS 模型与 API page renders
+PASS 统计 page renders
+PASS 设置 page renders
+PASS no invalid nested buttons
+PASS unsupported Seedance 1.5 reference video hidden
+PASS theme applies globally
+PASS template dialog opens
+PASS v1.0.4 version and New Task navigation
+PASS new task saves prior workspace and opens blank independent draft
+PASS visual asset picker shows image/video metadata
+PASS image filter
+PASS video filter
+PASS multiselect reuses image/video IDs without importing again
+PASS @ opens bound material menu
+PASS keyboard selects Video1 and inserts bound highlighted token
+PASS @ search filters selected assets
+PASS mouse selects Image1 with stable ID
+PASS WAN 12s / 720P / 9:16 estimate visible before submit
+PASS all ratio diagrams use actual width/height relationships
+PASS Copy Task opens independent unsubmitted draft without API
+PASS v105 task center excludes drafts and preserves them in workspace storage
+PASS current queue exposes delete control
+PASS queue click opens the selected task without bypassing the button
+PASS current task detail contains delete operation
+PASS current task deletion hides task, preserves materials and billing
+PASS billing center shows today yesterday month estimates and actual split
+PASS account connection diagnostics show correct ws workspace/region, no secret
+PASS generate button enqueues once and resets submitted workspace without cloud charges
+PASS v104 reset requires duration selection and footer owns model controls
+PASS v104 Ctrl Enter cannot submit duration zero
+PASS v104 tab rename Enter saves to SQLite
+PASS v104 tab rename Escape preserves original
+PASS v104 tab rename blur saves
+PASS v104 usage selection persists asset default by ID
+PASS v104 thumbnail opens internal preview
+PASS v104 second preview click closes
+PASS v104 accounting modal persists confirmed cost and audit
+PASS v104 accounting modal undo preserves audit
+PASS v106 audio workspace preserves the existing default model and account
+PASS v106 Qwen-Audio clone plus instruction model is selectable
+PASS v105 clone model disables unsupported instruction and offers cloning
+PASS v105 unified tasks default to all and contain no drafts
+PASS v105 asset sidebar quick filters select one shared asset page
+PASS v106 asset sidebar expands without an all entry
+PASS v106 sidebar and visible asset tabs stay synchronized
+PASS v106 asset page tab updates the sidebar selection
+PASS v105 settings exposes independent paths and tray preference
+PASS v108 sidebar uses the existing logo asset at its original size
+PASS v108 clone home has no model or account selectors
+PASS v108 modal contains the two new models
+PASS v108 creation submits and preserves the final modal model/API/reference
+PASS v108 compatible voice and fixed Seed appear for CosyVoice
+PASS v108 edited Seed survives navigation
+PASS v108 old models hide Seed and clear unsupported parameters
+UI unit checks: 59 passed. jsdom DOM tests, not visual or Windows tests.

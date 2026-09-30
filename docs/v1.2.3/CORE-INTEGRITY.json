@@ -1,0 +1,252 @@
+{
+  "protected_files": 49,
+  "all_identical": true,
+  "oneclick_workflow_identical": true,
+  "files": [
+    {
+      "file": "resources/workflow/单任务测试模板_V2.2.zip",
+      "sha256": "244eba7e8451960e0004756a7cbf5405efcc9791f9e73927fa8790f6f84917da",
+      "identical": true
+    },
+    {
+      "file": "resources/workflow/多任务测试模板_V2.2.zip",
+      "sha256": "85556726ead49900a10468cb282ad85a8fbe1335d651994bb44f7231c3925b7c",
+      "identical": true
+    },
+    {
+      "file": "resources/workflow/阶段1_爆款逆向工程_V2.2.md",
+      "sha256": "7c091c5af74e898e7ce11d5b3df92cfd861c2a22866c8c7528d7ee1b92558b7d",
+      "identical": true
+    },
+    {
+      "file": "resources/workflow/阶段2_Wan任务生产_V2.2.md",
+      "sha256": "9b96312d2bc2dc49516c940125df1272f4270e8751ec542f15e90d184f5efd64",
+      "identical": true
+    },
+    {
+      "file": "resources/workflow/阶段3_任务包转换_V2.2.md",
+      "sha256": "05bf6c478d2677e5c314467408a92ebaf336ef6ea4c97b5081ebe705e01961e9",
+      "identical": true
+    },
+    {
+      "file": "src/main/database/db.ts",
+      "sha256": "e0a5fa0c3081cdd9b323aef91a1713490939990fd28cc1021783c6cfceebedea",
+      "identical": true
+    },
+    {
+      "file": "src/main/database/schema.ts",
+      "sha256": "55c4229172556fc93645e7ce6f6bc5266cf62256f1c15e749858934e494609a6",
+      "identical": true
+    },
+    {
+      "file": "src/main/index.ts",
+      "sha256": "2507f8b2076e24148f1654c2a35eec00523e3608b585ed464890f20f013caffb",
+      "identical": true
+    },
+    {
+      "file": "src/main/models/adapters.ts",
+      "sha256": "0427d74f03410d790f086e046377be87e1f0f6267944f169125c879874fd3e48",
+      "identical": true
+    },
+    {
+      "file": "src/main/models/registry.ts",
+      "sha256": "3c950d15a6983e199b7e53fbdcfdf258b9043e3b7a124496b6719478662579e8",
+      "identical": true
+    },
+    {
+      "file": "src/main/models/validation.ts",
+      "sha256": "443d9e662bdbdd813dfa4d4fe53e515741e4ecf827773510d068dadceb4ec8d2",
+      "identical": true
+    },
+    {
+      "file": "src/main/preload.ts",
+      "sha256": "b70b907791c6f68cc5100ea6e859595e3ae2e0c20bebaf14d1dee7dc32d4caec",
+      "identical": true
+    },
+    {
+      "file": "src/main/providers/accounts.ts",
+      "sha256": "d6522c23570fa52db8268ac3a081e86ff604c57f31548df107b5c1ef3ac315c3",
+      "identical": true
+    },
+    {
+      "file": "src/main/providers/adapters.ts",
+      "sha256": "693618d85eee56e8d18df905860eab86d35baf2bb8f81b076354627426ab3834",
+      "identical": true
+    },
+    {
+      "file": "src/main/providers/http.ts",
+      "sha256": "3d642248e694e75c26838c2cb7c92c630202a66574bc48dba8e6fbe976fdf77e",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/application.ts",
+      "sha256": "158f1ad51773607bee978aef1eca8b7765587946c45d542bf51a92f596a6b7ab",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/assets.ts",
+      "sha256": "f23d0ed228519e21b6a449f5b90b81da6ab6e8b8d7dcf2bd6a8a489ba1a73cea",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/audio.ts",
+      "sha256": "011784b9dd18630a3556bc6b62d9a58ab98f3999249c14ecf2a43bb06008f8b8",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/billing.ts",
+      "sha256": "7583b005cfd6fc8ef2d02ae89c563253f9e75de845f9b67e38b752e60c7f2a68",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/cost.ts",
+      "sha256": "574a30b1d7bd659aada4c532b13c709c8712da68dad09f186cfcd34b81b568e9",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/credentials.ts",
+      "sha256": "e88fbf2861ca18bc116854ebd371f7779cf870d64ae331dd7103ece4b5a267b6",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/downloads.ts",
+      "sha256": "f365c5b06948e13aad67e70b5c00600e9e37ce2281b7d63f2fc36cd1cacadd22",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/drafts.ts",
+      "sha256": "97cc3cbaa63cae3b9b5d9221a95ae2e10decadb0009ca96574010bde3ca73ed5",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/errors.ts",
+      "sha256": "e55ee60944d082c64fd8e36ca55a214e49501f4b968c51d2997582d227fe208a",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/folders.ts",
+      "sha256": "63a1cf12c8d7ee2af50c137bfc75e4a4ee1784aeb5c3e35dff9f36e6673504a6",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/logger.ts",
+      "sha256": "96786f9924b3c5b42d03458cfa7108dd866aa3a322db6411fdd9502d637f6d0e",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/media.ts",
+      "sha256": "eb1362ad062c47fb4a65abefce922cda4afbb920af06cb9a397d219567bdfdc9",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/prompts.ts",
+      "sha256": "211d6f6ae74664d6c291030774647a24951b3df9a96e08e608efb82ef41e44ed",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/stage1Template.ts",
+      "sha256": "efb5f4fa036f50eef0c2e86986e7750181a43ee60919762e5a7e729933b32bfc",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/storage.ts",
+      "sha256": "8175e0fe7b6f37a89f5b9f8dc286b089c3df45da480bd6f10e9dfcaa10032933",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/taskPackage.ts",
+      "sha256": "fb0703044b7848f84e38048520340597e5209e818a881128070b3cb1b8c79495",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/tasks.ts",
+      "sha256": "f58f07ab3ca15807d0c65092c4c381d523641d55ac6b0445eb0049e8afd6d12b",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/thumbnails.ts",
+      "sha256": "792165fcf609c6e1bff5d349fa77ed5b4c6035028910a7d8f4b4721c41a7049e",
+      "identical": true
+    },
+    {
+      "file": "src/main/services/transcode.ts",
+      "sha256": "74c4d827204f8c0297964e827a8456a1eb58b19da06a3709955848db9d4d3e07",
+      "identical": true
+    },
+    {
+      "file": "src/shared/accounts.ts",
+      "sha256": "9cb90612e83c905854f7fef7b28c299127382fcf10d79211277b1ffe45626523",
+      "identical": true
+    },
+    {
+      "file": "src/shared/audioCatalog.ts",
+      "sha256": "5c8c2f2bc89c7be1af961dbce887f8c7a074352fe608512220a8c869cec4ea4f",
+      "identical": true
+    },
+    {
+      "file": "src/shared/audioDuration.ts",
+      "sha256": "0451a604a30063d6beade618364b9a97b5b03ad0b769a15ba8516fab4a03b930",
+      "identical": true
+    },
+    {
+      "file": "src/shared/catalog.ts",
+      "sha256": "e13d834bb6de02b95f668b924f319090332c367d862b149afaf85742bdf153de",
+      "identical": true
+    },
+    {
+      "file": "src/shared/deletion.ts",
+      "sha256": "31859cebbb6b6ae82cb6b56fe9c6c4527c8263afa4d26f45dbbf362ab0b2ae34",
+      "identical": true
+    },
+    {
+      "file": "src/shared/draftCompatibility.ts",
+      "sha256": "0986b4f1a72ad28691bacbbb9cc587078a9549333d3c2d66e2f9f81a7a01ce01",
+      "identical": true
+    },
+    {
+      "file": "src/shared/duration.ts",
+      "sha256": "c20776d9f64e6256fd7d868bdff5151b51f5d144426123c22893c548db50de9c",
+      "identical": true
+    },
+    {
+      "file": "src/shared/filenames.ts",
+      "sha256": "545711aa5f2a5d329e819fa70debfacecbc9b6988767a1b40d805d57a2ddf361",
+      "identical": true
+    },
+    {
+      "file": "src/shared/mentions.ts",
+      "sha256": "b379b253fec7d0304236bfc55b1a4912fa4a51af4c5f6f3e8654738063e35e0d",
+      "identical": true
+    },
+    {
+      "file": "src/shared/pricing.ts",
+      "sha256": "0752b946216a625f18dd2aff35204236d47d95b229649112967a1741ec1326c9",
+      "identical": true
+    },
+    {
+      "file": "src/shared/segmentation.ts",
+      "sha256": "8b8fd510090a4be86eae030a86ed2581dcf306c97fa46b9c5f2e3f099e519776",
+      "identical": true
+    },
+    {
+      "file": "src/shared/taskPackage.ts",
+      "sha256": "6d9879a3b5bef46a2ed6ebf5f4ccaf7630099534b5df5a1a5c80640333285f02",
+      "identical": true
+    },
+    {
+      "file": "src/shared/taskPackageDocs.ts",
+      "sha256": "6c9614a09221c098a70c72cb739e016c70f69e39d9e7758a2efbf520b03dd112",
+      "identical": true
+    },
+    {
+      "file": "src/shared/types.ts",
+      "sha256": "b32bd01004cf02732024c454a34bb71a3d97d6790e366360907373e2f34b693a",
+      "identical": true
+    },
+    {
+      "file": "src/shared/wanPreflight.ts",
+      "sha256": "fa06c534e849758888bbbf20d6a508dcca04a0386cfabc59d0febefe903a6c0f",
+      "identical": true
+    }
+  ]
+}

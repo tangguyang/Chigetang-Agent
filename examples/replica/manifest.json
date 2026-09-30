@@ -1,0 +1,29 @@
+{
+  "schema": "chigetang.replica",
+  "version": "1.0",
+  "name": "三个引擎文生视频示例",
+  "assets": [],
+  "segments": [
+    {
+      "id": "G001",
+      "model_id": "wan-safe",
+      "prompt": "一杯咖啡放在干净桌面，固定镜头，自然光。",
+      "params": {},
+      "bindings": []
+    },
+    {
+      "id": "G002",
+      "model_id": "seedance15",
+      "prompt": "一杯咖啡放在干净桌面，固定镜头，自然光。",
+      "params": {},
+      "bindings": []
+    },
+    {
+      "id": "G003",
+      "model_id": "kling26",
+      "prompt": "一杯咖啡放在干净桌面，固定镜头，自然光。",
+      "params": {},
+      "bindings": []
+    }
+  ]
+}

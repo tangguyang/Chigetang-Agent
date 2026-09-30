@@ -1,0 +1,89 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.2.4 test:transcription
+> node scripts/test-transcription.mjs
+
+TAP version 13
+# Evidence directory: /tmp/transcription-qa-k3COAP
+# Subtest: timestamp format and whole-word segmentation
+ok 1 - timestamp format and whole-word segmentation
+  ---
+  duration_ms: 11.281028
+  type: 'test'
+  ...
+# Subtest: real SenseVoice: imports, files, timeline, errors, cancellation and consecutive jobs
+    # Subtest: T1 WAV/MP3 metadata and T2 MP4 metadata
+    ok 1 - T1 WAV/MP3 metadata and T2 MP4 metadata
+      ---
+      duration_ms: 97.866777
+      type: 'test'
+      ...
+    # Subtest: T3 missing and incomplete model; no fake output
+    ok 2 - T3 missing and incomplete model; no fake output
+      ---
+      duration_ms: 280.320746
+      type: 'test'
+      ...
+    # Subtest: T4/T5/T6/T9 real Chinese inference, two TXT, real token timestamps, Chinese paths
+    ok 3 - T4/T5/T6/T9 real Chinese inference, two TXT, real token timestamps, Chinese paths
+      ---
+      duration_ms: 2560.763822
+      type: 'test'
+      ...
+    # Subtest: T8 consecutive MP3 and T2 delayed MP4 retains original video timeline
+    ok 4 - T8 consecutive MP3 and T2 delayed MP4 retains original video timeline
+      ---
+      duration_ms: 4341.351863
+      type: 'test'
+      ...
+    # Subtest: unsupported, corrupt and no-audio sources
+    ok 5 - unsupported, corrupt and no-audio sources
+      ---
+      duration_ms: 42.633187
+      type: 'test'
+      ...
+    # Subtest: T7 kill actual ASR child, reject duplicates, then restart
+    ok 6 - T7 kill actual ASR child, reject duplicates, then restart
+      ---
+      duration_ms: 2553.043174
+      type: 'test'
+      ...
+    # Subtest: multi-chunk genuine inference retains offset, no overlap or lost chunks
+    ok 7 - multi-chunk genuine inference retains offset, no overlap or lost chunks
+      ---
+      duration_ms: 4722.130532
+      type: 'test'
+      ...
+    # Subtest: missing FFmpeg and missing / unlaunchable runtime
+    ok 8 - missing FFmpeg and missing / unlaunchable runtime
+      ---
+      duration_ms: 721.033945
+      type: 'test'
+      ...
+    # Subtest: output write / disk-full failure is explicit and leaves no partial result
+    ok 9 - output write / disk-full failure is explicit and leaves no partial result
+      ---
+      duration_ms: 2022.248189
+      type: 'test'
+      ...
+    # Subtest: silent audio returns clear error, cleans temporary data
+    ok 10 - silent audio returns clear error, cleans temporary data
+      ---
+      duration_ms: 609.216049
+      type: 'test'
+      ...
+    1..10
+ok 2 - real SenseVoice: imports, files, timeline, errors, cancellation and consecutive jobs
+  ---
+  duration_ms: 18293.800432
+  type: 'test'
+  ...
+1..2
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 18401.995056

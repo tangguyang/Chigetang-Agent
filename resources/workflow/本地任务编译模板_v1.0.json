@@ -1,0 +1,31 @@
+{
+  "plan_version": "1.0",
+  "approved": false,
+  "task_id": "replace-with-unique-task-id",
+  "task_name": "已确认的复刻任务名称",
+  "source_video": "media/original.mp4",
+  "full_audio": "media/clone.wav",
+  "images": [
+    { "alias": "person", "file": "media/person.png" },
+    { "alias": "product", "file": "media/product.png" }
+  ],
+  "params": {
+    "duration": -1,
+    "audio": false,
+    "resolution": "720P",
+    "ratio": "adaptive",
+    "watermark": false,
+    "prompt_extend": false
+  },
+  "segments": [
+    {
+      "id": "G001",
+      "shot_ids": ["S001", "S002"],
+      "source_range_ms": [0, 5000],
+      "active_edit_range_ms": [1000, 4000],
+      "audio_range_ms": [0, 5000],
+      "duration_seconds": 5,
+      "prompt": "编辑 @motion，参考 @person、@product 和 @voice，仅替换已授权对象；按确认稿的时间轴保留动作、构图、镜头与原片节奏。禁止附加字幕、屏幕文字和水印。"
+    }
+  ]
+}

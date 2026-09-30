@@ -1,0 +1,3 @@
+[5:0923/101548.687483:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Failed to open socket: Operation not permitted
+[5:0923/101548.687714:ERROR:dbus/bus.cc:406] Failed to connect to the bus: Could not parse server address: Unknown address type (examples of valid types are "tcp" and on UNIX "unix")
+[5:0923/101548.751048:FATAL:chrome/browser/process_singleton_posix.cc:319] Check failed: . socket() failed: Operation not permitted (1)

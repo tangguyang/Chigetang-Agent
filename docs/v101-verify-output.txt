@@ -1,0 +1,132 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ai-video@1.0.1 verify
+> npm run typecheck && npm test && npm run test:ui && npm run test:bundle
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ai-video@1.0.1 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ai-video@1.0.1 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+✔ SQLite migration, restart, integrity and non-destructive backup (21.483425ms)
+✔ empty API key blocked; ciphertext does not contain key; foreign machine error is readable (5.895515ms)
+✔ 10k Prompt draft persists after restart (7.043684ms)
+✔ Prompt versions preserve V1 when V2 is edited (5.228919ms)
+✔ asset SHA-256 deduplication, moved source, relocate validation and mutation detection (15.989343ms)
+✔ copy import survives deletion of original file (7.529396ms)
+✔ immutable task snapshot and branching versions; copy forms independent group (16.757855ms)
+✔ concurrent duplicate requests create exactly one paid reservation (12.378774ms)
+✔ Wan payload matches official media/input/parameters shape (9.547079ms)
+✔ Seedance submit, status and result use official SDK protocol (2.510459ms)
+✔ invalid credentials and request errors have actionable categories (0.330164ms)
+✔ 429 retries, paid 500 and network timeout never repeat submission (8.860176ms)
+✔ safe polling retries on temporary disconnection (1003.033037ms)
+✔ unsupported params, long Prompt, invalid duration rejected before cloud submit (1.110608ms)
+✔ model asset size, format, dimensions, duration, fps and mixed modes preflight (1.113112ms)
+✔ unknown prices remain unknown; price snapshot never recalculates history (10.140378ms)
+✔ successful generation + failed download retains cloud success; redownload never resubmits (15.409921ms)
+✔ processing restart recovers task ID without duplicate submit; interrupted submit pauses (15.18137ms)
+✔ ambiguous paid submission pauses and preserves all inputs (7.256872ms)
+✔ output verification rejects HTML; valid MP4 never overwrites old output (16.053738ms)
+✔ deleting task record never deletes output or source (8.977249ms)
+✔ account/provider mismatch prevents submission (3.668553ms)
+✔ global concurrency includes processing cloud jobs between polls (62.685472ms)
+✔ per-account limit permits another account while first is saturated (75.11133ms)
+✔ re-generate preserves exact official model after registry change (7.812428ms)
+✔ logs redact keys and omit prompts (1.252747ms)
+✔ portable directory move rebases managed files without rewriting immutable snapshots (13.77982ms)
+✔ Seedance 2.5 rejects unsupported seed and enforces editing constraints (0.794593ms)
+✔ new output directory is created; file-as-directory fails before cloud calls (7.641985ms)
+✔ malformed successful submission is ambiguous and never marked safe to repeat (1.318461ms)
+✔ Wan upload obtains official policy, sends multipart file last, and resolves OSS in submission (3.472723ms)
+✔ existing API account cannot change Provider and invalidate historical tasks (3.539149ms)
+✔ packaged MediaInfo WASM reads actual MP4 dimensions/fps and WAV duration (227.775275ms)
+✔ v1.0.0 migration preserves all legacy tables, encrypted credential, draft ratio and backups (9.117997ms)
+✔ migration failure rolls back without erasing v1 data (7.160174ms)
+✔ workspace ws- saves normalizes reads and decrypts; partial edits preserve fields (8.163485ms)
+✔ legacy workspace_id and workspaceID aliases read and save (5.230216ms)
+✔ WAN endpoint builds from ws- workspace and region, strips video path, rejects chat (6.614333ms)
+✔ HTTP 400 preserves code,message,request_id and redacts secret (4.035762ms)
+✔ HTTP 401 preserves code,message,request_id and redacts secret (2.107558ms)
+✔ HTTP 403 preserves code,message,request_id and redacts secret (0.491124ms)
+✔ HTTP 429 preserves code,message,request_id and redacts secret (0.432685ms)
+✔ HTTP 500 preserves code,message,request_id and redacts secret (1.130361ms)
+✔ connection test only GET, checks workspace/region/model and never generates (5.222739ms)
+✔ connection errors preserve HTTP diagnostic (5.110319ms)
+✔ both providers report unsupported balance without fabricated value (0.172215ms)
+✔ estimated cost depends on duration and resolution (4.334964ms)
+✔ model price, sound, reference input and region select independent price rules (4.412018ms)
+✔ unconfigured price stays unknown; tokens only estimated with explicit conversion (3.878818ms)
+✔ new task defaults 9:16 and leaves saved/history ratio unchanged (22.424851ms)
+✔ multiple drafts and mention metadata persist after restart (6.42369ms)
+✔ copy task preserves all parameters as independent unsubmitted draft without API (6.936133ms)
+✔ deleting queued task hides record, cancels local queue, retains immutable snapshot and billing (7.947197ms)
+✔ deleting cloud processing task retains state/id for recovery and billing (10.841399ms)
+✔ images/videos reuse Asset ID; duplicate import no file duplication; picker filters search (9.737532ms)
+✔ mention menu searches label, filename and role (4.578608ms)
+✔ inserted mentions carry real asset_id and stable bindingId (3.740821ms)
+✔ rename and reorder assets preserve mention binding and correct final media index (5.196545ms)
+✔ deleting a mention removes binding only, never selected or library assets (4.762191ms)
+✔ dangling and pasted unbound tokens fail before API submission (5.020673ms)
+✔ WAN POST indexed references exactly match ordered media; async header and task_id parsing (5.680524ms)
+✔ WAN HTTP200 error without task_id includes actual provider code and request_id (3.686482ms)
+✔ corrected account used before submission without overwriting old immutable account snapshot (9.328833ms)
+✔ billing keeps estimate/actual separate, filters dates/accounts and retains deleted consumption (14.073097ms)
+✔ delete confirmation distinguishes active WAN billing from supported Seedance cancel (5.971552ms)
+✔ complete v1 database migrates tasks, prompts, assets, account ciphertext and prices unchanged (20.564038ms)
+ℹ tests 66
+ℹ suites 0
+ℹ pass 66
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1871.925864
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ai-video@1.0.1 test:ui
+> node scripts/run-ui-tests.mjs
+
+PASS generation page starts with real empty database
+PASS 11k editor draft autosaves through application to SQLite
+PASS 任务 page renders
+PASS 资产库 page renders
+PASS Prompt page renders
+PASS 模型与 API page renders
+PASS 统计 page renders
+PASS 设置 page renders
+PASS no invalid nested buttons
+PASS unsupported Seedance 1.5 reference video hidden
+PASS theme applies globally
+PASS template dialog opens
+PASS v1.0.1 version and New Task navigation
+PASS new task saves prior workspace and opens blank independent draft
+PASS visual asset picker shows image/video metadata
+PASS image filter
+PASS video filter
+PASS multiselect reuses image/video IDs without importing again
+PASS @ opens bound material menu
+PASS keyboard selects Video1 and inserts bound highlighted token
+PASS @ search filters selected assets
+PASS mouse selects Image1 with stable ID
+PASS WAN 12s / 720P / 9:16 estimate visible before submit
+PASS all ratio diagrams use actual width/height relationships
+PASS Copy Task opens independent unsubmitted draft without API
+PASS Delete copied draft retains original task and reusable assets
+PASS current queue exposes delete control
+PASS current task detail contains delete operation
+PASS current task deletion hides task, preserves materials and billing
+PASS billing center shows today yesterday month estimates and actual split
+PASS account connection diagnostics show correct ws workspace/region, no secret
+UI unit checks: 31 passed. jsdom DOM tests, not visual or Windows tests.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ai-video@1.0.1 test:bundle
+> node scripts/build.mjs && node scripts/test-bundle.mjs
+
+Bundled MediaInfo reads real MP4 successfully.

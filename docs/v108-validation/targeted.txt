@@ -1,0 +1,13 @@
+✔ v108: plus enrollment, exact model/API/voice binding, fixed seed generation and history (64.944732ms)
+✔ v108: flash enrollment, exact model/API/voice binding, fixed seed generation and history (40.709184ms)
+✔ v108: reject cross-model, cross-account, region and unsupported/invalid parameters before network (10.192378ms)
+✔ v108: existing data is backed up before model additions; restart is idempotent (11.165592ms)
+✔ v108: backup failure blocks upgrade without changing old records (8.031046ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 324.570898

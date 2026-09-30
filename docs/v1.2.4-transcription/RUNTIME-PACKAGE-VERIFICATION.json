@@ -1,0 +1,9 @@
+{
+  "runtime_version": "1.13.8",
+  "architecture": "Windows x64",
+  "runtime_sha256": "57ad48bd49d0d22207f65facf607f8aefcf0aae7240a37e5ba0415ae85f43c4d",
+  "packaged_engine_matches_original": true,
+  "guide_and_checksums_match": true,
+  "model_excluded": true,
+  "windows_native_launch_verified": false
+}

@@ -1,0 +1,6 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.8 test:bundle
+> node scripts/build.mjs && node scripts/test-bundle.mjs
+
+Bundled MediaInfo reads real MP4 successfully.

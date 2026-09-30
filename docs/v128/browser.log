@@ -1,0 +1,9 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.2.8 test:browser
+> node --experimental-strip-types scripts/test-browser.ts
+
+Launching browser
+Opening built app
+App loaded
+PASS browser: real PDF worker, local resources, convert/open handler, 1440/1050 screenshots, engine switch, no console/page errors

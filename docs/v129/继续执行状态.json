@@ -1,0 +1,18 @@
+{
+  "version": "1.2.9",
+  "status": "candidate_pending_real_voice_and_windows_acceptance",
+  "sourceBaselineSHA256": "505e097545528d1ba76eda0c13fd37cba207d6e9dc330f2f96c3f25d5e5946e5",
+  "automatedTestsPassed": true,
+  "realCosyVoicePassed": false,
+  "goldenCases": [
+    false,
+    false,
+    false
+  ],
+  "windowsRuntimeTested": false,
+  "next": [
+    "Windows原生候选程序验收",
+    "配置现有Voice ID及真实连接",
+    "Case1/2/3真实生成与人工QC"
+  ]
+}

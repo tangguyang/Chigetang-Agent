@@ -1,0 +1,22 @@
+M	CHANGELOG.md
+M	src/main/index.ts
+M	src/main/providers/http.ts
+M	src/main/services/application.ts
+M	src/main/services/tasks.ts
+M	src/renderer/components/PromptEditor.tsx
+M	src/renderer/pages/Assets.tsx
+M	src/renderer/pages/Generate.tsx
+M	src/renderer/pages/Models.tsx
+M	src/renderer/pages/Prompts.tsx
+M	src/renderer/pages/Settings.tsx
+M	src/renderer/pages/Statistics.tsx
+M	src/renderer/pages/Tasks.tsx
+M	src/renderer/store.ts
+M	src/renderer/style.css
+M	tests/v102.test.ts
+
+Untracked new files:
+src/renderer/workspaceLifecycle.ts
+src/shared/draftCompatibility.ts
+v1.0.2-Hotfix1-Fix-and-Test-Report.md
+docs/V102-HOTFIX1-CHANGED-FILES.txt

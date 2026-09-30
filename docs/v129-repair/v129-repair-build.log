@@ -1,0 +1,20 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.2.9 build
+> node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs
+
+真人口播文档版本、打包位置、字段白名单和完整示例Schema校验通过
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 1625 modules transformed.
+rendering chunks...
+computing gzip size...
+../../dist/renderer/index.html                              0.71 kB │ gzip:   0.42 kB
+../../dist/renderer/assets/pdf.worker.min-C8PGFc0r.mjs  1,298.21 kB
+../../dist/renderer/assets/Page-XsCU_BlQ.css                2.31 kB │ gzip:   0.89 kB
+../../dist/renderer/assets/index-Pq5sLTOr.css              60.34 kB │ gzip:  11.92 kB
+../../dist/renderer/assets/pdf.worker.min-B-_nov1m.js       0.09 kB │ gzip:   0.11 kB
+../../dist/renderer/assets/Page-BElFem5p.js                24.19 kB │ gzip:   8.91 kB
+../../dist/renderer/assets/index-B4qTDvu0.js              396.30 kB │ gzip: 125.58 kB
+../../dist/renderer/assets/pdf-D4X9PViX.js                469.96 kB │ gzip: 143.40 kB
+✓ built in 2.82s

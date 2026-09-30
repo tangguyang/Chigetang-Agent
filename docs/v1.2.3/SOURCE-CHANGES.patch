@@ -1,0 +1,779 @@
+--- v1.2.2/VERSION
++++ v1.2.3/VERSION
+@@ -1 +1 @@
+-1.2.2
++1.2.3
+--- v1.2.2/package-lock.json
++++ v1.2.3/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "chigetang-agent",
+-  "version": "1.2.2",
++  "version": "1.2.3",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "chigetang-agent",
+-      "version": "1.2.2",
++      "version": "1.2.3",
+       "license": "UNLICENSED",
+       "dependencies": {
+         "lucide-react": "0.468.0",
+--- v1.2.2/package.json
++++ v1.2.3/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "chigetang-agent",
+   "productName": "吃个糖Agent",
+-  "version": "1.2.2",
++  "version": "1.2.3",
+   "private": true,
+   "type": "module",
+   "description": "多模型 AI 视频生成与资产管理工作台",
+--- v1.2.2/scripts/test-ui.tsx
++++ v1.2.3/scripts/test-ui.tsx
+@@ -296,7 +296,7 @@
+   await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)); });
+ }
+ check("current version and New Task navigation", () => {
+-  assert.equal(app.bootstrap().version, "1.2.2");
++  assert.equal(app.bootstrap().version, "1.2.3");
+   assert(document.querySelector(".workspace-tab-new"));
+   assert(!document.querySelector(".new-task"));
+   assert.equal(useApp.getState().draft?.params.ratio, "9:16");
+@@ -800,28 +800,7 @@
+   assert(document.body.textContent?.includes("最小化到系统托盘"));
+   assert(!document.body.textContent?.includes("数据保存在程序目录"));
+ });
+-await act(async () => useApp.getState().setPage("长视频"));
+-check("v110 independent batch video page opens with one Prompt", () => {
+-  assert(document.querySelector("h1")?.textContent?.includes("长视频"));
+-  assert.equal(document.querySelectorAll(".prompt-plan-tabs button").length, 1);
+-  assert(document.body.textContent?.includes("实际将提交 0 个独立视频任务"));
+-});
+-await clickText("首尾帧", ".shared-config .segmented button");
+-check("v111 batch frame mode persists without selected assets", () => {
+-  assert(document.body.textContent?.includes("上传首帧"));
+-  assert(document.body.textContent?.includes("上传尾帧"));
+-  const stored = JSON.parse(
+-    localStorage.getItem("chigetang-batch-video-v110") || "null",
+-  );
+-  assert.equal(stored.mode, "frames");
+-});
+-await clickText("自由参考", ".shared-config .segmented button");
+-await clickText("新增 Prompt · 1/60");
+-await clickText("新增 Prompt · 2/60");
+-check("v112 long video can grow beyond three Prompt plans", () => {
+-  assert.equal(document.querySelectorAll(".prompt-plan-tabs button").length, 3);
+-  assert(!document.querySelector<HTMLButtonElement>(".prompt-plans > header .material-actions button:last-child")?.disabled);
+-});
++// v1.2.3 removes the long-video page; retired UI checks are replaced below.
+ // v1.0.9: exercise the fixed-model workbench and real clone workflow.
+ check("v109 sidebar keeps the existing logo asset at its original size", () => {
+   const logo = document.querySelector<HTMLImageElement>('.brand-symbol img');
+@@ -882,6 +861,60 @@
+   assert.notEqual(seeds[0],seeds[1]);
+ });
+ window.aiVideo.invoke = originalInvoke;
++check("v123 navigation removes long video and keeps other menu ordering", () => {
++  const names = [...document.querySelectorAll('.sidebar nav > button')].map(b=>b.textContent);
++  assert.deepEqual(names, ['一键生成','视频生成','音频生成','复刻音色','任务','资产库','模型与 API','设置']);
++  assert.equal(document.querySelector('.studio-results h2')?.textContent, '任务列表');
++});
++const uiCalls: Array<{action:string;payload:unknown}> = [];
++const durationRows = [
++  {...task,id:'duration-real',name:'漂亮和气质哪个更重要体重管理复刻任务20260923'.repeat(3),type:'video',status:'Completed',downloadStatus:'completed',outputPath:'/qa/real.mp4',createdAt:'2026-09-01T10:00:00Z',submittedAt:'2026-09-20T10:00:00Z'},
++  {...task,id:'duration-missing',type:'video',status:'Completed',downloadStatus:'completed',outputPath:'/qa/missing.mp4'},
++  {...task,id:'duration-pending',type:'video',status:'Processing',downloadStatus:'none',outputPath:null},
++  {...task,id:'duration-audio',type:'audio',status:'Completed',downloadStatus:'completed',outputPath:'/qa/audio.wav'},
++];
++window.aiVideo.invoke = async (action:string,p:any) => {
++  uiCalls.push({action,payload:p});
++  if(action==='tasks.list')return {items:durationRows,total:4,page:1,pageSize:30};
++  if(action==='open')return true;
++  return originalInvoke(action,p);
++};
++await act(async()=>useApp.getState().setPage('一键生成'));
++check("v123 oneclick list shows actual creation date and explicit pending states",()=>{
++ assert(document.querySelector('.workbench-task-sidebar header')?.textContent?.includes('任务列表'));
++ assert(document.querySelector('.workbench-task-row')?.textContent?.includes('2026/9/1'));
++ assert.equal(document.querySelectorAll('.workbench-task-row video').length,2);
++ assert(document.body.textContent?.includes('视频时长：待生成'));
++ assert(document.body.textContent?.includes('非视频任务'));
++});
++await act(async()=>{
++ const videos=document.querySelectorAll<HTMLVideoElement>('.workbench-task-row video');
++ Object.defineProperty(videos[0],'duration',{value:26.42,configurable:true});
++ videos[0].dispatchEvent(new Event('loadedmetadata'));
++ videos[1].dispatchEvent(new Event('error'));
++});
++check("v123 reads metadata instead of request params and handles missing output",()=>{
++ assert(document.body.textContent?.includes('视频时长：26.42秒'));
++ assert(document.body.textContent?.includes('视频时长：无法读取'));
++ assert.equal(document.querySelectorAll('.workbench-task-row video').length,0);
++});
++await act(async()=>document.querySelector<HTMLButtonElement>('[aria-label="打开生成视频保存目录"]')!.click());
++check("v123 folder entry only uses existing open API",()=>{
++ assert.deepEqual(uiCalls.find(c=>c.action==='open'),{action:'open',payload:{kind:'output'}});
++ assert(uiCalls.every(c=>['tasks.list','open'].includes(c.action)));
++});
++const pane=document.querySelector<HTMLElement>('.workbench-task-sidebar')!;
++Object.defineProperty(pane.parentElement,'clientWidth',{value:1300,configurable:true});
++Object.defineProperty(window,'innerWidth',{value:1500,configurable:true});
++await act(async()=>window.dispatchEvent(new Event('resize')));
++await act(async()=>document.querySelector('[aria-label="调整任务列表宽度"]')!.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true})));
++check("v123 resizing is constrained and saved independently of drafts",()=>{
++ assert.equal(pane.style.width,'420px');
++ assert.equal(localStorage.getItem('chigetang-oneclick-task-width'),'420');
++});
++await act(async()=>useApp.getState().setPage('生成视频'));
++check("v123 video task heading is unified",()=>assert(document.querySelector('.queue h3')?.textContent?.includes('任务列表')));
++window.aiVideo.invoke = originalInvoke;
+ app.close();
+ console.log(
+   `UI unit checks: ${checks.length} passed. jsdom DOM tests, not visual or Windows tests.`,
+--- v1.2.2/scripts/visual-v123.mjs
++++ v1.2.3/scripts/visual-v123.mjs
+@@ -0,0 +1,59 @@
++// Local UI acceptance only. Uses existing application/SQLite and a real MP4 fixture.
++import {build} from 'esbuild';
++import {readFileSync,writeFileSync,mkdirSync,cpSync} from 'node:fs';
++import {resolve} from 'node:path';
++import {spawn} from 'node:child_process';
++import assert from 'node:assert/strict';
++const {chromium}=await import(process.env.QA_PLAYWRIGHT_MODULE || process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/playwright-core/index.mjs');
++const dir=resolve('.visual-v123'), report='docs/v1.2.3';mkdirSync(dir,{recursive:true});mkdirSync(report,{recursive:true});
++await build({stdin:{contents:"import './src/renderer/main.tsx';import {useApp} from './src/renderer/store.ts';window.qa=useApp;",resolveDir:process.cwd(),loader:'tsx'},bundle:true,format:'esm',outfile:dir+'/app.js',plugins:[{name:'local-media',setup(b){b.onLoad({filter:/store\.ts$/},async({path})=>({contents:readFileSync(path,'utf8').replace('aivideo://local/','http://127.0.0.1:4178/media/'),loader:'ts'}));}}]});
++mkdirSync(dir+'/resources',{recursive:true});cpSync('resources/brand.svg',dir+'/resources/brand.svg');
++let font='';if(process.env.QA_FONT_DIR){cpSync(process.env.QA_FONT_DIR,dir+'/font',{recursive:true});font='<link rel="stylesheet" href="/font/400.css"><style>:root{font-family:"Noto Sans SC",sans-serif}</style>';}
++writeFileSync(dir+'/index.html',`<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/app.css">${font}</head><body><div id="root"></div><script type="module" src="/app.js"></script></body></html>`);
++let serverCode=readFileSync('scripts/visual-server.ts','utf8')
++ .replace('name: `视频测试任务 ${i + 1}`','name: `漂亮和气质哪个更重要体重管理复刻任务20260923VeryLongUnbrokenName${i + 1}`')
++ .replace('app.tasks.save(t);',"t.downloadStatus='completed';t.outputPath=resolve('tests/fixtures/sample.mp4');app.tasks.save(t);")
++ .replace('const a = app.assets.get(url.pathname.split("/").at(-1)!);\n      file = a.managedPath || a.originalPath;',"const id=url.pathname.split('/').at(-1);if(url.pathname.includes('/output/'))file=app.tasks.get(id).outputPath;else {const a=app.assets.get(id);file=a.managedPath||a.originalPath;}")
++ .replace('".png": "image/png",', '".png": "image/png", \".svg\": \"image/svg+xml\",')
++ .replace('case "assets.get":', 'case "assets.inspect":\n        case "assets.get":')
++ .replace('case "bootstrap":', 'case "open": value=true;break;\n        case "bootstrap":');
++writeFileSync('scripts/.visual-v123-server.ts',serverCode);
++const server=spawn(process.execPath,['--experimental-strip-types','scripts/.visual-v123-server.ts',dir],{stdio:['ignore','pipe','pipe']});
++server.stderr.on('data',b=>process.stderr.write(b));
++await new Promise((ok,no)=>{server.stdout.on('data',b=>{if(String(b).includes('QA_READY'))ok();});server.once('exit',c=>no(Error('Server exit '+c)));});
++let browser;const results=[];
++try{
++ browser=await chromium.launch({executablePath:process.env.QA_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage','--disable-gpu'],headless:true});
++ for(const [width,height] of [[1440,960],[1920,1080],[1050,720],[960,540],[740,720]]){
++  const context=await browser.newContext({viewport:{width,height}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(String(e)));
++  await page.addInitScript(()=>{window.aiVideo={invoke:async(action,payload)=>{const r=await fetch('/invoke',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,payload})});const v=await r.json();if(!v.ok)throw Error(v.error);return v.data;},onChange:()=>()=>{},onNavigate:()=>()=>{},filePath:()=>''};});
++  await page.goto('http://127.0.0.1:4178');await page.waitForSelector('.queue-item');await page.evaluate(()=>document.fonts.ready);
++  const queue=await page.locator('.queue').evaluate(el=>({width:el.getBoundingClientRect().width,client:el.clientWidth,scroll:el.scrollWidth,titleStyle:getComputedStyle(el.querySelector('strong')).whiteSpace}));
++  assert.equal(queue.width,290);assert(queue.scroll<=queue.client+1);assert.equal(queue.titleStyle,'normal');
++  if(width===1440)await page.screenshot({path:report+'/video-1440.png'});
++  await page.getByRole('button',{name:'一键生成',exact:true}).click();await page.waitForSelector('.output-video-duration');
++  await page.waitForFunction(()=>[...document.querySelectorAll('.output-video-duration')].every(el=>/视频时长：[\d.]+秒/.test(el.textContent)),null,{timeout:15000});
++  const actualDuration=await page.locator('.output-video-duration').first().textContent();assert(!actualDuration.includes('12秒'));
++  if(width>740){
++   const handle=page.getByRole('separator',{name:'调整任务列表宽度'});const box=await handle.boundingBox();
++   const before=await page.locator('.workbench-task-sidebar').evaluate(e=>e.getBoundingClientRect().width);
++   await page.mouse.move(box.x+box.width/2,box.y+30);await page.mouse.down();await page.mouse.move(box.x+160,box.y+30);await page.mouse.up();
++   assert((await page.locator('.workbench-task-sidebar').evaluate(e=>e.getBoundingClientRect().width))>before);
++   await handle.press('End');
++  }
++  const layout=await page.evaluate(()=>{
++   const get=s=>{const e=document.querySelector(s),r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,right:r.right,bottom:r.bottom,client:e.clientWidth,scroll:e.scrollWidth};};
++   return {list:get('.workbench-task-list'),pane:get('.workbench-task-sidebar'),main:get('.oneclick-main'),options:get('.oneclick-options'),root:get('.oneclick-workbench')};
++  });
++  assert(layout.list.scroll<=layout.list.client+1);assert(layout.root.scroll<=layout.root.client+1);
++  if(width>740){assert(layout.main.width>=300);assert(layout.pane.right<=layout.main.x);if(width>1140)assert(layout.main.right<=layout.options.x);}
++  await page.screenshot({path:report+`/oneclick-${width}.png`});
++  if(width===1440){
++   const saved=await page.evaluate(()=>localStorage.getItem('chigetang-oneclick-task-width'));assert.equal(saved,'420');
++   await page.getByRole('separator',{name:'调整任务列表宽度'}).press('Home');assert.equal(await page.locator('.workbench-task-sidebar').evaluate(e=>e.getBoundingClientRect().width),180);
++   await page.getByRole('button',{name:'打开生成视频保存目录'}).click();
++  }
++  assert.deepEqual(errors,[]);results.push({width,height,queue,layout,actualDuration,errors});await context.close();
++ }
++ writeFileSync(report+'/visual-results.json',JSON.stringify(results,null,2));console.log('PASS five viewport layouts, pointer/keyboard resize, actual MP4 metadata, fixed queue, no page errors');
++}finally{await browser?.close();server.kill('SIGTERM');}
+--- v1.2.2/src/renderer/components/OutputVideoDuration.tsx
++++ v1.2.3/src/renderer/components/OutputVideoDuration.tsx
+@@ -0,0 +1,30 @@
++import { useEffect, useState } from 'react';
++import type { Task } from '../../shared/types.ts';
++import { media } from '../store.ts';
++
++/** Read only the local output's metadata. Never substitute requested duration. */
++export function OutputVideoDuration({ task }: { task: Task }) {
++  const isVideo = task.type ? task.type === 'video' || task.type === 'video-group' : task.snapshot.model.type === 'video';
++  const readable = isVideo && Boolean(task.outputPath) && task.downloadStatus === 'completed';
++  const [duration, setDuration] = useState<number | null>(null);
++  const [failed, setFailed] = useState(false);
++  useEffect(() => {
++    if (!readable || duration !== null || failed) return;
++    const timer = setTimeout(() => setFailed(true), 15000);
++    return () => clearTimeout(timer);
++  }, [readable, duration, failed]);
++  const label = !isVideo ? '非视频任务' : !readable
++    ? task.downloadStatus === 'failed' ? '视频时长：下载失败' : task.status === 'Completed' ? '视频时长：等待下载' : '视频时长：待生成'
++    : duration !== null ? `视频时长：${Number(duration.toFixed(2))}秒`
++    : failed ? '视频时长：无法读取' : '视频时长：读取中…';
++  return <>
++    <small className="output-video-duration">{label}</small>
++    {readable && duration === null && !failed && <video hidden muted preload="metadata"
++      src={media('output', task.id)}
++      onLoadedMetadata={event => {
++        const seconds = event.currentTarget.duration;
++        if (Number.isFinite(seconds) && seconds > 0) setDuration(seconds);
++        else setFailed(true);
++      }} onError={() => setFailed(true)} />}
++  </>;
++}
+--- v1.2.2/src/renderer/components/WorkbenchTaskSidebar.tsx
++++ v1.2.3/src/renderer/components/WorkbenchTaskSidebar.tsx
+@@ -1,6 +1,7 @@
+ import { useEffect, useRef, useState } from 'react';
+ import type { Page, Task } from '../../shared/types.ts';
+ import { api, labels, time, useApp } from '../store.ts';
++import { OutputVideoDuration } from './OutputVideoDuration.tsx';
+ /** Read-only local task list. Never invokes tasks.refreshAll or a cloud API. */
+ export function useWorkbenchTasks(pageSize = 30) {
+  const [tasks,setTasks]=useState<Task[]>([]);
+@@ -22,11 +23,43 @@
+  },[pageSize]);
+  return {tasks,refresh:load};
+ }
++const WIDTH_KEY = 'chigetang-oneclick-task-width';
+ export function WorkbenchTaskSidebar({tasks,focusIds=[]}:{tasks:Task[];focusIds?:string[]}) {
+  const {setTask}=useApp();const [collapsed,setCollapsed]=useState(false);
++ const pane=useRef<HTMLElement>(null);
++ const drag=useRef<{pointerId:number;x:number;width:number}|null>(null);
++ const [width,setWidth]=useState(()=>{
++  try { const saved=Number(localStorage.getItem(WIDTH_KEY));return saved>0&&Number.isFinite(saved)?Math.min(420,Math.max(180,saved)):245; }
++  catch { return 245; }
++ });
++ const [maxWidth,setMaxWidth]=useState(420);
++ useEffect(()=>{
++  const parent=pane.current?.parentElement;
++  if(!parent)return;
++  const measure=()=>{
++   // Reserve the editor and output controls; shrinking the window clamps only presentation.
++   const reserved=window.innerWidth<=1140?342:616;
++   setMaxWidth(Math.max(180,Math.min(420,parent.clientWidth-reserved)));
++  };
++  measure();
++  const observer=typeof ResizeObserver==='undefined'?null:new ResizeObserver(measure);
++  observer?.observe(parent);window.addEventListener('resize',measure);
++  return()=>{observer?.disconnect();window.removeEventListener('resize',measure);};
++ },[]);
++ const actualWidth=Math.min(width,maxWidth);
++ const resize=(next:number)=>{
++  const value=Math.round(Math.min(maxWidth,Math.max(180,next)));setWidth(value);
++  try{localStorage.setItem(WIDTH_KEY,String(value));}catch{/* layout still works when storage is unavailable */}
++ };
+  const ordered=[...tasks].sort((a,b)=>Number(focusIds.includes(b.id))-Number(focusIds.includes(a.id)));
+- return <aside className={'workbench-task-sidebar '+(collapsed?'collapsed':'')}>
+-  <header><strong>生成任务 · {tasks.length}</strong><button onClick={()=>setCollapsed(v=>!v)}>{collapsed?'展开':'收起'}</button></header>
+-  {!collapsed&&<div className="workbench-task-list">{ordered.length===0?<p className="muted">暂无任务。提交后可在这里跟踪进度。</p>:ordered.map(task=><button key={task.id} onClick={()=>setTask(task.id)} className="workbench-task-row"><strong>{task.name}</strong><span>{labels[task.status]??task.status}</span><small>{time(task.submittedAt??task.createdAt)}</small></button>)}</div>}
++ return <aside ref={pane} style={{width:actualWidth}} className={'workbench-task-sidebar '+(collapsed?'collapsed':'')}>
++  <header><strong>任务列表 · {tasks.length}</strong><button onClick={()=>setCollapsed(v=>!v)}>{collapsed?'展开':'收起'}</button></header>
++  {!collapsed&&<div className="workbench-task-list">{ordered.length===0?<p className="muted">暂无任务。提交后可在这里跟踪进度。</p>:ordered.map(task=><button key={task.id} onClick={()=>setTask(task.id)} className="workbench-task-row"><strong>{task.name}</strong><span>{task.downloadStatus==='failed'?'生成成功 · 下载失败':labels[task.status]??task.status}</span><OutputVideoDuration key={`${task.id}:${task.outputPath}:${task.downloadStatus}:${task.completedAt}`} task={task}/><small>创建时间：{time(task.createdAt)}</small></button>)}</div>}
++  <div className="task-list-resizer" role="separator" tabIndex={0} aria-label="调整任务列表宽度" aria-orientation="vertical" aria-valuemin={180} aria-valuemax={maxWidth} aria-valuenow={actualWidth}
++   onPointerDown={event=>{if(event.button!==0)return;event.preventDefault();drag.current={pointerId:event.pointerId,x:event.clientX,width:actualWidth};event.currentTarget.setPointerCapture(event.pointerId);}}
++   onPointerMove={event=>{const start=drag.current;if(start?.pointerId===event.pointerId)resize(start.width+event.clientX-start.x);}}
++   onPointerUp={event=>{drag.current=null;if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);}}
++   onPointerCancel={()=>{drag.current=null;}} onLostPointerCapture={()=>{drag.current=null;}}
++   onKeyDown={event=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();resize(event.key==='Home'?180:event.key==='End'?maxWidth:actualWidth+(event.key==='ArrowLeft'?-10:10));}}}/>
+  </aside>;
+ }
+--- v1.2.2/src/renderer/main.tsx
++++ v1.2.3/src/renderer/main.tsx
+@@ -14,7 +14,6 @@
+ import { brand } from "../shared/brand.ts";
+ import { AssetsPage } from "./pages/Assets.tsx";
+ import { GeneratePage } from "./pages/Generate.tsx";
+-import { BatchGeneratePage } from "./pages/BatchGenerate.tsx";
+ import { OneClickPage } from "./pages/OneClick.tsx";
+ import { AudioPage, VoiceClonePage } from "./pages/Audio.tsx";
+ import { ModelsPage } from "./pages/Models.tsx";
+@@ -24,9 +23,8 @@
+ import { run, useApp } from "./store.ts";
+ import "./style.css";
+ const nav = [
++  ["一键生成", Clapperboard],
+   ["生成视频", Sparkles],
+-  ["长视频", Layers],
+-  ["一键生成", Clapperboard],
+   ["生成音频", FileText],
+   ["复刻音色", FileText],
+   ["任务", Layers],
+@@ -137,7 +135,7 @@
+                 }}
+               >
+                 <Icon size={19} />
+-                {name}
++                {name === "生成视频" ? "视频生成" : name === "生成音频" ? "音频生成" : name}
+                 {state.page === name && <i />}
+               </button>
+               {name === "资产库" && assetExpanded && (
+@@ -181,15 +179,13 @@
+       <div className="workspace">
+         <main
+           className={
+-            state.page === "生成视频" || state.page === "长视频" || state.page === "一键生成"
++            state.page === "生成视频" || state.page === "一键生成"
+               ? "main generation-main"
+               : "main"
+           }
+         >
+           {state.page === "生成视频" ? (
+             <GeneratePage />
+-          ) : state.page === "长视频" ? (
+-            <BatchGeneratePage />
+           ) : state.page === "一键生成" ? (
+             <OneClickPage />
+           ) : state.page === "生成音频" ? (
+--- v1.2.2/src/renderer/pages/Audio.tsx
++++ v1.2.3/src/renderer/pages/Audio.tsx
+@@ -172,8 +172,8 @@
+         [...rename.name.trim()].length > 80 ||
+         /[\\/:*?"<>|\r\n]/.test(rename.name)),
+   );
+-  if (collapsed) return <aside className="studio-results collapsed"><button title="展开结果与历史" onClick={() => setCollapsed(false)}>‹</button></aside>;
+-  return <aside className="studio-results"><div className="result-heading"><div><h2>结果与历史</h2><p>成功项立即保留；失败不会影响同批其他结果</p></div><div className="actions"><button onClick={() => setCollapsed(true)}>收起</button><button onClick={() => void run(refresh)}>刷新</button></div></div>
++  if (collapsed) return <aside className="studio-results collapsed"><button title="展开任务列表" onClick={() => setCollapsed(false)}>‹</button></aside>;
++  return <aside className="studio-results"><div className="result-heading"><div><h2>任务列表</h2><p>成功项立即保留；失败不会影响同批其他结果</p></div><div className="actions"><button onClick={() => setCollapsed(true)}>收起</button><button onClick={() => void run(refresh)}>刷新</button></div></div>
+     {batches.map((batch) => <section className="batch-card" key={batch.id}><header><div><strong>{batch.name}</strong><small>{batch.voiceName} · {time(batch.createdAt)}</small></div>{batch.jobs.some((job) => job.status === "failed") && <button onClick={() => void run(async () => { await api("audio.batch.retry", { id: batch.id }); await refresh(); }, "已仅重新排队失败项")}>只重试失败项</button>}</header>
+       {batch.jobs.map((job) => <article className={`result-job ${job.status}`} key={job.id}><div className="job-title"><strong>{job.config.name}</strong><span>{job.status === "pending" ? "待生成" : job.status === "generating" ? "生成中" : job.status === "completed" ? "已完成" : job.status === "cancelled" ? "已取消" : job.status === "uncertain" ? "提交结果待核对" : "失败"}</span></div><small>配置 {job.configIndex + 1} · Seed {job.config.seed}{job.duration != null ? ` · ${job.duration.toFixed(1)} 秒` : ""}</small>
+         {job.status === "completed" && <><audio controls preload="metadata" src={media("output", job.taskId)} />{job.duration == null && <small>播放器元数据尚未载入；生成结果仍可试听。</small>}</>}
+--- v1.2.2/src/renderer/pages/BatchGenerate.tsx
++++ v1.2.3/src/renderer/pages/BatchGenerate.tsx
+@@ -1,346 +0,0 @@
+-import { WorkbenchTaskSidebar, useWorkbenchTasks } from '../components/WorkbenchTaskSidebar.tsx';
+-import { Copy, Image, Plus, Trash2, Upload } from "lucide-react";
+-import { useEffect, useRef, useState } from "react";
+-import { durationOptions } from "../../shared/duration.ts";
+-import { autoBindMentions } from "../../shared/mentions.ts";
+-import { mergeImportedAssets, retainDraftAssets } from "../../shared/draftCompatibility.ts";
+-import type { Asset, AssetRole, Draft, Mention, Task } from "../../shared/types.ts";
+-import { formatWanIssue, wanPreflight } from "../../shared/wanPreflight.ts";
+-import { AssetPicker } from "../components/AssetPicker.tsx";
+-import { Field } from "../components/common.tsx";
+-import { PromptEditor } from "../components/PromptEditor.tsx";
+-import { RatioPicker } from "../components/RatioPicker.tsx";
+-import { api, run, useApp } from "../store.ts";
+-import { AssetPreview } from "./Assets.tsx";
+-
+-interface PromptPlan {
+-  id: string;
+-  name: string;
+-  prompt: string;
+-  mentions: Mention[];
+-  duration?: number;
+-  referenceVideoId?: string;
+-  referenceAudioId?: string;
+-  sourceStart?: number;
+-  sourceEnd?: number;
+-}
+-interface BatchWorkspace {
+-  shared: Draft;
+-  prompts: PromptPlan[];
+-  activeId: string;
+-  mode?: "reference" | "frames";
+-}
+-const STORAGE_KEY = "chigetang-batch-video-v110";
+-const newPrompt = (number: number, source?: PromptPlan): PromptPlan => ({
+-  id: crypto.randomUUID(),
+-  name: source ? `${source.name} 副本` : `Prompt ${number}`,
+-  prompt: source?.prompt ?? "",
+-  mentions: structuredClone(source?.mentions ?? []),
+-  duration: source?.duration,
+-  referenceVideoId: source?.referenceVideoId,
+-  referenceAudioId: source?.referenceAudioId,
+-  sourceStart: source?.sourceStart,
+-  sourceEnd: source?.sourceEnd,
+-});
+-
+-function restore(fallback: Draft): BatchWorkspace {
+-  try {
+-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") as BatchWorkspace | null;
+-    if (stored?.shared && stored.prompts?.length)
+-      return {
+-        ...stored,
+-        shared: {...stored.shared, name: stored.shared.name === "批量视频" ? "长视频" : stored.shared.name},
+-        mode:
+-          stored.mode ??
+-          (stored.shared.assets.some((binding) =>
+-            binding.role.endsWith("frame"),
+-          )
+-            ? "frames"
+-            : "reference"),
+-      };
+-  } catch {}
+-  const first = newPrompt(1);
+-  return {
+-    shared: {
+-      ...structuredClone(fallback),
+-      draftId: undefined,
+-      name: "长视频",
+-      prompt: "",
+-      mentions: [],
+-      parentVersionId: undefined,
+-      groupId: undefined,
+-    },
+-    prompts: [first],
+-    activeId: first.id,
+-    mode: "reference",
+-  };
+-}
+-
+-export function BatchGeneratePage() {
+-  const { boot, draft: currentDraft, message, setTask } = useApp();
+-  const {tasks}=useWorkbenchTasks();
+-  const [workspace, setWorkspace] = useState<BatchWorkspace | null>(null);
+-  const [assets, setAssets] = useState<Asset[]>([]);
+-  const [picker, setPicker] = useState<AssetRole | "all" | "segment_video" | "segment_audio" | null>(null);
+-  const [segmentVideos, setSegmentVideos] = useState<Record<string, Asset>>({});
+-  const [segmentAudios, setSegmentAudios] = useState<Record<string, Asset>>({});
+-  const [reuseSharedAudio, setReuseSharedAudio] = useState(false);
+-  const [pasteOpen, setPasteOpen] = useState(false);
+-  const [pasteValue, setPasteValue] = useState("");
+-  const [busy, setBusy] = useState(false);
+-  const [statuses, setStatuses] = useState<Record<string, { status: string; taskId?: string }>>({});
+-  const submitting = useRef(false);
+-  useEffect(() => {
+-    if (currentDraft && !workspace) setWorkspace(restore(currentDraft));
+-  }, [currentDraft]);
+-  useEffect(() => {
+-    if (workspace) localStorage.setItem(STORAGE_KEY, JSON.stringify(workspace));
+-  }, [workspace]);
+-  useEffect(() => {
+-    if (!workspace) return;
+-    let cancelled = false;
+-    void Promise.all(
+-      workspace.shared.assets.map((binding) =>
+-        api<Asset>("assets.inspect", { id: binding.assetId }).catch(async () => ({
+-          ...(await api<Asset>("assets.get", { id: binding.assetId })),
+-          missing: true,
+-        })),
+-      ),
+-    ).then((items) => { if (!cancelled) setAssets(items); });
+-    return () => { cancelled = true; };
+-  }, [workspace?.shared.assets]);
+-  useEffect(() => {
+-    if (!workspace) return;
+-    const missing = [...new Set(workspace.prompts.map(p => p.referenceVideoId).filter((id): id is string => Boolean(id)))].filter(id => !assets.some(a => a.id === id) && !segmentVideos[id]);
+-    if (!missing.length) return;
+-    let cancelled = false;
+-    void Promise.all(missing.map(id => api<Asset>("assets.inspect", {id}))).then(rows => {
+-      if (!cancelled) setSegmentVideos(old => ({...old,...Object.fromEntries(rows.map(a => [a.id,a]))}));
+-    }).catch(error => message(`本段参考视频读取失败：${String(error)}`));
+-    return () => {cancelled = true;};
+-  }, [workspace?.prompts.map(p => p.referenceVideoId).join('|'), assets, segmentVideos]);
+-  useEffect(() => {
+-    if (!workspace) return;
+-    const missing = [...new Set(workspace.prompts.map(p => p.referenceAudioId).filter((id): id is string => Boolean(id)))].filter(id => !assets.some(a => a.id === id) && !segmentAudios[id]);
+-    if (!missing.length) return;
+-    let cancelled = false;
+-    void Promise.all(missing.map(id => api<Asset>("assets.inspect", {id}))).then(rows => {
+-      if (!cancelled) setSegmentAudios(old => ({...old,...Object.fromEntries(rows.map(a => [a.id,a]))}));
+-    }).catch(error => message(`本段参考音频读取失败：${String(error)}`));
+-    return () => {cancelled = true;};
+-  }, [workspace?.prompts.map(p => p.referenceAudioId).join('|'), assets, segmentAudios]);
+-  useEffect(() => {
+-    if (!boot || !workspace) return;
+-    const wan = boot.models.find((item) => item.adapter === "wan3");
+-    if (!wan) return;
+-    const available = boot.accounts
+-      .filter((item) => item.enabled && item.providerId === wan.providerId)
+-      .sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+-    if (
+-      available.length &&
+-      !available.some((item) => item.id === workspace.shared.accountId)
+-    )
+-      setWorkspace({
+-        ...workspace,
+-        shared: { ...workspace.shared, accountId: available[0].id },
+-      });
+-  }, [boot, workspace?.shared.accountId]);
+-
+-  if (!boot || !currentDraft || !workspace) return null;
+-  const model = boot.models.find((item) => item.id === workspace.shared.modelId && item.adapter === "wan3")
+-    ?? boot.models.find((item) => item.adapter === "wan3");
+-  if (!model) return <p className="notice warning">Wan 3.0 模型未配置，无法使用长视频。</p>;
+-  const accounts = boot.accounts
+-    .filter((item) => item.enabled && item.providerId === model.providerId)
+-    .sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+-  const active = workspace.prompts.find((item) => item.id === workspace.activeId) ?? workspace.prompts[0];
+-  const mode = workspace.mode ?? "reference";
+-  const enriched = assets.map((asset) => ({
+-    ...asset,
+-    role: workspace.shared.assets.find((binding) => binding.assetId === asset.id)?.role,
+-  }));
+-  const preflight = wanPreflight(model, workspace.shared, enriched);
+-  const effective = workspace.prompts.filter((item) => item.prompt.trim());
+-  const promptErrors = workspace.prompts.map((item, index) => ({
+-    id: item.id,
+-    error: item.prompt.trim() ? "" : `Prompt ${index + 1} 为空，不会提交`,
+-  }));
+-  const draftFor = (plan: PromptPlan): Draft => {
+-    const source = structuredClone(workspace.shared);
+-    const ownVideo = plan.referenceVideoId;
+-    if (ownVideo) {
+-      const old = source.assets.find(b => b.role === "reference_video");
+-      source.assets = source.assets.filter(b => b.role !== "reference_video");
+-      source.assets.push({ assetId: ownVideo, role: "reference_video", bindingId: old?.bindingId ?? crypto.randomUUID() });
+-    }
+-    if (plan.referenceAudioId) {
+-      const old = source.assets.find(b => b.role === "reference_audio");
+-      source.assets = source.assets.filter(b => b.role !== "reference_audio");
+-      source.assets.push({ assetId: plan.referenceAudioId, role: "reference_audio", bindingId: old?.bindingId ?? crypto.randomUUID() });
+-    }
+-    source.params = { ...source.params, duration: plan.duration ?? source.params.duration };
+-    return source;
+-  };
+-  const allAssets = [...assets, ...Object.values(segmentVideos).filter(v => !assets.some(a => a.id === v.id)), ...Object.values(segmentAudios).filter(a => !assets.some(v => v.id === a.id))];
+-  const segmentError = effective.map(plan => {
+-    const task = draftFor(plan);
+-    const required = task.assets.map(b => allAssets.find(a => a.id === b.assetId));
+-    if (required.some(a => !a)) return `「${plan.name}」的本段参考视频或音频尚未读取完成`;
+-    const rows = required.map((a,i) => ({ ...a!, role: task.assets[i].role }));
+-    const options = durationOptions(model, task.params, rows);
+-    if (!options.includes(Number(task.params.duration))) return `「${plan.name}」的输出时长不符合模型限制`;
+-    const issue = wanPreflight(model, task, rows).issues.find(i => i.severity === "error");
+-    return issue ? `「${plan.name}」：${formatWanIssue(issue)}` : "";
+-  }).find(Boolean);
+-  const sharedAudio = workspace.shared.assets.some(b=>b.role==='reference_audio');
+-  const audioRisk = effective.length>1 && sharedAudio && effective.some(p=>!p.referenceAudioId) && !reuseSharedAudio
+-    ? '长视频存在继承共享音频的片段；如为不同原片区间，请逐段选择真实参考音频，或明确确认复用共享音频。' : '';
+-  const sharedError = assets.length !== workspace.shared.assets.length
+-    ? "正在读取素材真实信息"
+-    : segmentError || audioRisk;
+-
+-  const update = (patch: Partial<BatchWorkspace>) => setWorkspace({ ...workspace, ...patch });
+-  const updateShared = (patch: Partial<Draft>) => update({ shared: { ...workspace.shared, ...patch } });
+-  const updatePrompt = (id: string, patch: Partial<PromptPlan>) =>
+-    update({ prompts: workspace.prompts.map((item) => item.id === id ? { ...item, ...patch } : item) });
+-  const addPrompt = (source?: PromptPlan) => {
+-    if (workspace.prompts.length >= 60) return message("为防止误提交，一次最多创建 60 个 Prompt。");
+-    const item = newPrompt(workspace.prompts.length + 1, source);
+-    update({ prompts: [...workspace.prompts, item], activeId: item.id });
+-  };
+-  const removePrompt = (id: string) => {
+-    if (workspace.prompts.length === 1) return message("至少保留一个 Prompt。");
+-    const prompts = workspace.prompts.filter((item) => item.id !== id);
+-    update({ prompts, activeId: workspace.activeId === id ? prompts[0].id : workspace.activeId });
+-  };
+-  const choose = (selected: Asset[], role: AssetRole | "all" | "segment_video" | "segment_audio") => {
+-    if (role === "segment_audio") {
+-      const audio = selected.find(a => a.kind === "audio");
+-      if (!audio) return message("请选择真实参考音频");
+-      updatePrompt(active.id, { referenceAudioId: audio.id });
+-      setPicker(null);
+-      void api<Asset>("assets.inspect", { id: audio.id }).then(a => setSegmentAudios(old => ({ ...old, [a.id]:a }))).catch(e => message(String(e)));
+-      return;
+-    }
+-    if (role === "segment_video") {
+-      const video = selected.find(a => a.kind === "video");
+-      if (!video) return message("请选择参考视频");
+-      updatePrompt(active.id, { referenceVideoId: video.id });
+-      setPicker(null);
+-      void api<Asset>("assets.inspect", { id:video.id }).then(a => setSegmentVideos(old => ({ ...old, [a.id]:a }))).catch(e => message(String(e)));
+-      return;
+-    }
+-    const roles: AssetRole[] = role === "all"
+-      ? ["reference_image", "reference_video", "reference_audio"]
+-      : [role];
+-    const next = mergeImportedAssets(workspace.shared, workspace.shared, selected, roles, role !== "all");
+-    if (!next) return message("批量工作区已变化，请重新选择素材。");
+-    updateShared(next);
+-    setPicker(null);
+-  };
+-  const upload = async (role: AssetRole | "all") => {
+-    const imported = await api<{ asset: Asset }[]>("assets.import", {
+-      copy: false,
+-      ...(role !== "all" ? { kind: "image" } : {}),
+-    });
+-    if (imported.length) choose(imported.map((row) => row.asset), role);
+-  };
+-  const dropFiles = async (event: import("react").DragEvent) => {
+-    event.preventDefault();
+-    const paths = [...event.dataTransfer.files].map(f => window.aiVideo.filePath(f)).filter(Boolean);
+-    if (!paths.length) return;
+-    if (mode !== "reference") return message("请在自由参考模式下拖入文件；首尾帧使用对应上传按钮。");
+-    const imported = await api<{ asset:Asset }[]>("assets.import", {paths, copy:false});
+-    if (imported.length) choose(imported.map(item => item.asset), "all");
+-  };
+-  const pastePrompts = () => {
+-    const parts = pasteValue.split(/^\s*===\s*(?:SEGMENT|PROMPT|片段)\s*\d+\s*===\s*$/gim).map(x => x.trim()).filter(Boolean);
+-    if (!parts.length) return message("请粘贴 Prompt，并用 === SEGMENT 1 === 分隔不同片段。");
+-    if (parts.length + workspace.prompts.filter(p=>p.prompt.trim()).length > 60) return message("最多 60 个片段");
+-    const items = parts.map((prompt, i) => ({ ...newPrompt(i+1), prompt }));
+-    const existing = workspace.prompts.filter(p=>p.prompt.trim());
+-    update({prompts:[...existing,...items],activeId:items[0].id});
+-    setPasteOpen(false); setPasteValue("");
+-  };
+-  const switchMode = (next: "reference" | "frames") => {
+-    const keep = workspace.shared.assets.filter((binding) =>
+-      next === "reference" ? binding.role.startsWith("reference_") : binding.role.endsWith("frame"),
+-    );
+-    update({
+-      mode: next,
+-      shared: {
+-        ...retainDraftAssets(workspace.shared, keep),
+-        params:
+-          next === "frames"
+-            ? { ...workspace.shared.params, ratio: "adaptive" }
+-            : workspace.shared.params,
+-      },
+-    });
+-  };
+-  const submit = async () => {
+-    if (submitting.current || busy) return;
+-    if (!effective.length) return message("请至少填写一个 Prompt。");
+-    if (sharedError) return message(typeof sharedError === "string" ? sharedError : formatWanIssue(sharedError));
+-    submitting.current = true;
+-    setBusy(true);
+-    const batchKey = crypto.randomUUID();
+-    try {
+-      for (const [index, plan] of effective.entries()) {
+-        setStatuses((value) => ({ ...value, [plan.id]: { status: "正在提交" } }));
+-        const draft: Draft = {
+-          ...draftFor(plan),
+-          modelId: model.id,
+-          name: `${workspace.shared.name || "长视频"} · ${plan.name || `Prompt ${index + 1}`}`,
+-          prompt: plan.prompt,
+-          mentions: structuredClone(plan.mentions),
+-          draftId: undefined,
+-          parentVersionId: undefined,
+-          groupId: undefined,
+-        };
+-        try {
+-          const bound = autoBindMentions(draft, allAssets);
+-          const task = await api<Task>("tasks.create", {
+-            draft: bound,
+-            requestId: `${batchKey}:${plan.id}`,
+-          });
+-          setStatuses((value) => ({ ...value, [plan.id]: { status: "已进入任务队列", taskId: task.id } }));
+-        } catch (error) {
+-          setStatuses((value) => ({ ...value, [plan.id]: { status: error instanceof Error ? error.message : String(error) } }));
+-        }
+-      }
+-      message(`长视频提交结束：已处理 ${effective.length} 个独立任务；失败项不会自动重试`);
+-    } finally {
+-      submitting.current = false;
+-      setBusy(false);
+-    }
+-  };
+-
+-  const activeDraft = draftFor(active);
+-  const activeAssets = activeDraft.assets.map(b => allAssets.find(a => a.id === b.assetId)).filter((a): a is Asset => Boolean(a));
+-  const parameters = model.capabilities.parameters.filter((item) => !item.advanced);
+-  const durationValues = durationOptions(model, workspace.shared.params, assets);
+-  return <div className="batch-workbench"><WorkbenchTaskSidebar tasks={tasks} focusIds={Object.values(statuses).map(s=>s.taskId).filter((v):v is string=>Boolean(v))}/><div className="batch-page" onDragOver={e => e.preventDefault()} onDrop={e => void run(() => dropFiles(e))}>
+-    <div className="page-title"><div><h1>长视频</h1><p>共享 Wan 3.0 基础配置，各片段可覆盖时长和参考视频；支持拖入本地素材。</p></div></div>
+-    <section className="batch-card shared-config">
+-      <header><span className="eyebrow">01 / 共享生成配置</span><div className="segmented"><button className={mode === "reference" ? "active" : ""} onClick={() => switchMode("reference")}>自由参考</button><button className={mode === "frames" ? "active" : ""} onClick={() => switchMode("frames")}>首尾帧</button></div></header>
+-      <div className="compact-config-grid">
+-        <Field label="批次名称"><input value={workspace.shared.name} onChange={(event) => updateShared({ name: event.target.value })} /></Field>
+-      </div>
+-      <div className="material-actions">{mode === "reference" ? <><button onClick={() => void run(() => upload("all"))}><Upload size={15}/> 上传素材</button><button onClick={() => setPicker("all")}>从资产库选择</button></> : <><button onClick={() => void run(() => upload("first_frame"))}><Upload size={15}/> 上传首帧</button><button onClick={() => void run(() => upload("last_frame"))}><Upload size={15}/> 上传尾帧</button><button onClick={() => setPicker("first_frame")}><Image size={15}/> 资产库首帧</button><button onClick={() => setPicker("last_frame")}><Image size={15}/> 资产库尾帧</button></>}</div>
+-      <div className="batch-assets">{workspace.shared.assets.map((binding, index) => { const asset = assets.find((item) => item.id === binding.assetId); const duration = asset?.duration ? (binding.role === "reference_audio" && asset.duration > 14 ? `原音频 ${asset.duration.toFixed(2)} 秒 · 将自动截取前 14.00 秒` : `${asset.duration.toFixed(2)} 秒`) : asset?.width ? `${asset.width}×${asset.height}` : ""; return <div className="selected-asset" key={`${binding.assetId}-${index}`}>{asset ? <div className="mini-thumb"><AssetPreview asset={asset}/></div> : null}<div><strong>{asset?.name ?? "读取中"}</strong><small>{binding.role} · {duration}</small></div><button onClick={() => updateShared(retainDraftAssets(workspace.shared, workspace.shared.assets.filter((_, itemIndex) => itemIndex !== index)))}><Trash2 size={14}/></button></div>; })}</div>
+-      <div className="batch-parameter-grid">{parameters.map((parameter) => <Field key={parameter.key} label={parameter.label}>{parameter.key === "ratio" ? <RatioPicker value={String(workspace.shared.params.ratio)} options={parameter.options ?? []} onChange={(ratio) => updateShared({ params: { ...workspace.shared.params, ratio } })}/> : parameter.key === "duration" ? <select value={Number(workspace.shared.params.duration) || 0} onChange={(event) => updateShared({ params: { ...workspace.shared.params, duration: Number(event.target.value) } })}><option value={0}>请选择</option>{durationValues.map((value) => <option key={value} value={value}>{value === -1 ? "智能时长" : `${value} 秒`}</option>)}</select> : parameter.type === "boolean" ? <label className="switch"><input type="checkbox" checked={Boolean(workspace.shared.params[parameter.key])} onChange={(event) => updateShared({ params: { ...workspace.shared.params, [parameter.key]: event.target.checked } })}/><span>{workspace.shared.params[parameter.key] ? "开启" : "关闭"}</span></label> : <select value={String(workspace.shared.params[parameter.key] ?? parameter.default)} onChange={(event) => updateShared({ params: { ...workspace.shared.params, [parameter.key]: event.target.value } })}>{parameter.options?.map((value) => <option key={value}>{value}</option>)}</select>}</Field>)}</div>
+-      <div className={`preflight ${sharedError ? "invalid" : "valid"}`}><div><strong>{sharedError ? "片段需调整" : "已按每段参数预检查"}</strong><span>共享参考视频 {preflight.videoSeconds.toFixed(2)} 秒 · 音频 {preflight.audioSeconds.toFixed(2)} 秒 · 共享输出 {preflight.smartDuration ? "智能" : `${preflight.outputSeconds || "未选"} 秒`}</span></div>{sharedError && <p className="error">{typeof sharedError === "string" ? sharedError : formatWanIssue(sharedError)}</p>}</div>
+-    </section>
+-    <section className="batch-card prompt-plans"><header><span className="eyebrow">02 / Prompt 方案</span><div className="material-actions"><button onClick={() => setPasteOpen(v=>!v)}>批量粘贴导入</button><button disabled={workspace.prompts.length >= 60} onClick={() => addPrompt()}><Plus size={15}/> 新增 Prompt · {workspace.prompts.length}/60</button></div></header><div className="prompt-plan-tabs">{workspace.prompts.map((plan, index) => <button key={plan.id} className={plan.id === active.id ? "active" : ""} onClick={() => update({ activeId: plan.id })}><span>{plan.name || `Prompt ${index + 1}`}</span><small>{plan.prompt.trim() ? `${[...plan.prompt].length} 字` : "未填写"}</small></button>)}</div><div className="prompt-plan-toolbar"><input aria-label="Prompt 方案名称" value={active.name} onChange={(event) => updatePrompt(active.id, { name: event.target.value })}/><button disabled={workspace.prompts.length >= 60} onClick={() => addPrompt(active)}><Copy size={14}/> 复制</button><button disabled={workspace.prompts.length <= 1} onClick={() => removePrompt(active.id)}><Trash2 size={14}/> 删除</button></div>{pasteOpen && <div className="batch-card"><p>每段以单独一行 === SEGMENT 1 ===、=== SEGMENT 2 === 分隔。</p><textarea rows={8} value={pasteValue} onChange={e=>setPasteValue(e.target.value)}/><button onClick={pastePrompts}>导入分段 Prompt</button></div>}
+-    <div className="compact-config-grid"><Field label="本段输出时长"><select value={active.duration ?? ""} onChange={e=>updatePrompt(active.id,{duration:e.target.value ? Number(e.target.value):undefined})}><option value="">继承共享时长</option>{durationOptions(model, activeDraft.params, activeAssets).map(n=><option key={n} value={n}>{n === -1 ? "智能时长" : `${n} 秒`}</option>)}</select></Field><Field label="本段参考视频"><div className="material-actions"><span>{active.referenceVideoId ? segmentVideos[active.referenceVideoId]?.name ?? "读取中" : "继承共享参考视频"}</span><button onClick={()=>setPicker("segment_video")}>选择视频</button>{active.referenceVideoId && <button onClick={()=>updatePrompt(active.id,{referenceVideoId:undefined})}>恢复共享</button>}</div></Field></div>
+-    <div className="compact-config-grid"><Field label="本段参考音频"><div className="material-actions"><span>{active.referenceAudioId ? segmentAudios[active.referenceAudioId]?.name ?? "读取中" : "继承共享音频"}</span><button onClick={()=>setPicker("segment_audio")}>选择本段音频</button>{active.referenceAudioId && <button onClick={()=>updatePrompt(active.id,{referenceAudioId:undefined})}>恢复共享</button>}</div></Field>
+-    <Field label="原片绝对起点（秒）"><input type="number" min={0} step="0.1" value={active.sourceStart??''} onChange={e=>updatePrompt(active.id,{sourceStart:e.target.value?Number(e.target.value):undefined})}/></Field>
+-    <Field label="原片绝对终点（秒）"><input type="number" min={0} step="0.1" value={active.sourceEnd??''} onChange={e=>updatePrompt(active.id,{sourceEnd:e.target.value?Number(e.target.value):undefined})}/></Field></div>
+-    <p className="muted">本段相对区间：0 至 {active.duration??workspace.shared.params.duration} 秒；参考视频：{active.referenceVideoId?'独立':'共享'}，参考音频：{active.referenceAudioId?'本段独立':'共享'}。段内衔接点请在 Prompt 中注明。</p>
+-    <PromptEditor key={active.id} value={active.prompt} assets={activeAssets} bindings={activeDraft.assets} mentions={active.mentions} onChange={(prompt, mentions) => updatePrompt(active.id, { prompt, mentions })} limit={model.capabilities.promptLimit}/>{promptErrors.find((item) => item.id === active.id)?.error && <p className="validation-reason">{promptErrors.find((item) => item.id === active.id)?.error}</p>}</section>
+-    {audioRisk&&<div className="notice warning"><label><input type="checkbox" checked={reuseSharedAudio} onChange={e=>setReuseSharedAudio(e.target.checked)}/> {audioRisk}（确认当前全部未覆盖段确实可共用同一音频）</label></div>}
+-    <footer className="batch-submit"><div><strong>实际将提交 {effective.length} 个独立视频任务</strong><small>逐条创建；失败项保留 Prompt，且不会自动重发。</small></div><button className="primary" disabled={busy || !effective.length || Boolean(sharedError) || !accounts.length} onClick={() => void submit()}>{busy ? "正在逐条提交…" : `生成 ${effective.length} 个视频`}</button></footer>
+-    {Object.keys(statuses).length > 0 && <section className="batch-card batch-status"><header><span className="eyebrow">03 / 本批状态</span></header>{workspace.prompts.map((plan) => statuses[plan.id] ? <button key={plan.id} onClick={() => statuses[plan.id].taskId && setTask(statuses[plan.id].taskId!)}><strong>{plan.name}</strong><span>{statuses[plan.id].status}</span></button> : null)}</section>}
+-    {picker && <AssetPicker onClose={() => setPicker(null)} allowed={picker === "all" ? ["image", "video", "audio"] : picker === "segment_video" ? ["video"] : picker === "segment_audio" ? ["audio"] : ["image"]} onPick={(selected) => choose(selected, picker)}/>} 
+-  </div></div>;
+-}
+--- v1.2.2/src/renderer/pages/Generate.tsx
++++ v1.2.3/src/renderer/pages/Generate.tsx
+@@ -990,7 +990,7 @@
+         <aside className="queue">
+           <header>
+             <h3>
+-              当前任务 <span>{queue.length}</span>
++              任务列表 <span>{queue.length}</span>
+             </h3>
+             <span className="live">
+               <i className="dot" />
+--- v1.2.2/src/renderer/pages/OneClick.tsx
++++ v1.2.3/src/renderer/pages/OneClick.tsx
+@@ -1,5 +1,5 @@
+ import { useEffect, useRef, useState } from 'react';
+-import { Pause, Play, RefreshCw, Trash2 } from 'lucide-react';
++import { FolderOpen, Pause, Play, RefreshCw, Trash2 } from 'lucide-react';
+ import type { Asset } from '../../shared/types.ts';
+ import { api, media, useApp } from '../store.ts';
+ import { AssetPreview } from './Assets.tsx';
+@@ -50,7 +50,7 @@
+  return <div className="oneclick-workbench">
+   <WorkbenchTaskSidebar tasks={tasks} focusIds={focusIds}/>
+   <main className="oneclick-main">
+-   <div className="page-title"><div><h1>一键生成</h1><p>①导入 → ②素材检查 → ③预检费用 → ④确认提交</p></div></div>
++   <div className="page-title"><div><h1 className="oneclick-title">一键生成<button type="button" className="icon-button" aria-label="打开生成视频保存目录" title="打开当前生成视频保存目录" onClick={()=>void api('open',{kind:'output'}).catch(e=>message(`打开保存目录失败：${String(e)}`))}><FolderOpen size={23}/></button></h1><p>①导入 → ②素材检查 → ③预检费用 → ④确认提交</p></div></div>
+    <section className="oneclick-import-bar"><button className="primary" disabled={busy} onClick={importPack}>{busy?'处理中…':'导入 ZIP'}</button>{pack&&<button className="danger" disabled={busy||pack.state!=='ready'} onClick={clearPack}><Trash2 size={15}/> 清空任务</button>}</section>
+    {pack&&<p className="oneclick-pack-summary">已导入：{pack.name} · {pack.segments.length} 段 · 修订号 {pack.revision} · {pack.state}{pack.renewedTaskId?' · 已开启新轮次':''}</p>}
+    {pack&&<><section className="batch-card"><header><strong>片段与真实素材</strong><button onClick={()=>void api('packages.openFolder',{sessionId:pack.sessionId}).catch(e=>message(String(e)))}>打开素材目录</button></header>
+--- v1.2.2/src/renderer/style.css
++++ v1.2.3/src/renderer/style.css
+@@ -2855,7 +2855,7 @@
+ .package-segments small { display:block; overflow-wrap:anywhere; }
+ .oneclick-page { max-width:1080px; }
+ /* v1.2.0: responsive shared workbench layout; no per-page cloud polling. */
+-.oneclick-workbench{display:grid;grid-template-columns:minmax(190px,245px) minmax(390px,1fr) minmax(240px,285px);gap:14px;height:100%;overflow:hidden;padding:14px;background:var(--bg);}
++.oneclick-workbench{display:grid;grid-template-columns:auto minmax(300px,1fr) 260px;gap:14px;height:100%;overflow:hidden;padding:14px;background:var(--bg);}
+ .oneclick-workbench>*{min-width:0;overflow:auto;}
+ .oneclick-main{padding:5px 4px 24px;}
+ .oneclick-workbench .batch-card{padding:15px;margin:0 0 13px;}
+@@ -2884,9 +2884,31 @@
+ .workbench-task-list{display:flex;flex-direction:column;gap:7px;margin-top:12px;}
+ .workbench-task-row{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:10px;gap:4px;white-space:normal;border:1px solid var(--line);border-radius:8px;}
+ .workbench-task-row strong{overflow-wrap:anywhere;}
+-@media(max-width:1140px){.oneclick-workbench{grid-template-columns:minmax(150px,190px) minmax(350px,1fr);overflow:auto;height:auto}.oneclick-options{grid-column:2;grid-row:2}.oneclick-workbench>*{overflow:visible}}
++@media(max-width:1140px){.oneclick-workbench{grid-template-columns:auto minmax(300px,1fr);overflow:auto;height:100%;align-content:start}.oneclick-options{grid-column:2;grid-row:2}.oneclick-workbench>*{overflow:visible}}
+ @media(max-width:740px){.oneclick-workbench{display:flex;flex-direction:column;padding:10px}.oneclick-options{order:3}.workbench-task-sidebar{order:2}}
+ 
+ .batch-workbench{height:100%;display:grid;grid-template-columns:minmax(190px,245px) minmax(0,1fr);gap:12px;padding:12px;overflow:hidden;}
+ .batch-workbench>.batch-page{min-width:0;overflow:auto;padding:12px;}
+ @media(max-width:800px){.batch-workbench{height:auto;display:flex;flex-direction:column;overflow:auto;}}
++
++/* v1.2.3: presentation-only task list improvements. */
++.oneclick-title { display:flex; align-items:center; gap:10px; }
++.oneclick-title .icon-button { display:inline-flex; padding:6px; }
++.oneclick-workbench > .workbench-task-sidebar { position:relative; overflow:visible; display:flex; flex-direction:column; min-height:0; }
++.workbench-task-sidebar > header { flex:none; }
++.workbench-task-list { overflow-y:auto; overflow-x:hidden; min-height:0; }
++.workbench-task-row { width:100%; flex:none; overflow-wrap:anywhere; }
++.oneclick-workbench .workbench-task-row { align-items:stretch; }
++.workbench-task-row strong { display:block; white-space:normal; }
++.workbench-task-row small { color:var(--muted); }
++.task-list-resizer { position:absolute; right:-10px; top:0; bottom:0; width:9px; cursor:col-resize; touch-action:none; border-radius:5px; }
++.task-list-resizer:hover,.task-list-resizer:focus-visible { background:var(--accent-soft); outline:1px solid var(--accent); }
++.generation-layout > .queue { display:flex; width:290px; min-width:290px; max-width:290px; resize:none; overflow-x:hidden; overflow-y:auto; }
++.queue-list,.queue-row,.queue-row .queue-item { min-width:0; max-width:100%; }
++.queue-item strong { white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; line-height:1.55; }
++.queue-item small,.queue-item .status { white-space:normal; overflow-wrap:anywhere; }
++.queue-icon,.queue-item > svg,.queue-delete { flex-shrink:0; }
++@media(max-width:1140px) { .workbench-task-list { max-height:calc(100vh - 120px); } }
++@media(max-width:740px) { .oneclick-workbench > .workbench-task-sidebar { width:auto!important; } .task-list-resizer { display:none; } }
++
++@media(max-width:740px) { .oneclick-workbench > * { flex-shrink:0; } }
+--- v1.2.2/src/shared/brand.ts
++++ v1.2.3/src/shared/brand.ts
+@@ -1,6 +1,6 @@
+ export const brand = {
+   name: "吃个糖Agent",
+-  version: "1.2.2",
++  version: "1.2.3",
+   accent: "#e76b37",
+   accentDark: "#ed925c",
+   tagline: "VIDEO AGENT",

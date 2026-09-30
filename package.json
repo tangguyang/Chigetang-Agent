@@ -1,0 +1,56 @@
+{
+  "name": "chigetang-agent",
+  "productName": "吃个糖Agent",
+  "version": "1.2.9",
+  "private": true,
+  "type": "module",
+  "description": "多模型 AI 视频生成与资产管理工作台",
+  "author": "吃个糖Agent",
+  "license": "UNLICENSED",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs",
+    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts",
+    "start": "electron .",
+    "pack:win": "npm run build && node scripts/package-win.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:ui": "node scripts/run-ui-tests.mjs",
+    "verify": "npm run typecheck && npm test && npm run test:ui && npm run test:bundle",
+    "test:bundle": "node scripts/build.mjs && node scripts/test-bundle.mjs",
+    "format": "prettier --write src scripts tests",
+    "setup:electron": "node node_modules/electron/install.js",
+    "prestart": "npm run setup:electron",
+    "test:transcription": "node scripts/test-transcription.mjs",
+    "test:transcription:ui": "node scripts/run-transcription-ui.mjs",
+    "test:pdf": "node --experimental-strip-types scripts/test-local-pdf.ts",
+    "test:browser": "node --experimental-strip-types scripts/test-browser.ts",
+    "test:real-speech": "node --experimental-strip-types tests/v129.test.ts && node --experimental-strip-types tests/v129-media.test.ts && node scripts/run-real-speech-ui.mjs",
+    "test:repair": "node --experimental-strip-types tests/v129-repair.test.ts && node scripts/run-repair-ui.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "0.468.0",
+    "mediainfo.js": "0.3.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zustand": "5.0.3",
+    "pdfjs-dist": "5.6.205"
+  },
+  "devDependencies": {
+    "@electron/packager": "18.3.6",
+    "@resvg/resvg-js": "2.6.2",
+    "@types/jsdom": "^30.0.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "electron": "44.3.0",
+    "esbuild": "0.25.12",
+    "jsdom": "^30.0.1",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vite": "7.3.1"
+  },
+  "engines": {
+    "node": ">=24.19.0"
+  }
+}

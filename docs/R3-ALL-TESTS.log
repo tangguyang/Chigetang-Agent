@@ -1,0 +1,424 @@
+TAP version 13
+# (node:632) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:632) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: bootstrap and task snapshot report the current app version
+ok 1 - bootstrap and task snapshot report the current app version
+  ---
+  duration_ms: 334.873608
+  type: 'test'
+  ...
+# Subtest: manual status refresh only queries cloud and never re-submits
+ok 2 - manual status refresh only queries cloud and never re-submits
+  ---
+  duration_ms: 43.750708
+  type: 'test'
+  ...
+# Subtest: draft close semantics can preserve draft record while submitted draft removal is explicit
+ok 3 - draft close semantics can preserve draft record while submitted draft removal is explicit
+  ---
+  duration_ms: 16.620272
+  type: 'test'
+  ...
+# Subtest: batch frame import assigns first and last frame exactly once
+ok 4 - batch frame import assigns first and last frame exactly once
+  ---
+  duration_ms: 3.070143
+  type: 'test'
+  ...
+# Subtest: model switch preserves compatible bindings and removes only stale mention tokens
+ok 5 - model switch preserves compatible bindings and removes only stale mention tokens
+  ---
+  duration_ms: 1.68813
+  type: 'test'
+  ...
+# Subtest: Application routes account diagnostics through injected desktop fetcher
+ok 6 - Application routes account diagnostics through injected desktop fetcher
+  ---
+  duration_ms: 90.607696
+  type: 'test'
+  ...
+# Subtest: Application routes WAN paid submission through injected desktop fetcher
+ok 7 - Application routes WAN paid submission through injected desktop fetcher
+  ---
+  duration_ms: 37.647378
+  type: 'test'
+  ...
+# Subtest: refresh all is not capped at the newest 100 tasks and reports successes accurately
+ok 8 - refresh all is not capped at the newest 100 tasks and reports successes accurately
+  ---
+  duration_ms: 514.042714
+  type: 'test'
+  ...
+# Subtest: applying a Prompt template clears stale mention metadata but preserves selected assets
+ok 9 - applying a Prompt template clears stale mention metadata but preserves selected assets
+  ---
+  duration_ms: 1.097616
+  type: 'test'
+  ...
+# Subtest: paid submission timeout is configurable and never auto-resubmits
+ok 10 - paid submission timeout is configurable and never auto-resubmits
+  ---
+  duration_ms: 11.848526
+  type: 'test'
+  ...
+# Subtest: submitted workspace cleanup never replaces a newer workspace selected mid-flight
+ok 11 - submitted workspace cleanup never replaces a newer workspace selected mid-flight
+  ---
+  duration_ms: 0.655011
+  type: 'test'
+  ...
+# Subtest: submitted workspace cleanup re-checks ownership after replacement creation
+ok 12 - submitted workspace cleanup re-checks ownership after replacement creation
+  ---
+  duration_ms: 1.143969
+  type: 'test'
+  ...
+# Subtest: v103 import completion preserves newer edits and rejects switched workspaces/models
+ok 13 - v103 import completion preserves newer edits and rejects switched workspaces/models
+  ---
+  duration_ms: 9.701079
+  type: 'test'
+  ...
+# Subtest: v103 material removal deletes matching tokens and rebases remaining mentions
+ok 14 - v103 material removal deletes matching tokens and rebases remaining mentions
+  ---
+  duration_ms: 8.711361
+  type: 'test'
+  ...
+# (node:633) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:633) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: v104 new workspace and replacement duration zero; backend never submits zero
+ok 15 - v104 new workspace and replacement duration zero; backend never submits zero
+  ---
+  duration_ms: 56.157228
+  type: 'test'
+  ...
+# Subtest: v104 model switching revalidates duration without falling back to model default
+ok 16 - v104 model switching revalidates duration without falling back to model default
+  ---
+  duration_ms: 38.366996
+  type: 'test'
+  ...
+# Subtest: v104 account price fractional real video duration and breakdown; unknown duration stays unknown
+ok 17 - v104 account price fractional real video duration and breakdown; unknown duration stays unknown
+  ---
+  duration_ms: 47.427139
+  type: 'test'
+  ...
+# Subtest: v104 account price changes affect only new tasks and preserve account ciphertext
+ok 18 - v104 account price changes affect only new tasks and preserve account ciphertext
+  ---
+  duration_ms: 63.923786
+  type: 'test'
+  ...
+# Subtest: v104 manual accounting priority, zero, audit, undo, provider updates, no double counting
+ok 19 - v104 manual accounting priority, zero, audit, undo, provider updates, no double counting
+  ---
+  duration_ms: 38.55736
+  type: 'test'
+  ...
+# Subtest: v104 billing estimate fallback counts each task once and excludes unsubmitted budgets
+ok 20 - v104 billing estimate fallback counts each task once and excludes unsubmitted budgets
+  ---
+  duration_ms: 79.104841
+  type: 'test'
+  ...
+# Subtest: v104 usage follows asset ID, new binding inherits, existing drafts and snapshots frozen
+ok 21 - v104 usage follows asset ID, new binding inherits, existing drafts and snapshots frozen
+  ---
+  duration_ms: 78.501521
+  type: 'test'
+  ...
+# Subtest: v104 frame supplement never silently omitted by backend
+ok 22 - v104 frame supplement never silently omitted by backend
+  ---
+  duration_ms: 78.95713
+  type: 'test'
+  ...
+# Subtest: v104 rename survives reopen and submission name matches without changing inactive draft
+ok 23 - v104 rename survives reopen and submission name matches without changing inactive draft
+  ---
+  duration_ms: 26.603623
+  type: 'test'
+  ...
+# Subtest: v104 polling default migration preserves custom interval and explicit old default going forward
+ok 24 - v104 polling default migration preserves custom interval and explicit old default going forward
+  ---
+  duration_ms: 19.966897
+  type: 'test'
+  ...
+# Subtest: v104 first poll after five seconds; repeated polling and download never submit twice
+ok 25 - v104 first poll after five seconds; repeated polling and download never submit twice
+  ---
+  duration_ms: 71.698595
+  type: 'test'
+  ...
+# Subtest: v104 Windows names: illegal chars, reserved devices, Unicode, timestamp seconds
+ok 26 - v104 Windows names: illegal chars, reserved devices, Unicode, timestamp seconds
+  ---
+  duration_ms: 2.112518
+  type: 'test'
+  ...
+# Subtest: v104 concurrent download case collisions append sequence; unnamed timestamp is commit time
+ok 27 - v104 concurrent download case collisions append sequence; unnamed timestamp is commit time
+  ---
+  duration_ms: 233.301916
+  type: 'test'
+  ...
+# (node:634) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:634) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: v109: only CosyVoice 3.5 Plus remains and Wan 3.0 model/request path is unchanged
+ok 28 - v109: only CosyVoice 3.5 Plus remains and Wan 3.0 model/request path is unchanged
+  ---
+  duration_ms: 280.803142
+  type: 'test'
+  ...
+# Subtest: v109: one-time legacy cleanup deletes only owned audio and protects Wan/draft references
+ok 29 - v109: one-time legacy cleanup deletes only owned audio and protects Wan/draft references
+  ---
+  duration_ms: 63.209661
+  type: 'test'
+  ...
+# Subtest: v109: voice enrollment submits official fields, saves full voice_id and persists management state
+ok 30 - v109: voice enrollment submits official fields, saves full voice_id and persists management state
+  ---
+  duration_ms: 120.46804
+  type: 'test'
+  ...
+# Subtest: v109: invalid reference duration, format and size stop before enrollment
+ok 31 - v109: invalid reference duration, format and size stop before enrollment
+  ---
+  duration_ms: 477.743334
+  type: 'test'
+  ...
+# Subtest: v109: instruction counting, 20 presets, CRUD, favorite and ordering persist
+ok 32 - v109: instruction counting, 20 presets, CRUD, favorite and ordering persist
+  ---
+  duration_ms: 24.30709
+  type: 'test'
+  ...
+# Subtest: v109: 1-10 config batch is sequential, saves exact parameters, isolates failure and retries only failed
+ok 33 - v109: 1-10 config batch is sequential, saves exact parameters, isolates failure and retries only failed
+  ---
+  duration_ms: 130.122529
+  type: 'test'
+  ...
+# Subtest: v109: empty text, weighted instruction, parameter ranges and 10-config limit reject locally
+ok 34 - v109: empty text, weighted instruction, parameter ranges and 10-config limit reject locally
+  ---
+  duration_ms: 50.186644
+  type: 'test'
+  ...
+# Subtest: v109: completed result prepares linked second clone without overwriting original
+ok 35 - v109: completed result prepares linked second clone without overwriting original
+  ---
+  duration_ms: 157.119561
+  type: 'test'
+  ...
+# (node:665) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:665) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: v110 Wan preflight keeps video/audio budgets separate and enforces input plus output
+ok 36 - v110 Wan preflight keeps video/audio budgets separate and enforces input plus output
+  ---
+  duration_ms: 9.787313
+  type: 'test'
+  ...
+# Subtest: v110 Wan preflight rejects count, totals, unreadable media, bad format, alpha and mixed modes
+ok 37 - v110 Wan preflight rejects count, totals, unreadable media, bad format, alpha and mixed modes
+  ---
+  duration_ms: 1.526381
+  type: 'test'
+  ...
+# Subtest: v110 Wan preflight rejects file size, dimensions, ratio and low frame rate
+ok 38 - v110 Wan preflight rejects file size, dimensions, ratio and low frame rate
+  ---
+  duration_ms: 0.904563
+  type: 'test'
+  ...
+# Subtest: v110 signature detection distinguishes MP3 from AAC and detects PNG alpha
+ok 39 - v110 signature detection distinguishes MP3 from AAC and detects PNG alpha
+  ---
+  duration_ms: 41.876637
+  type: 'test'
+  ...
+# Subtest: v110 missing assets hide reversibly without deleting records or IDs
+ok 40 - v110 missing assets hide reversibly without deleting records or IDs
+  ---
+  duration_ms: 50.110162
+  type: 'test'
+  ...
+# Subtest: v110 default voice toggles off and is isolated per API account
+ok 41 - v110 default voice toggles off and is isolated per API account
+  ---
+  duration_ms: 42.185596
+  type: 'test'
+  ...
+# Subtest: v110 single audio result display name persists independently from batch name
+ok 42 - v110 single audio result display name persists independently from batch name
+  ---
+  duration_ms: 21.718539
+  type: 'test'
+  ...
+# (node:676) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# node:internal/modules/package_json_reader:256
+#   throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+#         ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'mediainfo.js' imported from /mnt/data/r3_work/吃个糖Agent-v1.2.0-Source/src/main/services/media.ts
+#     at Object.getPackageJSONURL (node:internal/modules/package_json_reader:256:9)
+#     at packageResolve (node:internal/modules/esm/resolve:768:81)
+#     at moduleResolve (node:internal/modules/esm/resolve:854:18)
+#     at defaultResolve (node:internal/modules/esm/resolve:984:11)
+#     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:780:12)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:704:25)
+#     at ModuleLoader.resolve (node:internal/modules/esm/loader:687:38)
+#     at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:305:38)
+#     at ModuleJob._link (node:internal/modules/esm/module_job:137:49) {
+#   code: 'ERR_MODULE_NOT_FOUND'
+# }
+# Node.js v22.16.0
+# Subtest: tests/v111.test.ts
+not ok 5 - tests/v111.test.ts
+  ---
+  duration_ms: 1038.061525
+  type: 'test'
+  location: '/mnt/data/r3_work/吃个糖Agent-v1.2.0-Source/tests/v111.test.ts:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# (node:687) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:687) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: v112 single and multi-segment packages have exact real @asset bindings
+ok 44 - v112 single and multi-segment packages have exact real @asset bindings
+  ---
+  duration_ms: 31.073876
+  type: 'test'
+  ...
+# Subtest: v112 rejects unbound semantic @asset before paid submission
+ok 45 - v112 rejects unbound semantic @asset before paid submission
+  ---
+  duration_ms: 6.623872
+  type: 'test'
+  ...
+# Subtest: v112 rejects path traversal, duplicate ZIP entries and CRC tampering
+ok 46 - v112 rejects path traversal, duplicate ZIP entries and CRC tampering
+  ---
+  duration_ms: 0.865047
+  type: 'test'
+  ...
+# Subtest: v112 exported ChatGPT instructions and schema share contract and hand restrictions
+ok 47 - v112 exported ChatGPT instructions and schema share contract and hand restrictions
+  ---
+  duration_ms: 1.162644
+  type: 'test'
+  ...
+# Subtest: v112 imported two segments bind distinct references and queue only after both are prepared
+ok 48 - v112 imported two segments bind distinct references and queue only after both are prepared
+  ---
+  duration_ms: 270.413896
+  type: 'test'
+  ...
+# (node:698) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:698) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: protocol 1.2.0 and previous 1.1 are separate and accepted
+ok 49 - protocol 1.2.0 and previous 1.1 are separate and accepted
+  ---
+  duration_ms: 47.880217
+  type: 'test'
+  ...
+# Subtest: stage documents are separated and consistently reference current protocol
+ok 50 - stage documents are separated and consistently reference current protocol
+  ---
+  duration_ms: 0.60995
+  type: 'test'
+  ...
+# Subtest: custom MD template preview, legacy consent, persistence, backup and restore
+ok 51 - custom MD template preview, legacy consent, persistence, backup and restore
+  ---
+  duration_ms: 45.472949
+  type: 'test'
+  ...
+# Subtest: DOCX extraction retains paragraphs and table cell contents and validates chapters
+ok 52 - DOCX extraction retains paragraphs and table cell contents and validates chapters
+  ---
+  duration_ms: 41.901347
+  type: 'test'
+  ...
+# Subtest: positive overlay directives are rejected but negative constraints remain valid
+ok 53 - positive overlay directives are rejected but negative constraints remain valid
+  ---
+  duration_ms: 0.848786
+  type: 'test'
+  ...
+# (node:699) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:699) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: R3 subtitle instruction clauses: conflicting positive action is rejected
+ok 54 - R3 subtitle instruction clauses: conflicting positive action is rejected
+  ---
+  duration_ms: 3.327469
+  type: 'test'
+  ...
+# Subtest: R3 default duration boundary strictly accepts -1 and 2-30
+ok 55 - R3 default duration boundary strictly accepts -1 and 2-30
+  ---
+  duration_ms: 5.998654
+  type: 'test'
+  ...
+# Subtest: R3 submit has a synchronous per-session backend lock before preflight await
+ok 56 - R3 submit has a synchronous per-session backend lock before preflight await
+  ---
+  duration_ms: 26.11545
+  type: 'test'
+  ...
+# (node:720) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:720) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: v120 contract: version/limits/exported docs reflect machine definitions
+ok 57 - v120 contract: version/limits/exported docs reflect machine definitions
+  ---
+  duration_ms: 15.80011
+  type: 'test'
+  ...
+# Subtest: v120 reject @ binding key, unknown shared field and undeclared file
+ok 58 - v120 reject @ binding key, unknown shared field and undeclared file
+  ---
+  duration_ms: 7.53872
+  type: 'test'
+  ...
+# Subtest: v120 alias parsing supports Chinese, overlap, escaped @@, and rejects adjacent longer token
+ok 59 - v120 alias parsing supports Chinese, overlap, escaped @@, and rejects adjacent longer token
+  ---
+  duration_ms: 1.558353
+  type: 'test'
+  ...
+# Subtest: v120 SHA, ZIP CRC, path and duplicate limits reject without task creation
+ok 60 - v120 SHA, ZIP CRC, path and duplicate limits reject without task creation
+  ---
+  duration_ms: 2.237443
+  type: 'test'
+  ...
+# Subtest: v120 persisted editable drafts invalidate old preflight, reject unbound and over-budget duration
+ok 61 - v120 persisted editable drafts invalidate old preflight, reject unbound and over-budget duration
+  ---
+  duration_ms: 127.609994
+  type: 'test'
+  ...
+1..61
+# tests 61
+# suites 0
+# pass 60
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5292.689669

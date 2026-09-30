@@ -1,0 +1,26 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.2.4 test:ui
+> node scripts/run-ui-tests.mjs
+
+PASS app opens on one-click generation by default
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+'生成视频' !== '一键生成'
+
+    at file:///workspace/scratch/c1d8c25a70ec/work/%CF%83%C3%89%C3%A2%CE%A3%E2%95%95%C2%AC%CF%84%E2%94%82%C3%BBAgent-v1.2.4-Source/scripts/.ui-tests.mjs:13527:10
+    at check (file:///workspace/scratch/c1d8c25a70ec/work/%CF%83%C3%89%C3%A2%CE%A3%E2%95%95%C2%AC%CF%84%E2%94%82%C3%BBAgent-v1.2.4-Source/scripts/.ui-tests.mjs:13517:3)
+    at file:///workspace/scratch/c1d8c25a70ec/work/%CF%83%C3%89%C3%A2%CE%A3%E2%95%95%C2%AC%CF%84%E2%94%82%C3%BBAgent-v1.2.4-Source/scripts/.ui-tests.mjs:13526:1 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '生成视频',
+  expected: '一键生成',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

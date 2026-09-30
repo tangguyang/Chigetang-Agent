@@ -1,0 +1,14 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> ai-video@1.0.1 build
+> tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 1599 modules transformed.
+rendering chunks...
+computing gzip size...
+../../dist/renderer/index.html                   0.69 kB │ gzip:  0.39 kB
+../../dist/renderer/assets/index-BgBCCpcb.css   28.48 kB │ gzip:  6.41 kB
+../../dist/renderer/assets/index-DGYHhW2Q.js   291.78 kB │ gzip: 90.45 kB
+✓ built in 2.29s

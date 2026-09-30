@@ -1,0 +1,15 @@
+{
+  "src/main/services/tasks.ts": "f58f07ab3ca15807d0c65092c4c381d523641d55ac6b0445eb0049e8afd6d12b",
+  "src/main/services/taskPackage.ts": "fb0703044b7848f84e38048520340597e5209e818a881128070b3cb1b8c79495",
+  "src/shared/wanPreflight.ts": "fa06c534e849758888bbbf20d6a508dcca04a0386cfabc59d0febefe903a6c0f",
+  "src/shared/brand.ts": "10fa5819598628bf0edbe19a47d0cdfde7223f63e304493f1cdaf4b35eb78192",
+  "src/renderer/pages/OneClick.tsx": "aa3781e7cf1583c222639553a8e64822f27911a46f3850ade704881be5f99880",
+  "src/main/models/adapters.ts": "0427d74f03410d790f086e046377be87e1f0f6267944f169125c879874fd3e48",
+  "src/main/models/validation.ts": "443d9e662bdbdd813dfa4d4fe53e515741e4ecf827773510d068dadceb4ec8d2",
+  "src/main/models/registry.ts": "3c950d15a6983e199b7e53fbdcfdf258b9043e3b7a124496b6719478662579e8",
+  "src/main/providers/adapters.ts": "693618d85eee56e8d18df905860eab86d35baf2bb8f81b076354627426ab3834",
+  "src/shared/catalog.ts": "e13d834bb6de02b95f668b924f319090332c367d862b149afaf85742bdf153de",
+  "src/shared/taskPackage.ts": "6d9879a3b5bef46a2ed6ebf5f4ccaf7630099534b5df5a1a5c80640333285f02",
+  "src/shared/mentions.ts": "b379b253fec7d0304236bfc55b1a4912fa4a51af4c5f6f3e8654738063e35e0d",
+  "src/renderer/components/WorkbenchTaskSidebar.tsx": "41449e0c8db9bd5a3ca9f9f090c862843f4850cf01d14bd470f19151bc4e2e57"
+}

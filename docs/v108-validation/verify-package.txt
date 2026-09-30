@@ -1,0 +1,1 @@
+PASS Windows x64 PE / EXE version 1.0.8 / bundled file hashes / FFmpeg x64 / user data outside program

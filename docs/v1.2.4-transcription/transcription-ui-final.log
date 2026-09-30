@@ -1,0 +1,5 @@
+PASS original header actions and empty-state disabled start
+PASS actual UI → local service → SenseVoice → two TXT → result operations; survives remount
+PASS removal stays removed after polling
+PASS drag import, actual cancellation and immediate reuse
+TRANSCRIPTION_UI_PASS

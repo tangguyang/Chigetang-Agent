@@ -1,0 +1,135 @@
+{
+  "taskId": "延迟音轨 中文_20260924_230344_12738b0a",
+  "source": {
+    "path": "/tmp/transcription-qa-k3COAP/原始音视频 空格/延迟音轨 中文.mp4",
+    "name": "延迟音轨 中文.mp4",
+    "size": 55706,
+    "duration": 8,
+    "kind": "video"
+  },
+  "rawResults": [
+    {
+      "offset": 0,
+      "result": {
+        "lang": "<|zh|>",
+        "emotion": "<|NEUTRAL|>",
+        "event": "<|Speech|>",
+        "text": "开饭时间早上9点至下午5点。",
+        "timestamps": [
+          1.98,
+          2.22,
+          2.52,
+          2.76,
+          3.18,
+          3.36,
+          3.84,
+          4.08,
+          4.56,
+          5.16,
+          5.46,
+          5.82,
+          6.06,
+          6.84
+        ],
+        "durations": [],
+        "tokens": [
+          "开",
+          "饭",
+          "时",
+          "间",
+          "早",
+          "上",
+          "9",
+          "点",
+          "至",
+          "下",
+          "午",
+          "5",
+          "点",
+          "。"
+        ],
+        "ys_log_probs": [],
+        "words": []
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "text": "开",
+      "startMs": 1980,
+      "endMs": 2220
+    },
+    {
+      "text": "饭",
+      "startMs": 2220,
+      "endMs": 2520
+    },
+    {
+      "text": "时",
+      "startMs": 2520,
+      "endMs": 2760
+    },
+    {
+      "text": "间",
+      "startMs": 2760,
+      "endMs": 3180
+    },
+    {
+      "text": "早",
+      "startMs": 3180,
+      "endMs": 3360
+    },
+    {
+      "text": "上",
+      "startMs": 3360,
+      "endMs": 3840
+    },
+    {
+      "text": "9",
+      "startMs": 3840,
+      "endMs": 4080
+    },
+    {
+      "text": "点",
+      "startMs": 4080,
+      "endMs": 4560
+    },
+    {
+      "text": "至",
+      "startMs": 4560,
+      "endMs": 5160
+    },
+    {
+      "text": "下",
+      "startMs": 5160,
+      "endMs": 5460
+    },
+    {
+      "text": "午",
+      "startMs": 5460,
+      "endMs": 5820
+    },
+    {
+      "text": "5",
+      "startMs": 5820,
+      "endMs": 6060
+    },
+    {
+      "text": "点",
+      "startMs": 6060,
+      "endMs": 6357
+    },
+    {
+      "text": "。",
+      "startMs": 6840,
+      "endMs": 6882
+    }
+  ],
+  "segments": [
+    {
+      "startMs": 1980,
+      "endMs": 6882,
+      "text": "开饭时间早上9点至下午5点。"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+✔ v1.2.4 sidebar places 转文字 directly after 复刻音色 and defaults to 一键生成 (1.225462ms)
+✔ v1.2.4 transcription header exposes output/model/guide actions (0.243908ms)
+✔ Wan-friendly segmentation keeps semantic punctuation and 2-5 second target where possible (11.740243ms)
+✔ token join supports sentencepiece spaces without breaking Chinese (0.164418ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 130.807764

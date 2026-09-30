@@ -1,0 +1,10 @@
+import { Resvg } from "@resvg/resvg-js";
+import { readFileSync, writeFileSync } from "node:fs";
+const svg=readFileSync("resources/brand.svg");
+const sizes=[16,20,24,32,40,48,64,128,256];
+const pngs=sizes.map(size=>new Resvg(svg,{fitTo:{mode:"width",value:size}}).render().asPng());
+writeFileSync("resources/brand.png",pngs.at(-1));
+const header=Buffer.alloc(6+sizes.length*16);header.writeUInt16LE(1,2);header.writeUInt16LE(sizes.length,4);
+let offset=header.length;
+sizes.forEach((size,i)=>{const p=6+i*16;header[p]=header[p+1]=size===256?0:size;header.writeUInt16LE(1,p+4);header.writeUInt16LE(32,p+6);header.writeUInt32LE(pngs[i].length,p+8);header.writeUInt32LE(offset,p+12);offset+=pngs[i].length;writeFileSync(`resources/brand-${size}.png`,pngs[i]);});
+writeFileSync("resources/brand.ico",Buffer.concat([header,...pngs]));

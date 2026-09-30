@@ -1,0 +1,297 @@
+[
+  {
+    "width": 1440,
+    "height": 960,
+    "queue": {
+      "width": 290,
+      "client": 289,
+      "scroll": 289,
+      "titleStyle": "normal"
+    },
+    "layout": {
+      "list": {
+        "x": 179,
+        "y": 80,
+        "width": 390,
+        "right": 569,
+        "bottom": 931,
+        "client": 390,
+        "scroll": 390
+      },
+      "pane": {
+        "x": 164,
+        "y": 14,
+        "width": 420,
+        "right": 584,
+        "bottom": 946,
+        "client": 418,
+        "scroll": 428
+      },
+      "main": {
+        "x": 598,
+        "y": 14,
+        "width": 554,
+        "right": 1152,
+        "bottom": 946,
+        "client": 554,
+        "scroll": 554
+      },
+      "options": {
+        "x": 1166,
+        "y": 14,
+        "width": 260,
+        "right": 1426,
+        "bottom": 946,
+        "client": 258,
+        "scroll": 258
+      },
+      "root": {
+        "x": 150,
+        "y": 0,
+        "width": 1290,
+        "right": 1440,
+        "bottom": 960,
+        "client": 1290,
+        "scroll": 1290
+      }
+    },
+    "actualDuration": "视频时长：1秒",
+    "errors": []
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "queue": {
+      "width": 290,
+      "client": 289,
+      "scroll": 289,
+      "titleStyle": "normal"
+    },
+    "layout": {
+      "list": {
+        "x": 179,
+        "y": 80,
+        "width": 390,
+        "right": 569,
+        "bottom": 1051,
+        "client": 390,
+        "scroll": 390
+      },
+      "pane": {
+        "x": 164,
+        "y": 14,
+        "width": 420,
+        "right": 584,
+        "bottom": 1066,
+        "client": 418,
+        "scroll": 428
+      },
+      "main": {
+        "x": 598,
+        "y": 14,
+        "width": 1034,
+        "right": 1632,
+        "bottom": 1066,
+        "client": 1034,
+        "scroll": 1034
+      },
+      "options": {
+        "x": 1646,
+        "y": 14,
+        "width": 260,
+        "right": 1906,
+        "bottom": 1066,
+        "client": 258,
+        "scroll": 258
+      },
+      "root": {
+        "x": 150,
+        "y": 0,
+        "width": 1770,
+        "right": 1920,
+        "bottom": 1080,
+        "client": 1770,
+        "scroll": 1770
+      }
+    },
+    "actualDuration": "视频时长：1秒",
+    "errors": []
+  },
+  {
+    "width": 1050,
+    "height": 720,
+    "queue": {
+      "width": 290,
+      "client": 289,
+      "scroll": 289,
+      "titleStyle": "normal"
+    },
+    "layout": {
+      "list": {
+        "x": 179,
+        "y": 80,
+        "width": 390,
+        "right": 569,
+        "bottom": 566.109375,
+        "client": 390,
+        "scroll": 390
+      },
+      "pane": {
+        "x": 164,
+        "y": 14,
+        "width": 420,
+        "right": 584,
+        "bottom": 581.109375,
+        "client": 418,
+        "scroll": 428
+      },
+      "main": {
+        "x": 598,
+        "y": 14,
+        "width": 438,
+        "right": 1036,
+        "bottom": 581.109375,
+        "client": 438,
+        "scroll": 438
+      },
+      "options": {
+        "x": 598,
+        "y": 595.109375,
+        "width": 438,
+        "right": 1036,
+        "bottom": 706,
+        "client": 436,
+        "scroll": 436
+      },
+      "root": {
+        "x": 150,
+        "y": 0,
+        "width": 900,
+        "right": 1050,
+        "bottom": 720,
+        "client": 900,
+        "scroll": 900
+      }
+    },
+    "actualDuration": "视频时长：1秒",
+    "errors": []
+  },
+  {
+    "width": 960,
+    "height": 540,
+    "queue": {
+      "width": 290,
+      "client": 289,
+      "scroll": 289,
+      "titleStyle": "normal"
+    },
+    "layout": {
+      "list": {
+        "x": 179,
+        "y": 80,
+        "width": 390,
+        "right": 569,
+        "bottom": 362.71875,
+        "client": 390,
+        "scroll": 390
+      },
+      "pane": {
+        "x": 164,
+        "y": 14,
+        "width": 420,
+        "right": 584,
+        "bottom": 377.71875,
+        "client": 418,
+        "scroll": 428
+      },
+      "main": {
+        "x": 598,
+        "y": 14,
+        "width": 348,
+        "right": 946,
+        "bottom": 377.71875,
+        "client": 348,
+        "scroll": 348
+      },
+      "options": {
+        "x": 598,
+        "y": 391.71875,
+        "width": 348,
+        "right": 946,
+        "bottom": 526,
+        "client": 346,
+        "scroll": 346
+      },
+      "root": {
+        "x": 150,
+        "y": 0,
+        "width": 810,
+        "right": 960,
+        "bottom": 540,
+        "client": 810,
+        "scroll": 810
+      }
+    },
+    "actualDuration": "视频时长：1秒",
+    "errors": []
+  },
+  {
+    "width": 740,
+    "height": 720,
+    "queue": {
+      "width": 290,
+      "client": 289,
+      "scroll": 289,
+      "titleStyle": "normal"
+    },
+    "layout": {
+      "list": {
+        "x": 175,
+        "y": 278.53125,
+        "width": 540,
+        "right": 715,
+        "bottom": 878.53125,
+        "client": 540,
+        "scroll": 540
+      },
+      "pane": {
+        "x": 160,
+        "y": 212.53125,
+        "width": 570,
+        "right": 730,
+        "bottom": 893.53125,
+        "client": 568,
+        "scroll": 568
+      },
+      "main": {
+        "x": 160,
+        "y": 10,
+        "width": 570,
+        "right": 730,
+        "bottom": 198.53125,
+        "client": 570,
+        "scroll": 570
+      },
+      "options": {
+        "x": 160,
+        "y": 907.53125,
+        "width": 570,
+        "right": 730,
+        "bottom": 1018.421875,
+        "client": 568,
+        "scroll": 568
+      },
+      "root": {
+        "x": 150,
+        "y": 0,
+        "width": 590,
+        "right": 740,
+        "bottom": 720,
+        "client": 590,
+        "scroll": 590
+      }
+    },
+    "actualDuration": "视频时长：1秒",
+    "errors": []
+  }
+]

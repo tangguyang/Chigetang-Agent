@@ -1,0 +1,2 @@
+Packaging app for platform win32 x64 using electron v44.3.0
+Verified Windows package structure: release/吃个糖Agent-win32-x64

@@ -1,0 +1,1 @@
+PASS 5 viewport/scale combinations; generation footer, sidebar, material cards; 4 paginated pages each.

@@ -1,0 +1,52 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.2.9 test:real-speech
+> node --experimental-strip-types tests/v129.test.ts && node --experimental-strip-types tests/v129-media.test.ts && node scripts/run-real-speech-ui.mjs
+
+✔ Instruction 40汉字 (1.66817ms)
+✔ Instruction 41汉字 (0.246933ms)
+✔ Instruction 50汉字 (0.104839ms)
+✔ Instruction 39汉字标点 (0.113622ms)
+✔ Instruction 40汉字非汉超限 (0.452323ms)
+✔ Instruction 英文数字空格 (0.102525ms)
+✔ Instruction emoji (0.075885ms)
+✔ Instruction Han扩展 (0.081003ms)
+✔ 严格Director与Execution示例 (10.860513ms)
+✔ 拒绝旧/危险字段 taskId (1.597775ms)
+✔ 拒绝旧/危险字段 taskRevision (1.284221ms)
+✔ 拒绝旧/危险字段 exportId (1.284802ms)
+✔ 拒绝旧/危险字段 contextHash (2.096698ms)
+✔ 拒绝旧/危险字段 apiKey (1.51531ms)
+✔ 拒绝多协议、语法错、未知schema、嵌套未知字段、过长指令、未知Unit/Beat (1.800361ms)
+✔ 重复planId/planHash，事务不改变原稿 (3.311204ms)
+✔ 未知Window、越权、参数类型、NO_CHANGE和RECONCAT_ONLY (1.920752ms)
+✔ 双击只请求一次，confirmed不可覆盖，快照与新revision (4.309242ms)
+✔ ambiguous timeout不重试且unknown_result不可自动再发 (1.9517ms)
+✔ 崩溃恢复generating→interrupted，unknown_result保留 (1.735483ms)
+✔ 独立DB损坏不会修改旧库 (0.563201ms)
+✔ 数据库事务rollback (1.269318ms)
+✔ Unit稳定、纯文本长度和dangerous XML拦截 (1.458063ms)
+✔ 三篇真实台词协议E2E（模拟TTS；不代表真人听感） (12.64526ms)
+✔ JOINT_REPAIR必须相邻，合并后方案事务执行，三轮停止 (2.742224ms)
+✔ 手动超限在提交前拦截，原稿更新使旧方案失效，试演未知不补发 (2.036618ms)
+✔ 已应用修复只执行一次，成功后消耗pendingAction并记录After (2.383001ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 66.738164
+✔ 完整HTTP适配器模拟→下载→真实ffprobe/FFmpeg→48kWAV→拼接→Golden门禁 (494.956365ms)
+✔ 云端成功下载失败保存remote证据，恢复仅GET不再付费 (232.112354ms)
+✔ 两个窗口实际拼接增加指定停顿，重拼接不调用TTS (415.252633ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1147.525657
+PASS 真人口播UI：创建页、任务选择、10题、试演Gate、导出、文档、DB错误隔离

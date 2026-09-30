@@ -1,0 +1,35 @@
+{
+  "engine": "Linux headless Chromium; viewport and device scale emulation, not Windows DPI",
+  "results": [
+    {
+      "width": 1440,
+      "height": 960,
+      "deviceScaleFactor": 1,
+      "passed": true
+    },
+    {
+      "width": 1050,
+      "height": 720,
+      "deviceScaleFactor": 1,
+      "passed": true
+    },
+    {
+      "width": 1536,
+      "height": 864,
+      "deviceScaleFactor": 1.25,
+      "passed": true
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "deviceScaleFactor": 1.5,
+      "passed": true
+    },
+    {
+      "width": 960,
+      "height": 540,
+      "deviceScaleFactor": 2,
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+TAP version 13
+# (node:584) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:584) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: protocol 1.2.0 and previous 1.1 are separate and accepted
+ok 1 - protocol 1.2.0 and previous 1.1 are separate and accepted
+  ---
+  duration_ms: 29.821294
+  type: 'test'
+  ...
+# Subtest: stage documents are separated and consistently reference current protocol
+ok 2 - stage documents are separated and consistently reference current protocol
+  ---
+  duration_ms: 0.754598
+  type: 'test'
+  ...
+# Subtest: custom MD template preview, legacy consent, persistence, backup and restore
+ok 3 - custom MD template preview, legacy consent, persistence, backup and restore
+  ---
+  duration_ms: 70.545107
+  type: 'test'
+  ...
+# Subtest: DOCX extraction retains paragraphs and table cell contents and validates chapters
+ok 4 - DOCX extraction retains paragraphs and table cell contents and validates chapters
+  ---
+  duration_ms: 18.122445
+  type: 'test'
+  ...
+# Subtest: positive overlay directives are rejected but negative constraints remain valid
+ok 5 - positive overlay directives are rejected but negative constraints remain valid
+  ---
+  duration_ms: 0.684509
+  type: 'test'
+  ...
+# (node:585) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:585) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: R3 subtitle instruction clauses: conflicting positive action is rejected
+ok 6 - R3 subtitle instruction clauses: conflicting positive action is rejected
+  ---
+  duration_ms: 4.17061
+  type: 'test'
+  ...
+# Subtest: R3 default duration boundary strictly accepts -1 and 2-30
+ok 7 - R3 default duration boundary strictly accepts -1 and 2-30
+  ---
+  duration_ms: 8.10521
+  type: 'test'
+  ...
+# Subtest: R3 submit has a synchronous per-session backend lock before preflight await
+ok 8 - R3 submit has a synchronous per-session backend lock before preflight await
+  ---
+  duration_ms: 63.475009
+  type: 'test'
+  ...
+# (node:586) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:586) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# Subtest: v120 contract: version/limits/exported docs reflect machine definitions
+ok 9 - v120 contract: version/limits/exported docs reflect machine definitions
+  ---
+  duration_ms: 24.725042
+  type: 'test'
+  ...
+# Subtest: v120 reject @ binding key, unknown shared field and undeclared file
+ok 10 - v120 reject @ binding key, unknown shared field and undeclared file
+  ---
+  duration_ms: 6.4582
+  type: 'test'
+  ...
+# Subtest: v120 alias parsing supports Chinese, overlap, escaped @@, and rejects adjacent longer token
+ok 11 - v120 alias parsing supports Chinese, overlap, escaped @@, and rejects adjacent longer token
+  ---
+  duration_ms: 1.92671
+  type: 'test'
+  ...
+# Subtest: v120 SHA, ZIP CRC, path and duplicate limits reject without task creation
+ok 12 - v120 SHA, ZIP CRC, path and duplicate limits reject without task creation
+  ---
+  duration_ms: 3.052829
+  type: 'test'
+  ...
+# Subtest: v120 persisted editable drafts invalidate old preflight, reject unbound and over-budget duration
+ok 13 - v120 persisted editable drafts invalidate old preflight, reject unbound and over-budget duration
+  ---
+  duration_ms: 120.910338
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1160.080464

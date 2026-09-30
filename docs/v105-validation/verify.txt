@@ -1,0 +1,187 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 verify
+> npm run typecheck && npm test && npm run test:ui && npm run test:bundle
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 typecheck
+> tsc --noEmit
+
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 test
+> node --experimental-strip-types --test tests/*.test.ts
+
+✔ SQLite migration, restart, integrity and non-destructive backup (51.761954ms)
+✔ empty API key blocked; ciphertext does not contain key; foreign machine error is readable (22.365187ms)
+✔ 10k Prompt draft persists after restart (11.784876ms)
+✔ Prompt versions preserve V1 when V2 is edited (10.594611ms)
+✔ asset SHA-256 deduplication, moved source, relocate validation and mutation detection (37.69004ms)
+✔ copy import survives deletion of original file (19.712906ms)
+✔ immutable task snapshot and branching versions; copy forms independent group (24.900275ms)
+✔ concurrent duplicate requests create exactly one paid reservation (13.808455ms)
+✔ Wan payload matches official media/input/parameters shape (8.152717ms)
+✔ Seedance submit, status and result use official SDK protocol (4.280257ms)
+✔ invalid credentials and request errors have actionable categories (0.746948ms)
+✔ 429 retries, paid 500 and network timeout never repeat submission (6.932975ms)
+✔ safe polling retries on temporary disconnection (1005.669513ms)
+✔ unsupported params, long Prompt, invalid duration rejected before cloud submit (6.876079ms)
+✔ model asset size, format, dimensions, duration, fps and mixed modes preflight (2.002594ms)
+✔ unknown prices remain unknown; price snapshot never recalculates history (44.130913ms)
+✔ successful generation + failed download retains cloud success; redownload never resubmits (35.677084ms)
+✔ processing restart recovers task ID without duplicate submit; interrupted submit pauses (21.596922ms)
+✔ ambiguous paid submission pauses and preserves all inputs (11.099887ms)
+✔ output verification rejects HTML; valid MP4 never overwrites old output (30.688729ms)
+✔ deleting task record never deletes output or source (23.066825ms)
+✔ account/provider mismatch prevents submission (8.50828ms)
+✔ global concurrency includes processing cloud jobs between polls (66.993223ms)
+✔ per-account limit permits another account while first is saturated (85.107419ms)
+✔ re-generate preserves exact official model after registry change (17.213759ms)
+✔ logs redact keys and omit prompts (2.117053ms)
+✔ portable directory move rebases managed files without rewriting immutable snapshots (31.981501ms)
+✔ Seedance 2.5 rejects unsupported seed and enforces editing constraints (2.129654ms)
+✔ new output directory is created; file-as-directory fails before cloud calls (16.222235ms)
+✔ malformed successful submission is ambiguous and never marked safe to repeat (3.944937ms)
+✔ Wan upload obtains official policy, sends multipart file last, and resolves OSS in submission (5.825485ms)
+✔ existing API account cannot change Provider and invalidate historical tasks (9.5273ms)
+✔ packaged MediaInfo WASM reads actual MP4 dimensions/fps and WAV duration (214.260284ms)
+✔ v1.0.0 migration preserves all legacy tables, encrypted credential, draft ratio and backups (27.225973ms)
+✔ migration failure rolls back without erasing v1 data (16.862289ms)
+✔ workspace ws- saves normalizes reads and decrypts; partial edits preserve fields (18.108706ms)
+✔ legacy workspace_id and workspaceID aliases read and save (11.351343ms)
+✔ WAN endpoint builds from ws- workspace and region, strips video path, rejects chat (13.462554ms)
+✔ HTTP 400 preserves code,message,request_id and redacts secret (9.158907ms)
+✔ HTTP 401 preserves code,message,request_id and redacts secret (1.505081ms)
+✔ HTTP 403 preserves code,message,request_id and redacts secret (0.832882ms)
+✔ HTTP 429 preserves code,message,request_id and redacts secret (1.037344ms)
+✔ HTTP 500 preserves code,message,request_id and redacts secret (1.359651ms)
+✔ connection test only GET, checks workspace/region/model and never generates (10.563713ms)
+✔ connection errors preserve HTTP diagnostic (11.679562ms)
+✔ both providers report unsupported balance without fabricated value (0.325762ms)
+✔ estimated cost depends on duration and resolution (9.807814ms)
+✔ model price, sound, reference input and region select independent price rules (8.602502ms)
+✔ unconfigured price stays unknown; tokens only estimated with explicit conversion (8.620893ms)
+✔ new task defaults 9:16 and leaves saved/history ratio unchanged (35.264785ms)
+✔ multiple drafts and mention metadata persist after restart (9.444583ms)
+✔ copy task preserves all parameters as independent unsubmitted draft without API (12.825545ms)
+✔ deleting queued task hides record, cancels local queue, retains immutable snapshot and billing (17.01039ms)
+✔ deleting cloud processing task retains state/id for recovery and billing (18.597054ms)
+✔ images/videos reuse Asset ID; duplicate import no file duplication; picker filters search (113.541247ms)
+✔ mention menu searches label, filename and role (37.720169ms)
+✔ inserted mentions carry real asset_id and stable bindingId (17.804173ms)
+✔ rename and reorder assets preserve mention binding and correct final media index (12.508426ms)
+✔ deleting a mention removes binding only, never selected or library assets (10.553593ms)
+✔ dangling and pasted unbound tokens fail before API submission (11.012929ms)
+✔ WAN POST indexed references exactly match ordered media; async header and task_id parsing (12.612958ms)
+✔ WAN HTTP200 error without task_id includes actual provider code and request_id (11.271082ms)
+✔ corrected account used before submission without overwriting old immutable account snapshot (25.815138ms)
+✔ billing keeps estimate/actual separate, filters dates/accounts and retains deleted consumption (24.36608ms)
+✔ delete confirmation distinguishes active WAN billing from supported Seedance cancel (19.964171ms)
+✔ complete v1 database migrates tasks, prompts, assets, account ciphertext and prices unchanged (29.989784ms)
+✔ v1.0.5 bootstrap and task snapshot report 1.0.5 (70.776517ms)
+✔ manual status refresh only queries cloud and never re-submits (38.337395ms)
+✔ draft close semantics can preserve draft record while submitted draft removal is explicit (17.510543ms)
+✔ batch frame import assigns first and last frame exactly once (4.105778ms)
+✔ model switch preserves compatible bindings and removes only stale mention tokens (2.407231ms)
+✔ Application routes account diagnostics through injected desktop fetcher (19.563981ms)
+✔ Application routes WAN paid submission through injected desktop fetcher (28.395198ms)
+✔ refresh all is not capped at the newest 100 tasks and reports successes accurately (611.341072ms)
+✔ applying a Prompt template clears stale mention metadata but preserves selected assets (1.199391ms)
+✔ paid submission timeout is configurable and never auto-resubmits (12.824043ms)
+✔ submitted workspace cleanup never replaces a newer workspace selected mid-flight (1.055464ms)
+✔ submitted workspace cleanup re-checks ownership after replacement creation (1.571665ms)
+✔ v103 import completion preserves newer edits and rejects switched workspaces/models (12.63023ms)
+✔ v103 material removal deletes matching tokens and rebases remaining mentions (8.595199ms)
+✔ v104 new workspace and replacement duration zero; backend never submits zero (45.181402ms)
+✔ v104 model switching revalidates duration without falling back to model default (15.091948ms)
+✔ v104 account price fractional real video duration and breakdown; unknown duration stays unknown (38.008229ms)
+✔ v104 account price changes affect only new tasks and preserve account ciphertext (28.52106ms)
+✔ v104 manual accounting priority, zero, audit, undo, provider updates, no double counting (21.805917ms)
+✔ v104 billing estimate fallback counts each task once and excludes unsubmitted budgets (19.435594ms)
+✔ v104 usage follows asset ID, new binding inherits, existing drafts and snapshots frozen (33.384048ms)
+✔ v104 frame supplement never silently omitted by backend (18.320955ms)
+✔ v104 rename survives reopen and submission name matches without changing inactive draft (31.185519ms)
+✔ v104 polling default migration preserves custom interval and explicit old default going forward (11.472506ms)
+✔ v104 first poll after five seconds; repeated polling and download never submit twice (31.190513ms)
+✔ v104 Windows names: illegal chars, reserved devices, Unicode, timestamp seconds (1.509686ms)
+✔ v104 concurrent download case collisions append sequence; unnamed timestamp is commit time (21.613835ms)
+✔ v105: v104 root migration preserves ciphertext, prompts, drafts, assets, project and task; restart is idempotent (89.674105ms)
+✔ v105: migration failure rolls back schema version, preserves original rows and backup (13.604648ms)
+✔ v105: ambiguous roots and program data paths stop safely (17.90043ms)
+✔ v105: cloned voice survives restart; TTS uses voice_id; generated asset binds to saved Wan draft and submits (96.726478ms)
+✔ v105: unsupported instruction and mismatched voice reject before paid request (11.243011ms)
+✔ v105: file download retry never resubmits paid TTS; interrupted submission pauses on restart (50.396966ms)
+✔ v105: logical folders, combined filtering and favorite order survive restart without file movement (94.141086ms)
+✔ v105: custom directories are created, persist and route new assets/audio/video draft and backups (98.387903ms)
+✔ v105: generic downloader preserves WAV/MP3/PNG extensions and does not overwrite (20.676419ms)
+✔ v105: real media probe and FFmpeg conversion produce playable 24k mono WAV and MP3 (840.079726ms)
+✔ v105: imported video cover is generated asynchronously at 15 percent and reused from cache (464.782582ms)
+ℹ tests 104
+ℹ suites 0
+ℹ pass 104
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2683.380159
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 test:ui
+> node scripts/run-ui-tests.mjs
+
+PASS generation page starts with real empty database
+PASS 11k editor draft autosaves through application to SQLite
+PASS 任务 page renders
+PASS 资产库 page renders
+PASS Prompt page renders
+PASS 模型与 API page renders
+PASS 统计 page renders
+PASS 设置 page renders
+PASS no invalid nested buttons
+PASS unsupported Seedance 1.5 reference video hidden
+PASS theme applies globally
+PASS template dialog opens
+PASS v1.0.4 version and New Task navigation
+PASS new task saves prior workspace and opens blank independent draft
+PASS visual asset picker shows image/video metadata
+PASS image filter
+PASS video filter
+PASS multiselect reuses image/video IDs without importing again
+PASS @ opens bound material menu
+PASS keyboard selects Video1 and inserts bound highlighted token
+PASS @ search filters selected assets
+PASS mouse selects Image1 with stable ID
+PASS WAN 12s / 720P / 9:16 estimate visible before submit
+PASS all ratio diagrams use actual width/height relationships
+PASS Copy Task opens independent unsubmitted draft without API
+PASS v105 task center excludes drafts and preserves them in workspace storage
+PASS current queue exposes delete control
+PASS queue click opens the selected task without bypassing the button
+PASS current task detail contains delete operation
+PASS current task deletion hides task, preserves materials and billing
+PASS billing center shows today yesterday month estimates and actual split
+PASS account connection diagnostics show correct ws workspace/region, no secret
+PASS generate button enqueues once and resets submitted workspace without cloud charges
+PASS v104 reset requires duration selection and footer owns model controls
+PASS v104 Ctrl Enter cannot submit duration zero
+PASS v104 tab rename Enter saves to SQLite
+PASS v104 tab rename Escape preserves original
+PASS v104 tab rename blur saves
+PASS v104 usage selection persists asset default by ID
+PASS v104 thumbnail opens internal preview
+PASS v104 second preview click closes
+PASS v104 accounting modal persists confirmed cost and audit
+PASS v104 accounting modal undo preserves audit
+PASS v105 audio workspace defaults to compatible configured model and account
+PASS v105 clone model disables unsupported instruction and offers cloning
+PASS v105 unified tasks default to all and contain no drafts
+PASS v105 asset sidebar quick filters select one shared asset page
+PASS v105 settings exposes independent paths and tray preference
+UI unit checks: 48 passed. jsdom DOM tests, not visual or Windows tests.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.5 test:bundle
+> node scripts/build.mjs && node scripts/test-bundle.mjs
+
+Bundled MediaInfo reads real MP4 successfully.

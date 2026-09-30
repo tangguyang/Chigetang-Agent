@@ -1,0 +1,6 @@
+PASS png 全部页面 /tmp/中文PDF测试-dr3w1N/多页中文-图片
+PASS png 2-3 /tmp/中文PDF测试-dr3w1N/多页中文-图片_1
+PASS jpg 全部页面 /tmp/中文PDF测试-dr3w1N/多页中文-图片_2
+PASS jpg 2-3 /tmp/中文PDF测试-dr3w1N/多页中文-图片_3
+Warning: Indexing all PDF objects
+PASS 错误 PDF 可捕获，不崩溃

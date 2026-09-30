@@ -1,0 +1,39 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> chigetang-agent@1.0.3 test:ui
+> node scripts/run-ui-tests.mjs
+
+PASS generation page starts with real empty database
+PASS 11k editor draft autosaves through application to SQLite
+PASS 任务 page renders
+PASS 资产库 page renders
+PASS Prompt page renders
+PASS 模型与 API page renders
+PASS 统计 page renders
+PASS 设置 page renders
+PASS no invalid nested buttons
+PASS unsupported Seedance 1.5 reference video hidden
+PASS theme applies globally
+PASS template dialog opens
+PASS v1.0.3 version and New Task navigation
+PASS new task saves prior workspace and opens blank independent draft
+PASS visual asset picker shows image/video metadata
+PASS image filter
+PASS video filter
+PASS multiselect reuses image/video IDs without importing again
+PASS @ opens bound material menu
+PASS keyboard selects Video1 and inserts bound highlighted token
+PASS @ search filters selected assets
+PASS mouse selects Image1 with stable ID
+PASS WAN 12s / 720P / 9:16 estimate visible before submit
+PASS all ratio diagrams use actual width/height relationships
+PASS Copy Task opens independent unsubmitted draft without API
+PASS Delete copied draft retains original task and reusable assets
+PASS current queue exposes delete control
+PASS queue click opens the selected task without bypassing the button
+PASS current task detail contains delete operation
+PASS current task deletion hides task, preserves materials and billing
+PASS billing center shows today yesterday month estimates and actual split
+PASS account connection diagnostics show correct ws workspace/region, no secret
+PASS generate button enqueues once and resets submitted workspace without cloud charges
+UI unit checks: 33 passed. jsdom DOM tests, not visual or Windows tests.
