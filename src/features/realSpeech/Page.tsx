@@ -566,6 +566,11 @@ function Workbench() {
                     recover={() =>
                       run(() => mutate("recover", { windowId: w.windowId }))
                     }
+                    reveal={(r) =>
+                      run(async () => {
+                        await api("reveal", { taskId: t.taskId, resultId: r.id });
+                      })
+                    }
                     original={w.unitIds
                       .map(
                         (id: string) =>
@@ -858,6 +863,7 @@ function Window({
   generate,
   feedback,
   recover,
+  reveal,
   original,
   phrases,
   updatePhrase,
@@ -871,6 +877,7 @@ function Window({
   generate: () => Promise<void>;
   feedback: (type: string, data: unknown) => Promise<void>;
   recover: () => Promise<void>;
+  reveal: (r: Obj) => Promise<void>;
   original: string;
   phrases: Obj[];
   updatePhrase: (unitId: string, changes: Obj) => Promise<void>;
@@ -990,14 +997,14 @@ function Window({
         <label>
           发音与定点停顿（新手建议由ChatGPT方案导入）
           <textarea
-            rows={4}
-            value={extra}
+            rows={4}            value={extra}
             onChange={(e) => setExtra(e.target.value)}
           />
         </label>
       </details>
       {changed && <p>窗口参数有未保存修改：保存后可立即重新生成本段，也可以取消修改。</p>}
-      {extraError && <p className="rs-error">{extraError}</p>}      {w.status !== "generated" && w.status !== "confirmed" && <p>先生成口播，再试听确认；全部片段生成后才能拼接。</p>}
+      {extraError && <p className="rs-error">{extraError}</p>}
+      {w.status !== "generated" && w.status !== "confirmed" && <p>先生成口播，再试听确认；全部片段生成后才能拼接。</p>}
       <div className="rs-actions">
         <button
           disabled={busy || !changed}
@@ -1050,35 +1057,50 @@ function Window({
       </div>
       {generateReason && <p className="rs-help">不能生成：{generateReason}</p>}
       {w.error && <p className="rs-error">{w.error}</p>}
-      <div className="rs-ab">
-        {last.map((r: Obj, i: number) => (
-          <div key={r.revision}>
-            <strong>
-              {last.length === 2
-                ? i === 0
-                  ? "A 上一版"
-                  : "B 当前版"
-                : "当前版"}{" "}
-              · rev{r.revision}
-            </strong>
-            <audio controls src={media(r)} />
+      {w.results.length > 0 && (
+        <details open>
+          <summary>生成版本（最新在前，永不覆盖旧音频）</summary>
+          <div className="rs-versions">
+            {[...w.results].reverse().map((r: Obj) => {
+              const current = (w.selectedRevision || w.results.at(-1)?.revision) === r.revision;
+              return (
+                <div className="rs-version" key={r.id || r.revision}>
+                  <div>
+                    <strong>rev{r.revision}{current ? " · ★ 当前使用" : ""}</strong>
+                    <small>{r.generatedAt ? ` · ${new Date(r.generatedAt).toLocaleString()}` : " · 历史版本"}</small>
+                  </div>
+                  <audio controls src={media(r)} />
+                  <div className="rs-actions">
+                    <button disabled={busy || current} onClick={() => void feedback("select", r.revision)}>
+                      {current ? "当前使用" : "设为当前"}
+                    </button>
+                    <button disabled={busy} onClick={() => void reveal(r)}>打开音频文件位置</button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
-      {last.length === 2 && (
-        <div className="rs-actions">
-          {["A 更自然", "B 更自然", "差不多", "都不好"].map((a) => (
-            <button
-              disabled={busy}
-              key={a}
-              onClick={() => void feedback("ab", a)}
-            >
-              {a}
-            </button>
-          ))}
-        </div>
+        </details>
       )}
-      {w.ab && <p>A/B：{w.ab}</p>}
+      {last.length === 2 && (
+        <details>
+          <summary>A/B 快速比较最近两版</summary>
+          <div className="rs-ab">
+            {last.map((r: Obj, i: number) => (
+              <div key={r.revision}>
+                <strong>{i === 0 ? "A 上一版" : "B 当前版"} · rev{r.revision}</strong>
+                <audio controls src={media(r)} />
+              </div>
+            ))}
+          </div>
+          <div className="rs-actions">
+            {["A 更自然", "B 更自然", "差不多", "都不好"].map((a) => (
+              <button disabled={busy} key={a} onClick={() => void feedback("ab", a)}>{a}</button>
+            ))}
+          </div>
+          {w.ab && <p>A/B：{w.ab}</p>}
+        </details>
+      )}
     </article>
   );
 }
