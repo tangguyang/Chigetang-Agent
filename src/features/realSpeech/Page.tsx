@@ -190,8 +190,9 @@ function Workbench() {
         </div>
         <div className="rs-actions">
           {[
+            ["stage1", "① 阶段一导演协议"],
+            ["stage2", "② 阶段二执行编译"],
             ["manual", "📄 使用手册"],
-            ["protocol", "🔒 ChatGPT返回协议"],
             ["diagnosis", "听感诊断手册"],
           ].map(([kind, label]) => (
             <button
@@ -361,9 +362,9 @@ function Workbench() {
                 )}
               </section>
               <section>
-                <h2>2. 与ChatGPT协作</h2>
+                <h2>2. 阶段二：导入 ChatGPT 执行方案</h2>
                 <p>
-                  点击后复制当前任务文字，到ChatGPT粘贴。文字不包含WAV；需要听感诊断时可单独导出音频附件。
+                  阶段一先在 ChatGPT 用可编辑 Markdown 把表演方案讨论清楚；确认后让 ChatGPT 按“阶段二执行编译”输出 REAL_SPEECH_PERFORMANCE_PLAN_V1，整段复制到下面即可。旧版 Director / Repair 协议仍兼容。
                 </p>
                 <div className="rs-actions">
                   {[
@@ -394,7 +395,7 @@ function Workbench() {
                     setPlanText(e.target.value);
                     setPreview(null);
                   }}
-                  placeholder="粘贴完整ChatGPT回复或唯一协议JSON"
+                  placeholder="粘贴阶段二 REAL_SPEECH_PERFORMANCE_PLAN_V1（或兼容的旧版唯一协议JSON）"
                 />
                 <button
                   disabled={busy || hasUnsaved || !planText}
@@ -571,6 +572,10 @@ function Workbench() {
                           t.units.find((u: Obj) => u.id === id).text,
                       )
                       .join("")}
+                    phrases={w.unitIds.map((id: string) => t.units.find((u: Obj) => u.id === id)).filter(Boolean)}
+                    updatePhrase={(unitId, changes) =>
+                      run(() => mutate("update", { unit: { unitId, ...changes } }))
+                    }
                   />
                 ))}
                 {error && <p role="alert" className="rs-error">{error}</p>}
@@ -854,6 +859,8 @@ function Window({
   feedback,
   recover,
   original,
+  phrases,
+  updatePhrase,
   onDirty,
 }: {
   w: Obj;
@@ -865,6 +872,8 @@ function Window({
   feedback: (type: string, data: unknown) => Promise<void>;
   recover: () => Promise<void>;
   original: string;
+  phrases: Obj[];
+  updatePhrase: (unitId: string, changes: Obj) => Promise<void>;
   onDirty:(key:string,value:boolean)=>void;
 }) {
   const [instruction, setInstruction] = useState(w.instruction),
@@ -897,7 +906,8 @@ function Window({
     synthesisText !== w.synthesisText ||
     Object.keys(params).some(
       (k) => params[k as keyof typeof params] !== w[k],
-    ) ||    extra !==
+    ) ||
+    extra !==
       JSON.stringify(
         { pronunciation: w.pronunciation, rhythmData: w.rhythmData },
         null,
@@ -939,8 +949,11 @@ function Window({
         </small>
       </h3>
       <p>{original}</p>
+      {phrases.filter((u) => u.phraseId).map((u) => (
+        <PhraseMeta key={u.id} unit={u} busy={busy} save={updatePhrase} onDirty={onDirty} />
+      ))}
       <label>
-        表演方向（Instruction）
+        CosyVoice 执行指令（Instruction）
         <textarea
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}
@@ -984,8 +997,7 @@ function Window({
         </label>
       </details>
       {changed && <p>窗口参数有未保存修改：保存后可立即重新生成本段，也可以取消修改。</p>}
-      {extraError && <p className="rs-error">{extraError}</p>}
-      {w.status !== "generated" && w.status !== "confirmed" && <p>先生成口播，再试听确认；全部片段生成后才能拼接。</p>}
+      {extraError && <p className="rs-error">{extraError}</p>}      {w.status !== "generated" && w.status !== "confirmed" && <p>先生成口播，再试听确认；全部片段生成后才能拼接。</p>}
       <div className="rs-actions">
         <button
           disabled={busy || !changed}
@@ -1071,6 +1083,45 @@ function Window({
   );
 }
 
+function PhraseMeta({unit,busy,save,onDirty}:{unit:Obj;busy:boolean;save:(unitId:string,changes:Obj)=>Promise<void>;onDirty:(key:string,value:boolean)=>void}) {
+  const base = () => ({
+    salesAction: unit.salesAction || "",
+    direction: unit.direction || "",
+    pace: unit.pace || "NORMAL",
+    energy: unit.energy || "MEDIUM",
+    emphasis: (unit.emphasis || []).join("、"),
+    pauseAfter: unit.pauseAfter || "NONE",
+  });
+  const [draft,setDraft]=useState(base);
+  const previous=useRef(unit);
+  useEffect(()=>{
+    if(previous.current!==unit) setDraft(base());
+    previous.current=unit;
+  },[unit]);
+  const saved=base();
+  const changed=Object.keys(saved).some(k=>draft[k as keyof typeof draft]!==saved[k as keyof typeof saved]);
+  useEffect(()=>{onDirty("phrase:"+unit.id,changed);return()=>onDirty("phrase:"+unit.id,false);},[changed,unit.id,onDirty]);
+  return <details className="rs-phrase">
+    <summary>{unit.phraseId} · {unit.salesAction || "表演短语"} · {unit.pace || "NORMAL"} / {unit.energy || "MEDIUM"}</summary>
+    <p><strong>台词：</strong>{unit.text}</p>
+    <fieldset disabled={busy}>
+      <label>销售动作<input value={draft.salesAction} onChange={e=>setDraft({...draft,salesAction:e.target.value})}/></label>
+      <label>导演演法（人话，可人工修改）<textarea rows={2} value={draft.direction} onChange={e=>setDraft({...draft,direction:e.target.value})}/></label>
+      <div className="rs-actions">
+        <label>速度<select value={draft.pace} onChange={e=>setDraft({...draft,pace:e.target.value})}>{["SLOW","NORMAL","FAST"].map(x=><option key={x}>{x}</option>)}</select></label>
+        <label>情绪<select value={draft.energy} onChange={e=>setDraft({...draft,energy:e.target.value})}>{["LOW","MEDIUM","HIGH"].map(x=><option key={x}>{x}</option>)}</select></label>
+        <label>句后停顿<select value={draft.pauseAfter} onChange={e=>setDraft({...draft,pauseAfter:e.target.value})}>{["NONE","SHORT","MEDIUM","LONG"].map(x=><option key={x}>{x}</option>)}</select></label>
+      </div>
+      <label>重点词（用、分隔）<input value={draft.emphasis} onChange={e=>setDraft({...draft,emphasis:e.target.value})}/></label>
+      <p className="rs-help">这些是导演标注，方便你和 ChatGPT 讨论；真正发送 CosyVoice 的是下方 Instruction 与模型参数。</p>
+      <div className="rs-actions">
+        <button disabled={!changed} onClick={()=>void save(unit.id,{salesAction:draft.salesAction,direction:draft.direction,pace:draft.pace,energy:draft.energy,pauseAfter:draft.pauseAfter,emphasis:draft.emphasis.split(/[、,，]/).map(x=>x.trim()).filter(Boolean)})}>保存 Phrase 标注</button>
+        <button disabled={!changed} onClick={()=>setDraft(base())}>取消修改</button>
+      </div>
+    </fieldset>
+  </details>;
+}
+
 function TaskInfo({task,voices,busy,save,onDirty}:{task:Obj;voices:Obj[];busy:boolean;save:(changes:Obj)=>Promise<void>;onDirty:(key:string,value:boolean)=>void}) {
   const keys=["name","goal","originalText","voiceRef","description"];
   const [draft,setDraft]=useState<Obj>(()=>Object.fromEntries(keys.map(k=>[k,task[k]||""])));
@@ -1083,7 +1134,7 @@ function TaskInfo({task,voices,busy,save,onDirty}:{task:Obj;voices:Obj[];busy:bo
   {keys.filter(k=>k!=="voiceRef").map(k=><label key={k}>{{name:"任务名称",goal:"任务目标",originalText:"原稿",description:"补充描述"}[k]}{k==="originalText"||k==="description"?<textarea rows={k==="originalText"?5:2} value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/>:<input value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/>}</label>)}
   <label>复刻音色<select value={draft.voiceRef} onChange={e=>setDraft({...draft,voiceRef:e.target.value})}><option value="">选择音色</option>{voices.map(v=><option key={v.id} value={v.id}>{v.name} · {v.status}</option>)}</select></label>
   {!draft.voiceRef && <p>尚未选择音色，可保存任务；生成前须选择可用音色。</p>}
-  <button disabled={!changed||!draft.originalText.trim()} onClick={()=>{if(originalChanged&&!window.confirm("确认保存原稿修改并重新解析？历史音频会保留；受影响的表演方案需要重新确认。"))return;void save(draft);}}>{originalChanged?"保存并重新解析原稿":"保存任务信息"}</button>
+  <button disabled={!changed||!draft.originalText.trim()} onClick={()=>{if(originalChanged&&!window.confirm("确认保存原稿修改并重新解析？未变化 Phrase/窗口会尽量保留 ID、参数和音频；真正受影响的部分标记为待重新生成。"))return;void save(draft);}}>{originalChanged?"保存并重新解析原稿":"保存任务信息"}</button>
   <button disabled={!changed} onClick={()=>setDraft(Object.fromEntries(keys.map(k=>[k,task[k]||""])))}>取消修改</button>
   {changed&&<p>有未保存修改</p>}
   </fieldset></details>;
