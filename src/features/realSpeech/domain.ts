@@ -262,14 +262,89 @@ export function parsePlan(text: string): Obj {
     (m) => m[1],
   );
   const candidates = blocks.length
-    ? blocks.filter((b) => /CHATGPT_(DIRECTOR|EXECUTION)_PLAN_V1/.test(b))
+    ? blocks.filter((b) => /(CHATGPT_(DIRECTOR|EXECUTION)_PLAN_V1|REAL_SPEECH_PERFORMANCE_PLAN_V1)/.test(b))
     : [text.trim()];
   if (candidates.length !== 1) throw Error("必须且只能包含一个协议JSON");
   const p = JSON.parse(candidates[0]);
   validateShape(p);
   return p;
 }
+function validatePerformanceImportShape(p: Obj) {
+  obj(p, [
+    "schema",
+    "protocolVersion",
+    "targetModel",
+    "planId",
+    "sourceText",
+    "globalDirection",
+    "phrases",
+    "windows",
+    "missingInputs",
+  ]);
+  if (p.schema !== "REAL_SPEECH_PERFORMANCE_PLAN_V1") throw Error("导入协议类型错误");
+  if (p.protocolVersion !== "1.0") throw Error("真人口播执行协议版本不匹配");
+  if (p.targetModel !== COSYVOICE_35_PLUS.model) throw Error("目标模型必须为 CosyVoice 3.5 Plus");
+  ["planId", "sourceText", "globalDirection"].forEach((k) => str(p[k]));
+  if (!p.planId.trim() || !p.sourceText.trim()) throw Error("planId/sourceText不能为空");
+  strings(p.missingInputs);
+  arr(p.phrases, (v) => {
+    obj(v, [
+      "phraseId",
+      "text",
+      "salesAction",
+      "direction",
+      "pace",
+      "energy",
+      "emphasis",
+      "pauseAfter",
+    ]);
+    ["phraseId", "text", "salesAction", "direction"].forEach((k) => str(v[k]));
+    if (!/^P\d{3,}$/.test(v.phraseId)) throw Error("Phrase ID格式错误");
+    if (!v.text.length) throw Error("Phrase文本不能为空");
+    choice(v.pace, ["SLOW", "NORMAL", "FAST"]);
+    choice(v.energy, ["LOW", "MEDIUM", "HIGH"]);
+    strings(v.emphasis);
+    choice(v.pauseAfter, ["NONE", "SHORT", "MEDIUM", "LONG"]);
+  });
+  if (!p.phrases.length) throw Error("至少需要一个Phrase");
+  arr(p.windows, (w) => {
+    obj(w, [
+      "windowId",
+      "phraseIds",
+      "instruction",
+      "rate",
+      "pitch",
+      "volume",
+      "seed",
+      "transitionPauseMs",
+      "pronunciation",
+      "rhythmBreaks",
+    ]);
+    str(w.windowId);
+    if (!/^GW\d{3,}$/.test(w.windowId)) throw Error("Window ID格式错误");
+    strings(w.phraseIds);
+    if (!w.phraseIds.length) throw Error("Window不能为空");
+    fieldValue("instruction", w.instruction);
+    fieldValue("rate", w.rate);
+    fieldValue("pitch", w.pitch);
+    fieldValue("volume", w.volume);
+    fieldValue("seed", w.seed);
+    fieldValue("transitionPauseMs", w.transitionPauseMs);
+    pronunciation(w.pronunciation);
+    arr(w.rhythmBreaks, (r) => {
+      obj(r, ["afterPhraseId", "pauseMs"]);
+      str(r.afterPhraseId);
+      num(r.pauseMs, ...COSYVOICE_35_PLUS.transitionPauseMs, true);
+    });
+  });
+  if (!p.windows.length) throw Error("至少需要一个Generation Window");
+}
+
 export function validateShape(p: Obj) {
+  if (p?.schema === "REAL_SPEECH_PERFORMANCE_PLAN_V1") {
+    validatePerformanceImportShape(p);
+    return;
+  }
   const base = [
     "schema",
     "protocolVersion",
@@ -405,6 +480,27 @@ export function validateShape(p: Obj) {
 }
 export function validateContext(p: Obj, t: Obj) {
   validateShape(p);
+  if (p.schema === "REAL_SPEECH_PERFORMANCE_PLAN_V1") {
+    if (p.sourceText !== t.originalText)
+      throw Error("执行方案原稿与当前任务不一致，请用当前原稿重新执行阶段二");
+    const phraseIds = p.phrases.map((v: Obj) => v.phraseId);
+    if (new Set(phraseIds).size !== phraseIds.length) throw Error("Phrase ID重复");
+    if (p.phrases.map((v: Obj) => v.text).join("") !== p.sourceText)
+      throw Error("Phrase必须按原顺序逐字覆盖完整原稿，不得改字或漏字");
+    const windowIds = p.windows.map((w: Obj) => w.windowId);
+    if (new Set(windowIds).size !== windowIds.length) throw Error("Window ID重复");
+    const coverage = p.windows.flatMap((w: Obj) => {
+      if (w.phraseIds.some((id: string) => !phraseIds.includes(id)))
+        throw Error("Window引用未知Phrase");
+      for (const r of w.rhythmBreaks)
+        if (!w.phraseIds.includes(r.afterPhraseId))
+          throw Error("停顿引用必须位于当前Window");
+      return w.phraseIds;
+    });
+    if (canonical(coverage) !== canonical(phraseIds))
+      throw Error("Window必须按顺序覆盖全部Phrase且不重复");
+    return;
+  }
   for (const k of ["taskId", "taskRevision", "exportId", "contextHash"])
     if (p[k] !== t[k]) throw Error("旧方案或任务不匹配：" + k);
   const known = t.units.map((u: Obj) => u.id);
