@@ -138,6 +138,38 @@ function Workbench() {
     `aivideo://local/realSpeech/${t!.taskId}${r ? `?artifact=${encodeURIComponent(r.id)}` : ""}`;
   const feedback = (type: string, data: unknown, windowId?: string) =>
     mutate("feedback", { type, data, windowId });
+  const diagnosisData = () => ({
+    answers,
+    problem,
+    position,
+    description,
+    range,
+    pronunciationOk,
+    seamsOk,
+    caseName,
+    caseChecks,
+  });
+  const saveDiagnosis = async (copyToChatGPT = false) => {
+    const next = await api<Obj>("feedback", {
+      taskId: t!.taskId,
+      taskRevision: t!.taskRevision,
+      type: "qc",
+      data: diagnosisData(),
+    });
+    let latest = next;
+    if (copyToChatGPT) {
+      latest = await api<Obj>("export", {
+        taskId: next.taskId,
+        taskRevision: next.taskRevision,
+        kind: "Diagnosis",
+        attachments: true,
+      });
+    }
+    await refresh(latest);
+    setNotice(copyToChatGPT
+      ? "诊断已保存，优化请求已复制；当前音频文件夹已打开"
+      : "听感诊断已保存");
+  };
   const deleteTask=(x:Obj)=>run(async()=>{
     const ids=new Set([...x.windows,...(x.rehearsal?[x.rehearsal]:[]),...(x.archives||[]).flatMap((a:Obj)=>a.windows||[])].flatMap((w:Obj)=>(w.results||[]).map((r:Obj)=>r.id)));
     for(const r of [...(x.finals||[]),...(x.final?[x.final]:[])])ids.add(r.id);
@@ -154,7 +186,7 @@ function Workbench() {
       <header>
         <div>
           <h1>真人口播表演生产系统</h1>
-          <p>原稿 → ChatGPT导演 → 试演 → 全文 → 听感诊断</p>
+          <p>原稿 → ChatGPT导演 → 导入方案 → 单段生成 / 修改 → 拼接</p>
         </div>
         <div className="rs-actions">
           {[
@@ -406,10 +438,10 @@ function Workbench() {
                 )}
               </section>
               <section>
-                <h2>3. 先试演，再生成</h2>
+                <h2>3. 逐段生成与版本管理</h2>
                 {t.assetSyncError && <p role="alert">音频生成已保存，但资产关联需要重试：{t.assetSyncError}<button onClick={()=>void run(()=>refresh(t))}>重试资产同步</button></p>}
                 <p>
-                  建议试演8–15秒，有效范围外音频也可人工确认。无导演方案时默认前三个Unit；不合适请导出给ChatGPT调整试演范围。
+                  首次可先做8–15秒快速试演确认大方向；试演是建议，不再是后续单段生成的强制门禁。任意窗口保存修改后都可以直接重新生成该段。
                 </p>
                 <TrialRange key={t.taskId} task={t} busy={busy} onDirty={markDirty} save={ids=>run(()=>mutate("update",{rehearsalUnitIds:ids}))}/>
                 <button
@@ -455,8 +487,8 @@ function Workbench() {
                 )}
                 <p>
                   {t.rehearsalPassed
-                    ? "✓ 试演已通过，可以生成全文"
-                    : "请试听当前参数的试演，点击“已试听，基础方向通过”后解锁全文生成"}
+                    ? "✓ 首轮方向已确认；后续可自由逐段修改和重生成"
+                    : "试演尚未确认；你仍可直接生成任意单段，建议先用代表性片段快速校准方向"}
                 </p>
                 {t.pendingAction && (
                   <div>
@@ -516,7 +548,7 @@ function Workbench() {
                     key={t.taskId + w.windowId}
                     w={w}
                     busy={busy}
-                    passed={t.rehearsalPassed}
+                    voiceReady={!!t.voiceRef}
                     onDirty={markDirty}
                     media={(r) => media(w, r)}
                     update={(changes) =>
@@ -749,27 +781,21 @@ function Workbench() {
                     {c}
                   </label>
                 ))}
-                <button
-                  disabled={busy}
-                  onClick={() =>
-                    void run(async () => {
-                      await feedback("qc", {
-                        answers,
-                        problem,
-                        position,
-                        description,
-                        range,
-                        pronunciationOk,
-                        seamsOk,
-                        caseName,
-                        caseChecks,
-                      });
-                      setNotice("诊断已保存，点击导出诊断给ChatGPT");
-                    })
-                  }
-                >
-                  保存听感诊断
-                </button>
+                <div className="rs-actions">
+                  <button
+                    disabled={busy}
+                    onClick={() => void run(() => saveDiagnosis(false))}
+                  >
+                    保存听感诊断
+                  </button>
+                  <button
+                    className="primary"
+                    disabled={busy}
+                    onClick={() => void run(() => saveDiagnosis(true))}
+                  >
+                    保存并复制优化请求给 ChatGPT
+                  </button>
+                </div>
                 <p>同一窗口同类问题最多三轮，之后检查音色、窗口设计或原稿。</p>
                 <button
                   disabled={busy || !t.final}
@@ -821,7 +847,7 @@ function Workbench() {
 function Window({
   w,
   busy,
-  passed,
+  voiceReady,
   media,
   update,
   generate,
@@ -832,7 +858,7 @@ function Window({
 }: {
   w: Obj;
   busy: boolean;
-  passed: boolean;
+  voiceReady: boolean;
   media: (r: Obj) => string;
   update: (c: Obj) => Promise<void>;
   generate: () => Promise<void>;
@@ -871,13 +897,38 @@ function Window({
     synthesisText !== w.synthesisText ||
     Object.keys(params).some(
       (k) => params[k as keyof typeof params] !== w[k],
-    ) ||
-    extra !==
+    ) ||    extra !==
       JSON.stringify(
         { pronunciation: w.pronunciation, rhythmData: w.rhythmData },
         null,
         2,
       );
+  let extraValue: Obj = {};
+  let extraError = "";
+  try {
+    extraValue = JSON.parse(extra);
+    if (!extraValue || typeof extraValue !== "object" || Array.isArray(extraValue))
+      extraError = "高级参数必须是JSON对象";
+  } catch {
+    extraError = "高级参数不是合法JSON";
+  }
+  const reset = () => {
+    setInstruction(w.instruction);
+    setText(w.synthesisText);
+    setParams({rate:w.rate,pitch:w.pitch,volume:w.volume,seed:w.seed,transitionPauseMs:w.transitionPauseMs});
+    setExtra(JSON.stringify({pronunciation:w.pronunciation,rhythmData:w.rhythmData},null,2));
+  };
+  const generateReason = busy
+    ? "正在处理，请稍候"
+    : !voiceReady
+      ? "请先选择可用复刻音色"
+      : changed
+        ? "请先保存或取消本段修改"
+        : !count.valid
+          ? "Instruction 超过模型限制，请先精简"
+          : extraError
+            ? extraError
+            : "";
   useEffect(()=>{onDirty(w.windowId,changed);return()=>onDirty(w.windowId,false);},[changed,w.windowId,onDirty]);
   return (
     <article className="rs-window">
@@ -932,26 +983,33 @@ function Window({
           />
         </label>
       </details>
-      {!passed && <p>尚未确认当前试演通过，暂不能生成全文。</p>}
-      {changed && <p>窗口参数有未保存修改，请先点击“保存参数”。</p>}
+      {changed && <p>窗口参数有未保存修改：保存后可立即重新生成本段，也可以取消修改。</p>}
+      {extraError && <p className="rs-error">{extraError}</p>}
       {w.status !== "generated" && w.status !== "confirmed" && <p>先生成口播，再试听确认；全部片段生成后才能拼接。</p>}
       <div className="rs-actions">
         <button
-          disabled={busy || !count.valid || !changed}
+          disabled={busy || !changed}
           onClick={() => {
-            try {
-              void update({
-                instruction,
-                synthesisText,
-                ...params,
-                ...JSON.parse(extra),
-              });
-            } catch {
-              alert("高级参数不是合法JSON，请使用ChatGPT方案导入。");
+            if (!count.valid) {
+              alert("Instruction 超过 CosyVoice 3.5 Plus 限制：汉字≤40且API加权≤100。请先精简，不会自动截断。");
+              return;
             }
+            if (extraError) {
+              alert(extraError + "，请修正或取消修改。");
+              return;
+            }
+            void update({
+              instruction,
+              synthesisText,
+              ...params,
+              ...extraValue,
+            });
           }}
         >
-          保存参数
+          保存本段修改
+        </button>
+        <button disabled={busy || !changed} onClick={reset}>
+          取消本段修改
         </button>
         {["unknown_result", "interrupted"].includes(w.status) && (
           <button disabled={busy} onClick={() => void recover()}>
@@ -959,10 +1017,11 @@ function Window({
           </button>
         )}
         <button
-          disabled={busy || !passed || !count.valid || changed}
+          disabled={!!generateReason}
+          title={generateReason || (w.results.length ? "重新生成会新增版本，不覆盖旧音频" : "生成本段") }
           onClick={() => void generate()}
         >
-          {w.unitIds.length ? "生成本段／完整口播（新版本）" : "生成口播"}
+          {w.results.length ? "重新生成本段" : "生成本段"}
         </button>
         <button
           disabled={busy || w.status !== "generated"}
@@ -977,6 +1036,7 @@ function Window({
           保存固定句方案
         </button>
       </div>
+      {generateReason && <p className="rs-help">不能生成：{generateReason}</p>}
       {w.error && <p className="rs-error">{w.error}</p>}
       <div className="rs-ab">
         {last.map((r: Obj, i: number) => (
@@ -1017,12 +1077,13 @@ function TaskInfo({task,voices,busy,save,onDirty}:{task:Obj;voices:Obj[];busy:bo
   const previous=useRef(task);
   useEffect(()=>{const old=previous.current;if(old!==task&&!keys.some(k=>draft[k]!== (old[k]||"")))setDraft(Object.fromEntries(keys.map(k=>[k,task[k]||""])));previous.current=task;},[task]);
   const changed=keys.some(k=>draft[k]!== (task[k]||""));
+  const originalChanged=draft.originalText!==task.originalText;
   useEffect(()=>{onDirty("info",changed);return()=>onDirty("info",false);},[changed,onDirty]);
   return <details open><summary>任务信息 · 可修改并保存</summary><fieldset disabled={busy}>
   {keys.filter(k=>k!=="voiceRef").map(k=><label key={k}>{{name:"任务名称",goal:"任务目标",originalText:"原稿",description:"补充描述"}[k]}{k==="originalText"||k==="description"?<textarea rows={k==="originalText"?5:2} value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/>:<input value={draft[k]} onChange={e=>setDraft({...draft,[k]:e.target.value})}/>}</label>)}
   <label>复刻音色<select value={draft.voiceRef} onChange={e=>setDraft({...draft,voiceRef:e.target.value})}><option value="">选择音色</option>{voices.map(v=><option key={v.id} value={v.id}>{v.name} · {v.status}</option>)}</select></label>
   {!draft.voiceRef && <p>尚未选择音色，可保存任务；生成前须选择可用音色。</p>}
-  <button disabled={!changed||!draft.originalText.trim()} onClick={()=>{if(draft.originalText!==task.originalText&&!window.confirm("修改原稿会重新划分Unit，旧方案和试演确认失效；历史音频仍保留。是否保存？"))return;void save(draft);}}>保存任务信息</button>
+  <button disabled={!changed||!draft.originalText.trim()} onClick={()=>{if(originalChanged&&!window.confirm("确认保存原稿修改并重新解析？历史音频会保留；受影响的表演方案需要重新确认。"))return;void save(draft);}}>{originalChanged?"保存并重新解析原稿":"保存任务信息"}</button>
   <button disabled={!changed} onClick={()=>setDraft(Object.fromEntries(keys.map(k=>[k,task[k]||""])))}>取消修改</button>
   {changed&&<p>有未保存修改</p>}
   </fieldset></details>;
