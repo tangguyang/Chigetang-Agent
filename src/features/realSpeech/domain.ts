@@ -107,23 +107,55 @@ export function reconcileUnits(previous: Obj[], text: string) {
       dp[i][j] = a[i] === b[j]
         ? dp[i + 1][j + 1] + 1
         : Math.max(dp[i + 1][j], dp[i][j + 1]);
-  const preserved = new Map<number, string>();
+
+  // Exact LCS matches preserve the complete Phrase metadata, not only the ID.
+  const matches: Array<[number, number]> = [];
   let i = 0, j = 0;
   while (i < a.length && j < b.length) {
     if (a[i] === b[j]) {
-      preserved.set(j, String(previous[i].id));
+      matches.push([i, j]);
       i++; j++;
     } else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
     else j++;
   }
+  const exactByNew = new Map(matches.map(([oi, ni]) => [ni, previous[oi]]));
+
+  // For a one-for-one edited Phrase between stable anchors, preserve the human
+  // Phrase identity/annotations but allocate a new Unit ID. This invalidates old
+  // machine bindings while keeping the user's Phrase card and marks it revised.
+  const revisedByNew = new Map<number, Obj>();
+  const anchors: Array<[number, number]> = [[-1, -1], ...matches, [a.length, b.length]];
+  for (let k = 0; k < anchors.length - 1; k++) {
+    const [oa, na] = anchors[k], [ob, nb] = anchors[k + 1];
+    const oldStart = oa + 1, oldCount = ob - oldStart;
+    const newStart = na + 1, newCount = nb - newStart;
+    if (oldCount > 0 && oldCount === newCount) {
+      for (let x = 0; x < oldCount; x++) {
+        const old = previous[oldStart + x];
+        if (old?.phraseId) revisedByNew.set(newStart + x, old);
+      }
+    }
+  }
+
   let nextId = Math.max(0, ...previous.map((u) => {
     const m = /^U(\d+)$/.exec(String(u.id));
     return m ? Number(m[1]) : 0;
   })) + 1;
-  return fresh.map((u, index) => ({
-    id: preserved.get(index) || `U${String(nextId++).padStart(3, "0")}`,
-    text: u.text,
-  }));
+  return fresh.map((u, index) => {
+    const exact = exactByNew.get(index);
+    if (exact)
+      return { ...structuredClone(exact), text: u.text, phraseChanged: false };
+    const revised = revisedByNew.get(index);
+    if (revised)
+      return {
+        ...structuredClone(revised),
+        id: `U${String(nextId++).padStart(3, "0")}`,
+        text: u.text,
+        phraseRevision: Number(revised.phraseRevision || 1) + 1,
+        phraseChanged: true,
+      };
+    return { id: `U${String(nextId++).padStart(3, "0")}`, text: u.text };
+  });
 }
 export function canonical(x: unknown): string {
   if (Array.isArray(x)) return "[" + x.map(canonical).join(",") + "]";
