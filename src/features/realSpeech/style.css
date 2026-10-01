@@ -150,6 +150,7 @@
   opacity: 0.82;
   font-size: 13px;
 }
+.rs-disabled-reason { display: block; max-width: 320px; margin-top: 3px; white-space: normal; opacity: 1; font-size: 11px; }
 .rs-inline-check {
   display: inline-flex !important;
   align-items: center;

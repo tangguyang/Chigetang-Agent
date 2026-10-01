@@ -117,12 +117,12 @@ const goal = [...info.querySelectorAll("input")][1];
 await change(goal, "坚定且快慢交替");
 assert.ok(document.body.textContent?.includes("有未保存修改"));
 const trial = [...document.querySelectorAll("button")].find(
-  (b) => b.textContent === "生成试演",
+  (b) => b.textContent?.startsWith("生成试演"),
 )!;
 assert.equal(trial.disabled, true);
 await click("保存任务信息");
 assert.equal(task.goal, "坚定且快慢交替");
-await click("一键导出给ChatGPT");
+await click("旧版 Director 导出");
 assert.ok(document.body.textContent?.includes("已复制"));
 assert.equal(
   calls.find((x) => x.action === "realSpeech:export")?.p.attachments,

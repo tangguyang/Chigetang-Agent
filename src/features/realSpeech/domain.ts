@@ -94,8 +94,29 @@ export function units(text: string) {
  * units receive monotonically increasing IDs so an old ChatGPT plan can never silently
  * bind to different text.
  */
-export function reconcileUnits(previous: Obj[], text: string) {
-  const fresh = units(text);
+export function reconcileUnits(previous: Obj[], text: string): Obj[] {
+  let fresh = units(text);
+  const oldText = previous.map((u) => String(u.text)).join("");
+  // Keep the director's phrase boundaries when a text edit is contained in one
+  // phrase, including phrases spanning several punctuation-delimited sentences.
+  if (previous.length && oldText !== text) {
+    let prefix = 0, suffix = 0;
+    while (prefix < Math.min(oldText.length, text.length) && oldText[prefix] === text[prefix]) prefix++;
+    while (suffix < Math.min(oldText.length, text.length) - prefix && oldText.at(-1 - suffix) === text.at(-1 - suffix)) suffix++;
+    let offset = 0;
+    const index = previous.findIndex((u) => {
+      const start = offset;
+      offset += String(u.text).length;
+      return prefix >= start && prefix < offset && oldText.length - suffix <= offset;
+    });
+    if (index >= 0) {
+      const start = previous.slice(0, index).reduce((n, u) => n + String(u.text).length, 0);
+      const end = start + String(previous[index].text).length + text.length - oldText.length;
+      if (end > start) fresh = previous.map((u, i) => ({ id: String(u.id), text: i === index ? text.slice(start, end) : String(u.text) }));
+    }
+  } else if (previous.length && oldText === text) {
+    fresh = previous.map((u) => ({ id: String(u.id), text: String(u.text) }));
+  }
   if (!previous.length) return fresh;
   const a = previous.map((u) => String(u.text));
   const b = fresh.map((u) => String(u.text));

@@ -24,21 +24,27 @@
 - 新增 `COSYVOICE-3.5-PLUS-CAPABILITY-LOCK.md`，按 2026-10-01 官方资料锁定执行白名单。
 - 新增 GitHub Actions CI 工作流，计划在干净 Linux/Windows 环境执行 typecheck、核心测试、build/UI/bundle 回归。
 
+## 本次补全
+
+- 修复4处TypeScript编译错误。
+- 局部原稿改动保留受影响窗口音频历史及当前版本，revision继续递增；保留跨多句Phrase边界。
+- 修改参数、音色、原稿或选择旧版本不能绕过unknown/interrupted计费确认。
+- 批量一段失败后其他段继续，失败段不自动重试。
+- 诊断增加本段范围选择，附件包含当前选择版本；允许重复复制已保存诊断。
+- 所有禁用按钮直接显示原因，保存后反馈；拼接结果增加打开文件位置入口。
+- 恢复V2.2原版模板ZIP并纳入Git，npm test自动准备WASM；修复旧UI文案和Windows媒体测试路径。
+- 新增DOM和Windows Electron五条黄金路径、取消无出口与批量失败回归。
+
 ## 已验证
 
-- 真人口播核心三组测试 `v129 + v129-repair + v129-repair2`：47/47 PASS。
-- 扩大回归（排除当前源码包缺 `mediainfo.js` 无法运行的 v111/v127）：147/147 PASS（2026-10-01 重新执行）。
-- 文档镜像、协议关键字、CosyVoice 模型边界检查通过。
-- `tsc --noEmit` 当前无法在本源码包环境执行：缺少 `node_modules/@types/node`。
-- UI runner 当前无法执行：源码包未附 `node_modules/esbuild`。这属于测试环境依赖缺失，不视作 UI 已验收。
+Node24.19.0；typecheck通过；完整核心156/156；口播核心与媒体53/53；通用DOM UI71项；口播三套DOM runner；Windows Electron隔离测试窗口五条黄金路径；build、bundle及Windows x64打包结构/PE/文件哈希通过。
 
-## 尚未完成 / 不可宣称已完成
+详情见 ACCEPTANCE-RESULTS-2026-10-01.md 和 WINDOWS-PACKAGE-VERIFICATION.json。
 
-- Windows 实机 UI 点击验收。
-- 安装依赖后的完整 `npm test` / `npm run test:ui` / `npm run build`。
-- 真实 CosyVoice 3.5 Plus 付费声音效果验收。
-- 修复版2 Windows 可运行包/安装包。
+## 不可宣称已完成
+
+真实付费CosyVoice声音质量、生产主进程IPC完整现场验收、资源管理器和剪映实际操作；Windows独立交付包启动命令被自动审批拒绝，未验证。Windows测试窗口使用模拟WAV，不能替代真人听感。
 
 ## 发布门槛
 
-以 `P0-WORKFLOW-ACCEPTANCE.md` 为准。任何核心黄金路径卡死、保存/取消无出口、局部修改导致全局不可生成、旧音频被覆盖、未知请求自动重试等问题，均阻止发布。
+冻结需求/P0文件不变。任何新发现核心卡死、旧音频覆盖或未知结果自动重试都阻止交付。本次提供源码和Windows测试交付包，并明确上述待现场验收项。

@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { RealSpeechService } from "../src/main/realSpeech/service.ts";
-import { checkInstruction, instructionCount } from "../src/features/realSpeech/domain.ts";
+import { checkInstruction, instructionCount, reconcileUnits } from "../src/features/realSpeech/domain.ts";
 
 const fixture = () => {
   const root = mkdtempSync(join(tmpdir(), "repair2-"));
@@ -20,6 +20,44 @@ const fake = (label: string) => async (_snapshot: any, path: string) => {
   writeFileSync(path, label);
   return { duration: 6.5 };
 };
+
+test("修复2：原稿修改保留当前段历史，重生成继续revision且旧WAV不变", async () => {
+  const {s,t}=fixture();
+  let next=await s.generate({taskId:t.taskId,taskRevision:t.taskRevision,windowId:"GW001"},fake("old"));
+  const old=next.windows[0].results[0];
+  next=s.update({taskId:next.taskId,taskRevision:next.taskRevision,originalText:"第一句改。第二句。第三句。"});
+  assert.equal(next.windows[0].results[0].id,old.id);
+  assert.equal(next.windows[0].status,"dirty");
+  next=await s.generate({taskId:next.taskId,taskRevision:next.taskRevision,windowId:"GW001"},fake("new"));
+  assert.equal(next.windows[0].results.at(-1).revision,2);
+  assert.equal(readFileSync(old.path,"utf8"),"old");
+  s.close();
+});
+
+test("修复2：跨多句的导演Phrase局部改字保留其他Phrase身份",()=>{
+  const old=[{id:"U001",phraseId:"P001",text:"第一句。第二句。",direction:"连续解释"},{id:"U002",phraseId:"P002",text:"第三句。"}];
+  const next=reconcileUnits(old,"第一句改。第二句。第三句。");
+  assert.equal(next.length,2);
+  assert.equal(next[0].phraseId,"P001");
+  assert.equal(next[0].phraseRevision,2);
+  assert.equal(next[1].id,"U002");
+  assert.equal(next.map(u=>u.text).join(""),"第一句改。第二句。第三句。");
+});
+
+test("修复2：未知结果不能靠修改参数、音色或原稿绕过计费确认",async()=>{
+  for(const change of [{window:{windowId:"GW001",rate:1.1}},{voiceRef:"other"},{originalText:"第一句修改。第二句。第三句。"}]) {
+    const {s,t}=fixture();
+    await assert.rejects(s.generate({taskId:t.taskId,taskRevision:t.taskRevision,windowId:"GW001"},async()=>{throw Object.assign(Error("unknown"),{code:"SubmissionUnknown"});}));
+    let next=s.get(t.taskId);
+    next=s.update({taskId:next.taskId,taskRevision:next.taskRevision,...change});
+    assert.equal(next.windows[0].status,"unknown_result");
+    assert.throws(()=>s.update({taskId:next.taskId,taskRevision:next.taskRevision,manualGroups:[next.units.map((u:any)=>u.id)]}),/核对计费/);
+    let calls=0;
+    await assert.rejects(s.generate({taskId:next.taskId,taskRevision:next.taskRevision,windowId:"GW001"},async()=>{calls++;return {};}),/核对/);
+    assert.equal(calls,0);
+    s.close();
+  }
+});
 
 test("修复2：首轮试演不再是正式窗口生成的全局Gate", async () => {
   const { s, t } = fixture();

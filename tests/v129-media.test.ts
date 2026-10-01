@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { RealSpeechService } from "../src/main/realSpeech/service.ts";
 import type { Application } from "../src/main/services/application.ts";
 import type { Obj } from "../src/features/realSpeech/domain.ts";
@@ -111,7 +111,7 @@ test("完整HTTP适配器模拟→下载→真实ffprobe/FFmpeg→48kWAV→拼�
   const path = t.windows[0].results[0].path;
   const snapshot = JSON.parse(
     readFileSync(
-      join(path.substring(0, path.lastIndexOf("/")), "request.json"),
+      join(dirname(path), "request.json"),
       "utf8",
     ),
   );

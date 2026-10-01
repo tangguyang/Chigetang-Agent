@@ -1,0 +1,17 @@
+[
+  {
+    "file": "resources/ffmpeg.exe",
+    "sha256": "04e1307997530f9cf2fe35cba2ca7e8875ca91da02f89d6c7243df819c94ad00",
+    "bytes": 82797568
+  },
+  {
+    "file": "resources/ffprobe.exe",
+    "sha256": "544238f5b2dd0de3830677cc0baee4e5696c5bd357d34dd2b8c151b3d89d14bf",
+    "bytes": 168026112
+  },
+  {
+    "file": "resources/sherpa-onnx/sherpa-onnx-offline.exe",
+    "sha256": "57ad48bd49d0d22207f65facf607f8aefcf0aae7240a37e5ba0415ae85f43c4d",
+    "bytes": 18750976
+  }
+]
