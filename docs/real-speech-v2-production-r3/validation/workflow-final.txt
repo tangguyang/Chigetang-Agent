@@ -1,0 +1,1 @@
+PASS V2 UI+SQLite+模拟WAV集成：导入→多段生成→锁保护Patch→V1/V2选择与回滚→真实FFmpeg拼接→诊断ZIP→Golden；零付费网络

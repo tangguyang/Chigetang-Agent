@@ -1,7 +1,7 @@
 {
   "name": "chigetang-agent",
   "productName": "吃个糖Agent",
-  "version": "1.2.9",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "description": "多模型 AI 视频生成与资产管理工作台",

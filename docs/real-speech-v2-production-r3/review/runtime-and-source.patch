@@ -1,0 +1,5889 @@
+diff --git a/resources/real-speech-v2/COSYVOICE_CAPABILITY_PROFILE.v1.json b/resources/real-speech-v2/COSYVOICE_CAPABILITY_PROFILE.v1.json
+index 1c78f49..c572449 100644
+--- a/resources/real-speech-v2/COSYVOICE_CAPABILITY_PROFILE.v1.json
++++ b/resources/real-speech-v2/COSYVOICE_CAPABILITY_PROFILE.v1.json
+@@ -2,8 +2,8 @@
+   "schema": "COSYVOICE_CAPABILITY_PROFILE",
+   "schemaVersion": "1.0",
+   "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+-  "capabilityVersion": "1.0.0-draft.2",
+-  "status": "approved_architecture_development_pending_spike",
++  "capabilityVersion": "1.0.0-draft.3",
++  "status": "PRODUCTION_RULES_FROM_BATCH1_HUMAN_REVIEW",
+   "engine": "aliyun-cosyvoice",
+   "model": "cosyvoice-v3.5-plus",
+   "verifiedAt": "2026-10-01",
+@@ -653,15 +653,22 @@
+     "recommendedRanges": {
+       "classification": "PRODUCT_RECOMMENDED_RANGE",
+       "empiricallyOptimized": false,
+-      "instructionWeightedMax": 80,
++      "instructionWeightedMax": 20,
+       "initialRate": [
+-        0.9,
+-        1.1
++        1,
++        1
+       ],
+       "initialPitch": 1,
+       "initialVolume": 50,
+       "initialSeed": 0,
+-      "exceedingRecommendation": "warn_and_allow_within_hard_limits"
++      "exceedingRecommendation": "PRODUCT_DISCOURAGED; explicit experiment and user approval required; never silently truncate",
++      "instructionDefault": "",
++      "basis": "PRODUCT_RECOMMENDED_RANGE: conservative product hypothesis from one voice/batch, not official restriction or optimized threshold",
++      "breakMs": [
++        80,
++        200
++      ],
++      "breakBasis": "short-first product hypothesis; not a proven best range; 400ms is not a default template"
+     },
+     "hardLimits": {
+       "classification": "PRODUCT_HARD_LIMIT",
+@@ -683,8 +690,14 @@
+         "say-as",
+         "sub"
+       ],
+-      "parallelSpeakReleaseDecision": "PENDING_SPIKE",
+-      "releaseTagAllowlist": null
++      "parallelSpeakReleaseDecision": "DISABLED_BY_DEFAULT_EXPERIMENT_ONLY",
++      "releaseTagAllowlist": [
++        "speak",
++        "break",
++        "sub",
++        "say-as",
++        "phoneme"
++      ]
+     },
+     "semanticRules": [
+       "no automatic directing",
+@@ -695,56 +708,112 @@
+     ],
+     "scope": "realSpeech V2 only; shared modelCapabilities may be used by ordinary audio with its own explicit product policy",
+     "availabilityStateDefinitions": {
+-      "PRODUCT_ENABLED": "Candidate design allows this path; not a claim of implemented V2 or completed cloud validation",
++      "PRODUCT_ENABLED": "Product permits explicit path with production policy; not an acoustic guarantee",
+       "PRODUCT_DISABLED_PENDING_VALIDATION": "Documented model support retained in candidate schemas; release decision awaits spike, not pre-excluded",
+       "PRODUCT_DISABLED_OUT_OF_SCOPE": "Deliberately outside this product scope, still recorded as model-supported",
+-      "PRODUCT_UNSUPPORTED": "No verified exact execution interface"
++      "PRODUCT_UNSUPPORTED": "No verified exact execution interface",
++      "PRODUCT_DISABLED_BY_DEFAULT": "Model supported, adverse listening risk; explicit experimental mode and local user approval required",
++      "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE": "Never auto-map emotion/rhythm to this parameter; explicit user experiment only",
++      "PRODUCT_DISCOURAGED": "Above product recommendation, not above official hard limit",
++      "PRODUCT_ENABLED_FOR_TEXT_ONLY": "Text alias correction only; no performance claim",
++      "PRODUCT_ENABLED_FOR_READING_ONLY": "Semantic/number reading only; no sales-climax claim",
++      "PRODUCT_ENABLED_FOR_PRONUNCIATION_ONLY": "Explicit pronunciation correction only",
++      "PRODUCT_ENABLED_FOR_REPRODUCIBILITY": "Two same-input PCM observations; no future/version guarantee"
+     },
+     "capabilityAvailability": {
+       "instruction": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "02",
++          "03"
++        ],
++        "usageRestrictions": [
++          "SHORT_ONLY",
++          "SINGLE_INTENT_ONLY"
++        ],
++        "longInstructionState": "PRODUCT_DISCOURAGED"
+       },
+       "rate": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "01",
++          "09"
++        ],
++        "scopeRestriction": "Only default global value validated; non-default value requires explicit experimental L3 approval"
+       },
+       "pitch": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "01",
++          "10"
++        ],
++        "scopeRestriction": "Only default global value validated; non-default value requires explicit experimental L3 approval"
+       },
+       "volume": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "01"
++        ],
++        "scopeRestriction": "Only default global value validated; non-default value requires explicit experimental L3 approval"
+       },
+       "seed": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED_FOR_REPRODUCIBILITY",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "02",
++          "14"
++        ],
++        "evidenceCaveat": "02/14 decoded PCM identical, two observations only; preserve raw audio rather than relying on regeneration"
+       },
+       "ssml": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "05"
++        ]
+       },
+       "break": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "06"
++        ],
++        "usageRestrictions": [
++          "NATURALNESS_VALIDATION_REQUIRED",
++          "SHORT_FIRST",
++          "NO_400MS_TEMPLATE"
++        ]
+       },
+       "phoneme": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED_FOR_PRONUNCIATION_ONLY",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "13"
++        ],
++        "usageRestrictions": [
++          "CORRECTION_ONLY_NO_EMOTION_RHYTHM_SALES"
++        ]
+       },
+       "sayAs": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED_FOR_READING_ONLY",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "12"
++        ],
++        "evidenceCaveat": "Case12 PCM same as16; reading anomaly risk reported by user"
+       },
+       "hotFix": {
+         "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+@@ -807,29 +876,46 @@
+         "spikeRequired": false
+       },
+       "sub": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_ENABLED_FOR_TEXT_ONLY",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "11"
++        ],
++        "evidenceCaveat": "Case11 PCM same as16; effect not discriminated"
+       },
+       "speakRangeRate": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "09"
++        ],
++        "reason": "第一批真人口播试听增加AI/TTS感，不自动用于表演；允许明确实验"
+       },
+       "speakRangePitch": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "10"
++        ],
++        "reason": "第一批真人口播试听增加AI/TTS感，不自动用于表演；允许明确实验"
+       },
+       "speakRangeVolume": {
+         "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+         "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "spikeRequired": true,
++        "evidenceCases": []
+       },
+       "parallelSpeak": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "evidenceStatus": "NOT_RUN",
+-        "spikeRequired": true
++        "state": "PRODUCT_DISABLED_BY_DEFAULT",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED",
++        "spikeRequired": false,
++        "evidenceCases": [
++          "08"
++        ],
++        "reason": "真人连续表达产生明显拼接/能量断裂风险"
+       },
+       "soundEvent": {
+         "state": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+@@ -839,8 +925,8 @@
+     },
+     "ssmlAttributeAvailability": {
+       "voice": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+-      "rate": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-      "pitch": "PRODUCT_DISABLED_PENDING_VALIDATION",
++      "rate": "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE",
++      "pitch": "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE",
+       "volume": "PRODUCT_DISABLED_PENDING_VALIDATION",
+       "effect": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+       "effectValue": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+@@ -849,29 +935,78 @@
+     },
+     "combinationAvailability": {
+       "instructionWithSsml": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+-        "modelSupport": "NOT_ESTABLISHED_BY_INDIVIDUAL_SUPPORT",
+-        "evidenceStatus": "NOT_RUN"
++        "state": "PRODUCT_ENABLED",
++        "modelSupport": "API_ACCEPTED",
++        "evidenceStatus": "API_ACCEPTED_AND_USER_LISTENED_HIGHER_ARTIFICIALITY",
++        "reason": "L2 minimum; explicit reason and listening validation required"
+       },
+       "parallelSpeakWithInstruction": {
+-        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "state": "PRODUCT_DISABLED_BY_DEFAULT",
+         "modelSupport": "NOT_ESTABLISHED_BY_INDIVIDUAL_SUPPORT",
+-        "evidenceStatus": "NOT_RUN"
++        "evidenceStatus": "NOT_RUN",
++        "reason": "NOT_RUN组合不默认生产启用；仅明确L3实验允许，不能声称本批验证"
++      }
++    },
++    "productionRules": {
++      "principle": "NATURALNESS_FIRST_MINIMAL_INTERVENTION",
++      "priority": [
++        "continuous_plain_text",
++        "punctuation_text_structure_or_one_short_instruction",
++        "necessary_ssml_structure",
++        "pronunciation_reading_tools",
++        "explicit_experimental_rate_pitch_parallel_speak"
++      ],
++      "instructionMode": [
++        "SHORT_ONLY",
++        "SINGLE_INTENT_ONLY"
++      ],
++      "instructionRecommendedWeightedMax": 20,
++      "instructionHardWeightedMax": 100,
++      "breakRecommendedMs": [
++        80,
++        200
++      ],
++      "defaultComplexity": [
++        "L0",
++        "L1"
++      ],
++      "l2ReasonRequired": true,
++      "l3RequiresExperimentalAndLocalUserApproval": true,
++      "controlStacking": "EACH_ADDITIONAL_CONTROL_REQUIRES_LISTENING_BENEFIT",
++      "changeIsolationPolicy": "ONE_PRIMARY_VARIABLE_AT_A_TIME",
++      "instructionSemanticCounting": "declared by compiler; software never infers intent from instruction/director text",
++      "pronunciationCompleteness": {
++        "level": "E2",
++        "usage": "DIRECTOR_INTENT_ONLY",
++        "hardParameter": null
+       }
+     }
+   },
+   "unsupportedEvidencePolicy": "No verified documented exact interface => unavailable for execution; not a permanent assertion about future model versions",
+   "freezeAllowed": false,
+   "capabilitySpike": {
+-    "status": "NOT_RUN",
++    "status": "BATCH1_COMPLETED_HUMAN_REVIEW_RECORDED",
++    "scope": {
++      "voice": "黄明昊修正版",
++      "model": "cosyvoice-v3.5-plus",
++      "region": "cn-beijing",
++      "actualCalls": 15,
++      "case04": "LOCAL_BLOCKED_NOT_SENT",
++      "usageCharacters": 729,
++      "usagePricedCny": 0.10935,
++      "accountDebitVerified": false
++    },
++    "reportFile": "spike/batch1-human-listening.md",
+     "approvalRequiredBeforeAnyPaidCall": true,
+-    "matrixFile": "spike/test-matrix.json",
+-    "reportFile": "spike/result-report-template.json",
+-    "freezePreconditions": [
+-      "approved and completed scoped live spike",
+-      "record per-feature API and perceptual evidence",
+-      "user approves enablement decisions",
+-      "freeze manifest and Plan/Patch schemas together"
+-    ]
++    "automaticNextBatch": false,
++    "generality": "one voice and finite inputs; subjective listening is user evidence, not model-wide unsupported conclusion"
++  },
++  "directorIntentCapabilities": {
++    "pronunciationCompleteness": {
++      "confidence": "E2",
++      "modelHardParameter": null,
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "notes": "发音完成度/口语粗糙度不是念错字或口音参数，不能由软件推导硬参数"
++    }
+   }
+ }
+diff --git a/resources/real-speech-v2/docs/capability.md b/resources/real-speech-v2/docs/capability.md
+index 91e999e..dcdcbca 100644
+--- a/resources/real-speech-v2/docs/capability.md
++++ b/resources/real-speech-v2/docs/capability.md
+@@ -1,76 +1,45 @@
+-# CosyVoice 3.5 Plus官方能力核验
++# 真人口播生产规则｜R3
+ 
+-核验日期：2026-10-01。证据等级：官方文档核验；无本轮真实云端调用。profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http@1.0.0-draft.2`。
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
+ 
+-## 官方来源索引
++# CosyVoice能力与真人口播生产建议
+ 
+-| ID | 官方页面 | 本次核对部分 |
+-|---|---|---|
+-| S1 | [非实时语音合成CosyVoice HTTP API](https://help.aliyun.com/zh/model-studio/cosyvoice-tts-http-api) | 地址、input字段、范围、响应、hot_fix |
+-| S2 | [非实时语音合成](https://help.aliyun.com/zh/model-studio/non-realtime-tts-user-guide) | v3.5 instruction自由指令、加权规则、地域 |
+-| S3 | [SSML与LaTeX](https://help.aliyun.com/zh/model-studio/ssml-latex-user-guide) | 使用限制、speak/break/phoneme/say-as |
+-| S4 | [声音复刻](https://help.aliyun.com/zh/model-studio/voice-cloning-user-guide) | CosyVoice样本要求、地域、target_model |
+-| S5 | [声音复刻HTTP API](https://help.aliyun.com/zh/model-studio/voice-clone-design-http-api) | voice-enrollment、prefix、预处理字段 |
+-| S6 | [CosyVoice客户端事件](https://help.aliyun.com/zh/model-studio/cosyvoice-client-events) | WebSocket范围与SSML单次continue限制 |
+-| S7 | [cosyvoice-v3.5-plus模型页](https://help.aliyun.com/en/model-studio/cosyvoice-v3-5-plus) | 模型身份、北京、模型描述 |
+-
+-所有事实为上述页面在核验日的内容；后续官方变更应生成新profile版本，不覆盖旧快照。页面通用描述不能直接证明某模型的每项能力。SDK代码注释含旧模型列表，采用当前明确使用限制列表；官方SSML示例也出现与其参数表范围不一致的旧写法（如rate=-500），不复制旧例，按当前表校验并在云端验收。
+-
+-## 官方硬限制与真实控制
+-
+-| 能力 | 核验结论（MODEL_HARD_LIMIT/支持条件） | 可信度与产品处理 | 来源 |
+-|---|---|---|---|
+-| model / region | cosyvoice-v3.5-plus，目前北京；无系统音色 | E0路由选择；仅复刻音色进入本产品 | S2/S3/S7 |
+-| instruction | 自由自然语言；加权≤100。Han按2，其余字符按1；涵盖日/韩汉字 | E2，控制方言/角色/情绪；不保证重点落点。产品取消Han40硬限制 | S2 |
+-| rate | 0.5–2，默认1，作用于请求文本 | E1，不是每秒字数/目标总时长 | S1 |
+-| pitch | 0.5–2，默认1 | E1，不是Hz曲线，也不保证人物连续性 | S1 |
+-| volume | 整数0–100，默认50 | E1，不是dB/LUFS目标 | S1 |
+-| seed | 整数0–65535，默认0；相同模型版本及完整输入时官方描述可复现 | E1，不是质量/情绪参数。保存实际请求；云服务版本未锁定时不作跨时间字节保证 | S1 |
+-| sample_rate | HTTP：8000/12000/16000/22050/24000/44100/48000 | E0输出格式结构；产品使用48000 | S1 |
+-| format | HTTP支持mp3/pcm/wav/opus | 产品固定wav，实际编码/声道用本地校验；不把本地PCM校验要求冒充API新参数 | S1 |
+-| language_hints | 数组仅第一项有效；HTTP列出16个语言值 | E1；产品建议单值zh。参数枚举不是模型每种语言同等质量证明 | S1 |
+-| SSML | v3.5-plus复刻音色支持HTTP enable_ssml=true | E0标签结构；只开放受控节点，不接任意XML | S3 |
+-| break | ms整数50–10000；s整数1–10；无time默认1s；连续break累加截到10s | E0插入静默请求；可听总间隙含自然停顿。拒绝让云端静默截断 | S3 |
+-| phoneme | py拼音、cmu英文音标；标签内纯文本 | E0发音标注，最终发音需试听；py音节数量需对应汉字 | S3 |
+-| say-as | cardinal/digits/telephone/name/address/id/characters/punctuation/date/time/currency/measure | E0解释类型；先匹配类型合法输入，价格可用cardinal标数字保留外部“元” | S3 |
+-| hot_fix | pronunciation词→拼音；replace词→替代文本，合成前作用 | E0文本/发音映射，区别原稿和实际合成内容 | S1 |
+-| pronunciation | 非顶层官方字段；产品抽象映射phoneme或hot_fix.pronunciation | 同一词同一范围只选一路，避免双重纠音 | S1/S3 |
+-| HTTP API | Workspace北京域名 /api/v1/services/audio/tts/SpeechSynthesizer；body={model,input}；非流式音频URL约24h | E0传输；保存响应并立即下载；过期恢复不能自动再付费 | S1 |
+-| 字级时间戳 | 复刻音色支持，但仅流式输出 | 是输出观察能力，不是逐字控制；首版非流式不可用 | S1 |
+-
+-S1对HTTP text没有在当前页面明确给出长度硬上限；不得把S6的单次20000/累计200000字符搬作HTTP官方硬限制。首版单Window纯文本与生成后的SSML字符串各≤20000 Unicode码点，**PRODUCT_HARD_LIMIT**，待真实接口验收再调整。Plan导入体积≤1MiB、Window/anchor数量≤500也都是本地资源保护，不是模型限额。
+-
+-**transport差异**：S6的sample_rate未列12000，S1 HTTP列12000；HTTP bit_rate只在opus生效，WS说明覆盖mp3/opus。当前首版wav不发送bit_rate；Manifest分别记录transport范围，不求一个虚假的统一枚举。WS enable_ssml=true只允许一次continue-task，不影响本产品HTTP实现。
++## Naturalness First / 最小干预
+ 
+-## 声音复刻与Voice Enrollment
++优先顺序：原始连续文本与模型自然生成 → 经确认的标点/文本结构或一个极短状态 → 必要SSML结构 → 确有读错时的phoneme/hot_fix/sub/say-as → 用户明确实验的rate/pitch/多speak。不是每次依次叠满；基线较自然就保留。软件不改台词、不拆Window、不读取导演文字推参数。
+ 
+-S4 CosyVoice样本：WAV16bit/MP3/M4A；≤10MB；≤60秒，推荐10–20秒；≥16kHz；单/双声道，双声道仅首声道；至少5秒连续清晰讲话，短暂停顿≤2秒；正常语速，无背景音乐/其他人声。官方推荐时长不是产品必达硬门禁。
++每增加一个控制层，必须证明带来听感收益；“更精细”不构成收益。Window切分也可能造成接缝，不把Window边界当无风险表演工具。
+ 
+-S5：北京 customization endpoint；model=voice-enrollment、action=create_voice、target_model必须与合成模型一致、url公网可访问，prefix仅英数字且≤10字符。max_prompt_audio_length为预处理后实际取样最大时长，3–30秒，默认10；它与上传样本≤60秒不是同一限制。enable_preprocess布尔默认false；enable_volume_normalization官方是字符串"true"/"false"；不得与合成volume混用。新口播只选择已有可用复刻音色，复刻管理基础模块保留。
+-
+-## 不能精确实现与近似途径
+-
+-| 要求 | 事实/推断分类 | 处理 |
++| 复杂度 | 明确执行字段 | 生产规则 |
+ |---|---|---|
+-| 逐字连续rate/pitch曲线、某字精确F0+8% | 当前已核验API未提供此类接口，按E3处理 | 禁止wordPitch等假字段；如用户接受，可用独立范围或Window整体pitch/Instruction近似 |
+-| 局部范围快慢/音高 | S3支持并列speak各自rate/pitch，非嵌套 | E1范围参数支持；“逐字精准声学变化”仍不成立。首版候选保留，等待Spike决定，Manifest不能写模型不支持 |
+-| 逐字emotion/emphasis数值 | 未发现独立官方接口，按E3精确要求处理 | Instruction中的重点/调侃等为E2；标明近似获用户确认 |
+-| 真人状态连续、价格高潮、CTA自然、销售能量曲线 | E2导演意图，非API真实数值 | Instruction与用户确认的Window设计近似；试听判断，禁止软件给自动听感分数 |
+-| 保证每个字时长、整段精确10秒、逐词时间戳用于控制 | 无相应控制承诺 | E3；时间戳仅观察；不假称可锁时长 |
+-| [laughing]等富语言标签 | S2列明属于Qwen-Audio系列的功能 | 不能挪用到CosyVoice3.5-plus；首版拒绝这类标签 |
+-| prosody/emphasis标准SSML标签 | 本次核验的官方标签集合未列这些控制接口 | 不因W3C支持就开放；要使用必须重新核官方profile |
+-
+-E3是“当前证据下不作为可执行控制”，不是推论模型永远没有能力。模型大概率理解“轻微调侃”，不等于每次都成功或可以标成EXACT。
++| L0 | 连续纯文本、默认参数 | 首选；仍可能平读，并非保证自然 |
++| L1 | 一个极短状态或单一结构/纠音控制 | 默认可用，必要时试听 |
++| L2 | instruction+单一SSML；两类控制 | controlReason必填，说明听感收益并验证 |
++| L3 | 多speak、非默认rate/pitch/volume、长指令或三层以上控制 | HIGH；experimental=true并在软件单独明确确认，禁止默认自动编译 |
+ 
+-## 产品范围（建议值不是效果证据）
++instruction默认空；需要时加权建议≤20（汉字计2、其他码点计1），只表达一个核心状态。这是保守PRODUCT_RECOMMENDED_RANGE，不是官方限额，也未证明为最佳阈值。官方MODEL_HARD_LIMIT仍为100。20以上为PRODUCT_DISCOURAGED；仅显式实验允许，软件不截断、不改写。软件核对instructionIntentCount=0/1，但不会解析句子判断是否真正单一状态，语义质量仍由导演和用户核对。
+ 
+-PRODUCT_RECOMMENDED_RANGE：初次rate 0.9–1.1、pitch优先1、volume优先50、seed先0；instruction建议加权≤80，保留修改余量，不做硬拦截；只给关键语义停顿添加break。以上为本产品初始调试建议，没有实测最优依据；超出建议但在官方范围内应提示并允许。
++break按语义使用，优先短停顿，建议80–200ms作为初始产品假设，非最优实测范围。400ms不是常用模板。E0是明确结构，不是实际总间隙严格等于数值；自然停顿可能叠入。每个break必须人工验证自然度，超建议值应说明理由。
+ 
+-PRODUCT_HARD_LIMIT：首版wav/48000Hz；单languageHints；不接原始XML；候选Schema包含break/phoneme/say-as/sub与并列speak参数；正式启用集合待Spike决定；每个边界仅SSML或transition一种额外停顿。全部需在profile.productPolicy明确声明，与modelCapabilities分开。
++“激情→pitch升高、更快→rate升高、爆点→volume升高”禁止自动映射；这些默认是DIRECTOR INTENT。数字怎么卖与数字怎么读分开。sub仅文本别名，say-as仅读法，phoneme仅纠音，不能承担情绪/节奏/销售感；hot_fix未测试，暂不执行。
+ 
++## Model Capability与Product Recommendation
+ 
+-## R2补核与能力真值
+-
+-官方SSML明确支持sub(alias替代朗读)、连续非嵌套speak及speak级rate/pitch/volume。不能用产品暂不开启覆盖模型能力真值。[官方SSML说明](https://help.aliyun.com/zh/model-studio/ssml-latex-user-guide)。Manifest分别存modelSupport=MODEL_SUPPORTED与productPolicy.capabilityAvailability；后者为PRODUCT_ENABLED、PRODUCT_DISABLED_PENDING_VALIDATION、PRODUCT_DISABLED_OUT_OF_SCOPE或PRODUCT_UNSUPPORTED。PRODUCT_ENABLED在本设计稿只表示产品候选规则允许，不表示软件已实现或云端已实测。所有Spike结果目前NOT_RUN。
+-
+-官方文档中的历史示例、HTTP/其他接口参数命名和数值口径不可混用；实际优先级、字符边界、指令与SSML组合必须按09实测，失败不能直接抹掉官方支持项。
++| 能力 | 模型事实 | 本产品状态 | 用途/限制 |
++|---|---|---|---|
++| instruction | MODEL_SUPPORTED | PRODUCT_ENABLED、SHORT_ONLY、SINGLE_INTENT_ONLY | E2；长指令PRODUCT_DISCOURAGED，20以上需实验，不突破官方100 |
++| 单speak | MODEL_SUPPORTED | PRODUCT_ENABLED | E0结构载体，不保证活人感收益 |
++| break | MODEL_SUPPORTED | PRODUCT_ENABLED | E0结构；NATURALNESS_VALIDATION_REQUIRED，不模板化400ms |
++| 多speak | MODEL_SUPPORTED | PRODUCT_DISABLED_BY_DEFAULT | 拼接/能量断裂风险，用户显式实验可用 |
++| 局部rate/pitch | MODEL_SUPPORTED | PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE | E1参数，不自动代表销售节奏/激情/重音 |
++| sub | MODEL_SUPPORTED | PRODUCT_ENABLED_FOR_TEXT_ONLY | E0别名；本例与基线PCM一致，未区分验证 |
++| say-as | MODEL_SUPPORTED | PRODUCT_ENABLED_FOR_READING_ONLY | E0读法，有异常风险，不做数字爆点 |
++| phoneme | MODEL_SUPPORTED | PRODUCT_ENABLED_FOR_PRONUNCIATION_ONLY | E0纠音，不控制情绪/节奏/销售力 |
++| seed | MODEL_SUPPORTED | PRODUCT_ENABLED_FOR_REPRODUCIBILITY | E1；本批两次PCM一致，不跨版本保证，不提升自然度 |
++| hot_fix | MODEL_SUPPORTED | PRODUCT_DISABLED_PENDING_VALIDATION | 未测；不顺带启用 |
++
++全局rate/pitch/volume本批只验证默认1/1/50；非默认只能L3实验，并保留范围未验证事实。局部volume和连续speak+instruction未测，仍阻断。E3指没有精确执行保证，不把主观不好听改成MODEL_UNSUPPORTED。
++
++第一批人工反馈为一个音色的有限经验：纯基线相对自然但仍平读，短instruction可能表演过度，长instruction播音腔，控制叠加更做作，多speak拼接/状态断裂，局部rate/pitch增加AI感。启用结构/读法能力不等于承诺效果。
++
++技术记录：15个HTTP200、729计费字符、用量计价0.10935元；实际账户扣款未核验。Case04只本地拦截。所有原始文件永久保留，不再调用第二批。
+diff --git a/resources/real-speech-v2/docs/compiler.md b/resources/real-speech-v2/docs/compiler.md
+index e63b175..90e0464 100644
+--- a/resources/real-speech-v2/docs/compiler.md
++++ b/resources/real-speech-v2/docs/compiler.md
+@@ -1,103 +1,70 @@
+-# 当前运行说明
++# 真人口播生产规则｜R3
+ 
+-V2主体已进入第一阶段开发；本规范的Schema保持R2候选版本，能力范围待Spike冻结。导入保存、版本与本地拼接可用；待验证能力不得发真实请求。
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
+ 
+-# ChatGPT → CosyVoice执行协议编译规范｜V2设计稿
++# ChatGPT → CosyVoice执行协议编译规范
+ 
+-schema版本：2.0。profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http@1.0.0-draft.2`。输入必须为用户确认的导演稿＋Manifest＋原稿。输出严格遵守本目录schemas；本规范同时负责Schema无法表达的语义规则。
++## Naturalness First / 最小干预
+ 
+-## 编译顺序与能力分类
++优先顺序：原始连续文本与模型自然生成 → 经确认的标点/文本结构或一个极短状态 → 必要SSML结构 → 确有读错时的phoneme/hot_fix/sub/say-as → 用户明确实验的rate/pitch/多speak。不是每次依次叠满；基线较自然就保留。软件不改台词、不拆Window、不读取导演文字推参数。
+ 
+-1. 检查当前会话读取了Manifest，版本与三份文档一致；确认导演稿有明确用户确认，原文没有擅改。
+-2. 按原稿顺序提取Window及directorReference，不机械按标点再拆段。推荐以一个完整意图连续表达为单位，结构必须用户确认。
+-3. 逐项判为E0 EXACT_STRUCTURAL、E1 PARAMETER_CONTROLLED、E2 SEMANTIC_CONTROLLED或E3 UNSUPPORTED。
+-4. E0用真实break/读法/文字映射；E1用真实rate/pitch/volume/seed；E2压缩到短Instruction；E3经确认后记录近似及原始要求，否则unresolved。严禁发明wordEmotion/pitchCurve/salesPressure字段。
+-5. 生成合成纯文本及明确的读法Diff，生成受控SSML节点；完成官方和产品规则校验。
+-6. 输出唯一Plan JSON。不能混入多个协议或额外解释字段；人类说明另发。PlanId、WindowId、anchorId用简单稳定的本地标识，不凭空猜软件taskId。
++每增加一个控制层，必须证明带来听感收益；“更精细”不构成收益。Window切分也可能造成接缝，不把Window边界当无风险表演工具。
+ 
+-| 导演需求 | 编译方式 | 可信度/边界 |
++| 复杂度 | 明确执行字段 | 生产规则 |
+ |---|---|---|
+-| “这里停400ms” | ssml break节点，offset指纯文本码点位置 | E0指定插入；最终可听间隙可能含自然停顿 |
+-| “整句话稍快” | 已确认该句为完整Window则rate；否则Instruction近似或重新确认结构 | E1整体参数；不暗中拆句 |
+-| “带一点调侃” | instruction：“像熟人聊天，带一点会心笑意，别夸张。” | E2，无emotion数值 |
+-| “某一个字pitch +8%” | 无逐字精准声学接口，E3。用户接受可用Instruction强调或另建范围/Window整体参数 | 范围控制是近似，需确认；多speak范围保留为首版候选，发布决策等待Spike |
+-| “这个数字正确朗读” | cardinal/digits等say-as；格式不匹配时用确认的synthesisText转换 | E0读法结构；不要给整数自动套currency |
+-| “这个词发音错误” | 一个位置用phoneme py/cmu；全窗口一致读法用hotFix.pronunciation | E0；pronunciation不能直接当官方input字段 |
++| L0 | 连续纯文本、默认参数 | 首选；仍可能平读，并非保证自然 |
++| L1 | 一个极短状态或单一结构/纠音控制 | 默认可用，必要时试听 |
++| L2 | instruction+单一SSML；两类控制 | controlReason必填，说明听感收益并验证 |
++| L3 | 多speak、非默认rate/pitch/volume、长指令或三层以上控制 | HIGH；experimental=true并在软件单独明确确认，禁止默认自动编译 |
+ 
+-executionConfidence数组逐项记录 intentId、需求、capability、E级、实现方式、目标路径和近似确认。不用单一“最高等级”掩盖E2。E3原要求仍保留，采用的E2近似另记录。不存在的官方能力按Manifest禁止；模型支持但产品未开放也拒绝，错误类型不同。
++instruction默认空；需要时加权建议≤20（汉字计2、其他码点计1），只表达一个核心状态。这是保守PRODUCT_RECOMMENDED_RANGE，不是官方限额，也未证明为最佳阈值。官方MODEL_HARD_LIMIT仍为100。20以上为PRODUCT_DISCOURAGED；仅显式实验允许，软件不截断、不改写。软件核对instructionIntentCount=0/1，但不会解析句子判断是否真正单一状态，语义质量仍由导演和用户核对。
+ 
+-## 指令编译
++break按语义使用，优先短停顿，建议80–200ms作为初始产品假设，非最优实测范围。400ms不是常用模板。E0是明确结构，不是实际总间隙严格等于数值；自然停顿可能叠入。每个break必须人工验证自然度，超建议值应说明理由。
+ 
+-Instruction优先包含人物关系/本窗口最关键动作/一个禁止项，例如“像熟人面对手机解释，中段自然连说，句尾收稳，不播音。”不要同时塞八种矛盾情绪。不按每句硬塞重音，不自动添加口误、喘息或承诺事实。
++“激情→pitch升高、更快→rate升高、爆点→volume升高”禁止自动映射；这些默认是DIRECTOR INTENT。数字怎么卖与数字怎么读分开。sub仅文本别名，say-as仅读法，phoneme仅纠音，不能承担情绪/节奏/销售感；hot_fix未测试，暂不执行。
+ 
+-加权校验按Unicode码点遍历：Script=Han计2，其余1；不得用JavaScript UTF-16.length把emoji代理对误算成2，不自动trim、规范化、翻译或截断原始instruction。对未明确的罕见组合字符计数属于产品实现解释，云端有冲突则记录证据更新profile。官方加权≤100；产品短指令建议不另变成硬上限。
++## 编译流程
+ 
+-## 文本、SSML与纠音只有一条权威链
++1. 读取本版Profile及Schema，确认原稿和导演意图。directorReference附件可选，正常工作流为任务名称→复刻音色→粘贴Plan→导入并校验；不额外要求上传导演稿。
++2. 先编译L0基线；若已较自然，不增加控制。文本、标点、Window边界变化均要用户确认，连续表达优先；一个窗口一个连续意图，不机械拆每句。
++3. 把请求区分DIRECTOR INTENT与明确硬参数实验。“更激情、更快、更有爆点”默认意图；确需实验必须用户明确授权，不能自作主张。
++4. E0仅结构/读法，E1明确参数，E2语义近似，E3无精确接口；把不能实现的局部销售意图记在intentRanges/未解决项，别硬造参数假装落实。
++5. 每Window明确controlComplexity、naturalnessRisk、experimental、controlReason、instructionIntentCount。模型支持与产品规则都校验；L3不得自动生成，除非用户明确实验。Plan里的experimental=true不能替代软件中的独立用户确认。
++6. intentRanges只用于阅读、解释、诊断；新增pronunciationCompletenessIntent也只展示。真正执行只来自execution、ssml、hotFix、transition。请求构建器禁止读取意图文字。
++7. 输出唯一符合Schema的Plan JSON；不得混入密钥、账户endpoint、任意XML或未知参数。
+ 
+-Window.original是原稿连续片段；synthesisText是送入发音标记前的纯文本。二者不同必须textApproval列出原因和用户确认引用。**Original Text锁定不等于合成文本可以偷偷改**，Diff必须展示词/标点/数字读法的变化。
++## 复杂度一致性
+ 
+-ssml不是原始XML字符串，而是`enabled + nodes + speakSegments`。节点只允许break(offset,timeMs)、phoneme(start,end,text,alphabet,ph)、sayAs(start,end,text,interpretAs)、sub(start,end,text,alias,confirmation)。位置以synthesisText的Unicode码点计，左闭右开。每个节点text必须等于切片；范围不得重叠，break不得落在phoneme/sayAs内部。节点按位置顺序，不允许DTD、实体声明、未知标签、外部声音/BGM或更换voice属性。
++软件只按明确参数计算复杂度，不“自行导演”。非默认全局rate/pitch/volume也为L3，因为本批没有验证它们的生产自然度；seed不是表演控制层。instruction或SSML节点至少MEDIUM；L3固定HIGH。L2、L3、任何实验必须controlReason非空。超过产品推荐的长instruction属于L3实验，官方加权超过100仍绝对拒绝。
+ 
+-软件只能确定性序列化明确节点，不根据导演文字添加参数。speakSegments为空时使用单一根speak；非空时按已指定区间输出连续多个根speak。各区间必须连续完整覆盖synthesisText，start/end按码点计，每段显式提供rate/pitch/volume，禁止嵌套。节点不得跨越段边界；边界break归前段，offset=0归首段。文本及alias都必须XML转义。enabled=false时nodes和speakSegments必须都为空。break遵守Manifest范围及连续总和约束。
++一个不带节点的单根speak是结构载体，不称提升活人感。一个单speakSegments且默认参数不是多speak；两个以上为L3。三种SSML节点或三层以上控制为L3。instruction+SSML至少L2；两类节点或两个控制组至少L2。默认空instruction时instructionIntentCount=0，否则1。这个计数是编译声明，不是软件的语义判读。
+ 
+-sub只接受纯文本子内容与明确alias，必须展示实际朗读替代并确认，不能暗改原稿。其与hotFix重叠时拒绝模糊执行。连续speak和局部rate/pitch已经进入候选Schema，状态为PRODUCT_DISABLED_PENDING_VALIDATION；这不是首版排除决定。Spike听感报告及用户启用决定之前不得由正式产品执行。任意XML、DTD、未知标签仍禁止。
++## 文本与确定性序列化
+ 
+-pronunciation条目只给method=phoneme的区间说明，必须与对应节点完全一致；method=hotFix仅镜像hotFix.pronunciation。它是供人核对的非执行声明，绝不第二次应用。hotFix在已指定节点文本上可能产生覆盖冲突时拒绝；replace源须真实出现在synthesisText，重复出现会影响全窗口，必须明确确认。所有replace的预期实际朗读文本展示在预览；不允许链式/循环替换和替换XML标签。台词原稿不会被hotFix覆盖。
++Window.original原稿锁定；synthesisText不同须textApproval明确原因与用户确认。位置按Unicode码点、左闭右开计算。ssml使用enabled/nodes/speakSegments，禁任意XML/DTD/脚本/未知标签；软件仅按明确节点序列化和转义。
+ 
+-同一边界只能一种额外静默：窗口尾部break与transition.pauseMs>0冲突；首版也拒绝下一个窗口开头break与前transition双加。transition由Plan明确指定，本地插入静默只保证插入样本数，不保证两侧TTS自然静默消失。没有用户确认不能自动裁两端静音或交叉淡化。
++节点必须声明固定purpose：break=SEMANTIC_PAUSE、phoneme=PRONUNCIATION_CORRECTION、sayAs=READING_CORRECTION、sub=TEXT_CORRECTION；不能声明EMOTION/SALES。允许break(offset,timeMs)、phoneme(start,end,text,alphabet,ph)、sayAs(start,end,text,interpretAs)、sub(start,end,text,alias,confirmation)。文本切片必须一致，范围不得重叠，节点不得跨speak边界。单根speak为空segments；多段segments连续覆盖全部文本，各段明确rate/pitch/volume，不嵌套。
+ 
+-## Hash与确认记录（防止ChatGPT手算Hash）
++sub只做文本别名且明确确认；say-as只处理读法；phoneme只纠音。phoneme py=拼音声调编号，cmu支持事实保留但未实测。hot_fix支持事实保留，但NOT_RUN，不因本次用户喜欢phoneme而顺带启用。pronunciation只是镜像，不可二次应用；替换源重复/链式/节点冲突拒绝。不得用这些工具制造情绪、重音、销售力。
+ 
+-originalTextHash=SHA-256(UTF-8原样originalText)；保留换行、空格、标点、Unicode，不做NFC/CRLF转换。文件hash=SHA-256原始字节。planHash=SHA-256(RFC8785规范化整个Plan JSON)；导演稿hash=SHA-256确认文件UTF-8原样正文，建议正文不含自身hash。
++同边界不叠break与transition，不自动裁静音、交叉淡化或换音色。原始WAV及所有版本永久保留，参数正确也不保证听感自然。
+ 
+-JSON Schema只校验hash格式。首次Plan的originalTextHash可为null，导入时软件计算并展示，保存执行方案后绑定真实原稿hash；提交了错误原稿hash则拒绝。directorReference可为null，或仅声明sourceType；documentHash始终可选，不是执行门槛。附件hash只增强追溯：无附件时为declared_unverified，不伪造已核验；自愿提供附件但hash不匹配时拒绝关联该附件，Plan自身校验通过仍可执行。
++## Plan字段与示例
+ 
+-正常工作流严格保持：任务名称 → 复刻音色 → 粘贴REAL_SPEECH_EXECUTION_PLAN_V2 → 导入并校验。用户在导入确认区明确勾选“该Plan来自我已确认的导演方案”，软件建立不可变本地确认记录，包含recordId、planId/planHash、profile版本、用户声明、时间及来源类型。记录属于软件审计，不发给TTS；无附件也能完成。没有该明确声明则暂不保存执行方案，但不要求另上传导演稿。
++protocolVersion=2.1，capabilityVersion=1.0.0-draft.3。当前运行Schema位于resources/real-speech-v2/schemas，本目录有同步副本。示例位于examples；plan.json保留单一短状态演示，plan-l0-baseline.json演示首选纯文本。多speak示例明确experimental，禁止复制为默认生产模板。
+ 
+-采用[RFC8785 JCS](https://www.rfc-editor.org/rfc/rfc8785)的确定性属性排序与ECMAScript数值序列化；拒绝重复键、无效Unicode与非有限数值。旧domain canonical使用localeCompare，不直接沿用作跨环境新协议哈希。Schema参考[JSON Schema 2020-12验证规范](https://json-schema.org/draft/2020-12/json-schema-validation)；跨字段集合、真实hash、官方范围及文本覆盖仍须语义验证。
++originalTextHash可首次null，由软件计算；提供错误hash则拒绝。SHA256基于原样UTF8；planHash用确定性JCS排序，拒重复键、无效Unicode/非有限数值。不要让ChatGPT手算。导入时保存本地确认记录和Profile内容hash；历史2.0/draft.2任务可读取、试听、诊断，不自动升级执行或改音频，需重新编译并确认2.1新任务。
+ 
+-首次Plan无需软件taskId。directorReference.confirmation仅保存可选的外部声明；执行授权以本次导入软件确认记录为准，不把文件hash当身份认证。
++## Patch：一个主要变量
+ 
+-Schema底层只约束类型，不在JSON Schema中复制官方参数范围；范围全部由Manifest validator校验。发布时生成范围视图并标注profile hash，防止第二套真值。
++必须changeIsolationPolicy=ONE_PRIMARY_VARIABLE_AT_A_TIME。一次整份Patch最多改变一个主要变量族，多个目标Window也遵守。不是只数set键；ssml内break、phoneme、sub、sayAs、speak结构、局部rate、局部pitch、局部volume是不同变量；hotFix.pronunciation与hotFix.replace也分别比较。启用SSML外壳只承载一种节点时与该节点算同一变量；pronunciation镜像、textApproval、E级解释和风险标签是辅助说明，不是新的声学变量。
+ 
+-## Plan语义校验必需项
++允许步骤：先只改instruction→生成新版本→试听→仍不满意再只改break。禁止instruction+rate+pitch+break+speak一把改。若还需改复杂度/风险，ChatGPT明确提供对应元数据，软件只校验，不自动补参数或风险标签。
+ 
+-- profile ID/version存在且受信；engine model/region/transport与profile匹配；voice requirements为复刻且targetModel匹配；本地选择的voice与账号/Workspace一致，API Key和endpoint不从Plan读。
+-- protocolVersion=2.0，未知字段在每层拒绝，JSON重复键拒绝，NaN/Infinity拒绝，单协议、体积符合产品保护。
+-- windows非空；id唯一；offset连续覆盖originalText码点0到末尾，original逐字等于切片，不能错序、重叠、漏字；不重拆。
+-- 所有anchor引用真实Window。首版同一个anchor只引用一个完整Window；多个anchor可引用同Window、focus不同，测试结果以参数binding复用；空anchor列表允许，须导演确认不做试演。
+-- 可选directorReference和附件只作追溯；软件确认记录存在；textApproval涉及的替代已获确认。
+-- confidence.capability存在；E级不能把instruction标E0；每个要求的路径存在且属于本Window。nearby constraints不自动变成API字段。
+-- unresolved须真实列出Window和处理；未确认E3阻止所影响Window生成，空windowIds视为全局阻止。其他无关Window可单独生成；全篇拼接与Golden需所有阻断清除。
+-- lockedFields采用规范JSON路径并解析实际字段；originalText、hash、engine、voiceRequirements和窗口边界为结构锁，普通编辑不能解锁。窗口用户锁/Golden引用由运行时加严。
++Patch带真实taskId、basePlanId/hash、expectedVersions、targetWindowIds、lockedWindows；软件预览实际Diff再由用户确认，只改目标，不能改锁或非目标。L3/experimental修复必须额外确认风险；不是初次勾选后永久授权任意参数。display-only Patch不建生成job，明确execution变化才追加音频版本，永不覆盖旧版本。
+ 
+-## Patch规则与Diff
++## 证据与边界
+ 
+-Patch包含patchId/basePlanId/basePlanHash/taskId、capability ID/version、targetWindowIds、expectedVersions、changes、lockedWindows、diagnosis、validationFocus。changes只有windowId和typed set，可改instruction/rate/pitch/volume/seed、synthesisText及配套textApproval、SSML/pronunciation/hotFix、transition；不接受任意JSON Pointer操作。不含原稿/边界/engine/voice/anchors更新，不含软件自定修复action。
++Case01/05解码PCM一致，但用户主观认为05稍慢；同时保留，不伪造客观差异。Case11/12/16 PCM一致，接口接受不代表读法控制已区分验证。Case02/14 PCM一致只证明本批两次复现，seed不是自然度按钮。Case04只有本地101拦截，不能记成云端拒绝测试。
+ 
+-expectedVersions逐目标包含配置configRevision及当前selectedVersionId/selectedVersionHash。以配置修订防用户手改，用音频ID/hash防选中版本已变；没有音频可null/null。软件检查target集合与expected集合完全相等，changes不越权且每目标至少一项真实变化；lockedWindows不能与targets交集，真实锁集合必须与包声明一致。Patch不能靠不声明锁解锁。
+-
+-basePlanHash绑定当前冻结Plan。Patch应用产生新的Plan Revision（新planId、parentPlanId旧planId、新hash），属于局部修订，不要求ChatGPT重交全文。结构改变才由ChatGPT提交新完整Plan。前一个Patch完成后旧baseHash失效；首版严格拒绝并行陈旧Patch，不自动rebase。
+-
+-过程：只读校验 → 展示字段级Diff、受影响Window、预计重新生成范围及不变范围 → 用户点击对应按钮（说明修订仅“应用说明修订”，执行修改为“应用并生成新版本”） → 事务内再次检查base/versions/locks → 保存新PlanRevision＋Patch记录；仅实际执行修改创建唯一generation job → 提交后顺序调用目标Window TTS。云端请求不能在SQLite事务里等待。
+-
+-DB应用成功但TTS失败：新配置和失败job保留，旧选中音频仍在，界面显示新配置尚未有成功版本；不回滚历史，不假称生成完成，不自动重发unknown请求。重启后durable job和请求快照恢复。patchId重复点击返回原job状态，不创建新付费任务。
+-
+-普通人工参数编辑走相同revision/Diff/校验服务，用户保存后创建新修订；“切换选中音频”仅改变选中指针。要恢复旧参数必须单独点击“从该版本恢复配置”，形成新revision，不能默默改写草稿。
+-
+-## 诊断编译与验收
+-
+-实际诊断包必须区分current frozen Plan、当前配置草稿、选中音频实际request snapshot、历史元数据。ChatGPT不能把现在rate误当作旧WAV使用的rate。只诊断选中的全文/单段/多段；非target窗口只能列观察，不能改。
+-
+-diagnosis.evidenceBasis为audio_listened/user_feedback_only/text_only；audio_listened必须实际读到对应WAV，记录listenedVersionIds。无声音不得假称听感确定。validationFocus描述重听具体位置和目标，例如“99元是否自然清楚，CTA是否延续人物状态”，不编造自动合格分。
+-
+-示例JSON是结构演示，真实hash由本次设计验证生成；示例Patch只改GW002，不改变GW001/GW003。V2第一阶段已实现严格导入及版本框架；待Spike的字段可导入展示，真实请求被产品能力状态拦截。旧修复版2仍不能导入V2。
+-
+-
+-## 导演意图展示层与执行隔离
+-
+-Plan.intentRanges必须包含至少一个展示条目；每项含target(windowId/start/end/targetText)、emphasisTerms、humanIntent、pacingIntent、pauseIntent、emotionIntent、relationshipIntent、requestedConfidence、adoptedExecution及limitation/unresolvedItemId。target坐标基于该Window的synthesisText码点，文本必须匹配；重点词必须在target内。路径只引用该Window真实execution字段，能力与E级须与Manifest一致。E3原要求可保留，但不能伪装为已执行能力；近似路径另标E2及限制。
+-
+-usage固定DISPLAY_AND_DIAGNOSIS_ONLY。UI展示与诊断导出可以读取这些文字；请求构建器不得读取它们，也不得根据“提气”“慢一点”再次生成instruction、rate、SSML或分段。意图与参数矛盾时仅提示用户交给ChatGPT修订，不自动纠正。
+-
+-Patch.set.intentRanges仅替换对应targetWindow的展示条目，禁止改非targetWindow。修改synthesisText/SSML时，已有范围及fieldRefs重新校验，失效则拒绝Patch并要求同时修订展示条目。只改展示文字产生审计Revision和新planHash，但executionFingerprint不变，不创建generation job；按钮为“应用说明修订”。含实际执行变更才允许“应用并生成新版本”。executionFingerprint只含模型、音色实际绑定、完整实际输入及输出配置，排除intentRanges、directorReference、名称与审计时间。全Plan哈希仍包括展示层，故旧Patch的basePlanHash会失效。
++本轮产品允许sub/say-as/phoneme的限定用途，是用户生产启用决定，不是模型全部读法/发音范围验证。多speak和局部rate/pitch继续MODEL_SUPPORTED，PRODUCT_DISABLED_BY_DEFAULT；明确实验用户可用，未测hot_fix/局部volume仍阻断；连续speak+instruction组合NOT_RUN，仅明确L3实验允许，不能标为已验证。
+diff --git a/resources/real-speech-v2/docs/diagnosis.md b/resources/real-speech-v2/docs/diagnosis.md
+index b74eb95..c57ed31 100644
+--- a/resources/real-speech-v2/docs/diagnosis.md
++++ b/resources/real-speech-v2/docs/diagnosis.md
+@@ -1,3 +1,28 @@
++# 真人口播生产规则｜R3
++
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
++
++## Naturalness First / 最小干预
++
++优先顺序：原始连续文本与模型自然生成 → 经确认的标点/文本结构或一个极短状态 → 必要SSML结构 → 确有读错时的phoneme/hot_fix/sub/say-as → 用户明确实验的rate/pitch/多speak。不是每次依次叠满；基线较自然就保留。软件不改台词、不拆Window、不读取导演文字推参数。
++
++每增加一个控制层，必须证明带来听感收益；“更精细”不构成收益。Window切分也可能造成接缝，不把Window边界当无风险表演工具。
++
++| 复杂度 | 明确执行字段 | 生产规则 |
++|---|---|---|
++| L0 | 连续纯文本、默认参数 | 首选；仍可能平读，并非保证自然 |
++| L1 | 一个极短状态或单一结构/纠音控制 | 默认可用，必要时试听 |
++| L2 | instruction+单一SSML；两类控制 | controlReason必填，说明听感收益并验证 |
++| L3 | 多speak、非默认rate/pitch/volume、长指令或三层以上控制 | HIGH；experimental=true并在软件单独明确确认，禁止默认自动编译 |
++
++instruction默认空；需要时加权建议≤20（汉字计2、其他码点计1），只表达一个核心状态。这是保守PRODUCT_RECOMMENDED_RANGE，不是官方限额，也未证明为最佳阈值。官方MODEL_HARD_LIMIT仍为100。20以上为PRODUCT_DISCOURAGED；仅显式实验允许，软件不截断、不改写。软件核对instructionIntentCount=0/1，但不会解析句子判断是否真正单一状态，语义质量仍由导演和用户核对。
++
++break按语义使用，优先短停顿，建议80–200ms作为初始产品假设，非最优实测范围。400ms不是常用模板。E0是明确结构，不是实际总间隙严格等于数值；自然停顿可能叠入。每个break必须人工验证自然度，超建议值应说明理由。
++
++“激情→pitch升高、更快→rate升高、爆点→volume升高”禁止自动映射；这些默认是DIRECTOR INTENT。数字怎么卖与数字怎么读分开。sub仅文本别名，say-as仅读法，phoneme仅纠音，不能承担情绪/节奏/销售感；hot_fix未测试，暂不执行。
++
++## 现有操作说明（能力启用状态以本页上方及当前Profile为准）
++
+ # 听感诊断：软件只打包
+ 
+ 选择全篇、单Window或多选Window，填写你实际听到的问题和位置，导出诊断ZIP给ChatGPT。必须听实际WAV；未听到时只能按文本或用户反馈提出假设。
+@@ -7,3 +32,6 @@
+ Patch必须复制taskId、basePlanId/basePlanHash、targetWindowIds、expectedVersions与lockedWindows；不能猜hash，不能改非目标Window。每个Window至少一个intentRange，展示文字不能被软件用于自行生成参数。
+ 
+ 用导演词典Ctrl+F搜索“平读”“句尾”“广告腔”“价格高潮”等。软件没有自动真人感评分，听感观察也不能替代API能力证据。
++
++
++修复只改一个主要变量。诊断加入发音完成度/口语粗糙度；只保存在意图层，没有硬参数。旧2.0任务安全读取/试听/导出，不自动升级；重新编译2.1并确认新任务后执行。
+diff --git a/resources/real-speech-v2/docs/director.md b/resources/real-speech-v2/docs/director.md
+index e9e227f..492e173 100644
+--- a/resources/real-speech-v2/docs/director.md
++++ b/resources/real-speech-v2/docs/director.md
+@@ -1,529 +1,606 @@
+-# ChatGPT真人口播导演意图沟通手册｜R2可检索词典
++# 真人口播生产规则｜R3
+ 
+-适用于听得出“不对”、却不知道怎么形容的人。Ctrl+F搜索词条或听感描述；将B整句复制给ChatGPT，再补具体原句、位置及真实音频。引用COSYVOICE_CAPABILITY_PROFILE.v1.json@1.0.0-draft.2；能力尚待Spike冻结。
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
+ 
+-E0=明确结构/读法控制，不等于听感保证；E1=真实参数控制，不等于精确声学结果；E2=instruction语义近似；E3=没有精确接口。一个诉求可混合多个等级。多speak局部rate/pitch是官方支持的E1候选，待Spike验证实用性，不能提前排除。不要让软件按这些描述自行导演。
++# ChatGPT真人口播导演意图沟通手册｜可检索导演词典
+ 
+-查词顺序：速度与结构（语速、节奏、停顿、连说、留白、气口）；重点与语势（重音、句尾、反问、转折、数字爆点、价格高潮、CTA）；人物与状态（音高感觉、能量、松弛、提气、收住、压低、调侃、熟人感、专业解释、戳痛、笃定）；问题诊断（广告腔、播音腔、念稿感、AI平读感、前后人物状态不一致、咬字、尾字吞掉、强调对比）。
++Ctrl+F查词，复制B给ChatGPT。B是导演沟通，不是可原样塞入instruction的执行指令。
+ 
+-## 可直接复制的沟通模板
++## Naturalness First / 最小干预
+ 
+-“原句是【…】，问题在【…】。听起来【…】。我想要【…】，不要【…】。请先解释你理解的导演意图，区分E0/E1/E2/E3及限制，等我确认再编译Plan/Patch。不要改事实、原稿或偷偷拆Window。”
++优先顺序：原始连续文本与模型自然生成 → 经确认的标点/文本结构或一个极短状态 → 必要SSML结构 → 确有读错时的phoneme/hot_fix/sub/say-as → 用户明确实验的rate/pitch/多speak。不是每次依次叠满；基线较自然就保留。软件不改台词、不拆Window、不读取导演文字推参数。
+ 
+-下列B是导演沟通表达，不是已冻结instruction；ChatGPT确认后需压缩为符合官方字符限制的指令。各条F说明独有边界。默认不自动加喘气、口误，不对无音频作“已听到”的判断。
++每增加一个控制层，必须证明带来听感收益；“更精细”不构成收益。Window切分也可能造成接缝，不把Window边界当无风险表演工具。
++
++| 复杂度 | 明确执行字段 | 生产规则 |
++|---|---|---|
++| L0 | 连续纯文本、默认参数 | 首选；仍可能平读，并非保证自然 |
++| L1 | 一个极短状态或单一结构/纠音控制 | 默认可用，必要时试听 |
++| L2 | instruction+单一SSML；两类控制 | controlReason必填，说明听感收益并验证 |
++| L3 | 多speak、非默认rate/pitch/volume、长指令或三层以上控制 | HIGH；experimental=true并在软件单独明确确认，禁止默认自动编译 |
++
++instruction默认空；需要时加权建议≤20（汉字计2、其他码点计1），只表达一个核心状态。这是保守PRODUCT_RECOMMENDED_RANGE，不是官方限额，也未证明为最佳阈值。官方MODEL_HARD_LIMIT仍为100。20以上为PRODUCT_DISCOURAGED；仅显式实验允许，软件不截断、不改写。软件核对instructionIntentCount=0/1，但不会解析句子判断是否真正单一状态，语义质量仍由导演和用户核对。
++
++break按语义使用，优先短停顿，建议80–200ms作为初始产品假设，非最优实测范围。400ms不是常用模板。E0是明确结构，不是实际总间隙严格等于数值；自然停顿可能叠入。每个break必须人工验证自然度，超建议值应说明理由。
++
++“激情→pitch升高、更快→rate升高、爆点→volume升高”禁止自动映射；这些默认是DIRECTOR INTENT。数字怎么卖与数字怎么读分开。sub仅文本别名，say-as仅读法，phoneme仅纠音，不能承担情绪/节奏/销售感；hot_fix未测试，暂不执行。
++
++## 九个听感维度
++
++语义停顿、速度变化、重音层级、情绪变化、聊天/临场感、人物连续性、销售能量曲线、CTA自然度、发音完成度/口语粗糙度。最后一项属于E2，当前无硬参数；不念错字、不伪造参数。
+ 
+ ## D01 语速
+ 
+-A. 小白听起来：一口气太赶，或拖得像慢放。
++A. 小白听感：一口气太赶，或拖得像慢放
+ 
+-B. 直接告诉ChatGPT：“这句意思没听清，请整体稍慢，重点词保持清楚。”
++B. 直接告诉ChatGPT：这句意思没听清，请整体稍慢，重点词保持清楚。
+ 
+-C. 专业理解：单位时间音节密度；区分整体速度和局部强调。
++C. 专业理解：单位时间音节密度；区分整体速度和局部强调
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：单位时间音节密度；区分整体速度和局部强调由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：整体rate；短语明确speakSegments.rate待Spike；instruction补自然度。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：参数倍率不等于听感或精确时长倍率。
++F. 不能保证：参数倍率不等于听感或精确时长倍率；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：为了重音把整段都降速。
++G. 常见错误：为了重音把整段都降速
+ 
+ ## D02 节奏
+ 
+-A. 小白听起来：每句长短、轻重都一样，没有推进。
++A. 小白听感：每句长短、轻重都一样，没有推进
+ 
+-B. 直接告诉ChatGPT：“解释部分连起来，结论前留一下，别每逗号都停。”
++B. 直接告诉ChatGPT：解释部分连起来，结论前留一下，别每逗号都停。
+ 
+-C. 专业理解：语义组块与能量分布。
++C. 专业理解：语义组块与能量分布
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：语义组块与能量分布由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：已确认break和范围rate候选；instruction表达连说。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证完全复刻参考音频节拍。
++F. 不能保证：不能保证完全复刻参考音频节拍；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把所有标点变成固定停顿。
++G. 常见错误：把所有标点变成固定停顿
+ 
+ ## D03 停顿
+ 
+-A. 小白听起来：两层意思挤在一起，或断得支离破碎。
++A. 小白听感：两层意思挤在一起，或断得支离破碎
+ 
+-B. 直接告诉ChatGPT：“在“99元”前留一个短空隙，让价格单独被听见。”
++B. 直接告诉ChatGPT：在“99元”前留一个短空隙，让价格单独被听见。
+ 
+-C. 专业理解：语义边界与悬念留白。
++C. 专业理解：语义边界与悬念留白
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义边界与悬念留白由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E0：明确停顿结构；E2：语义气口近似；E3：精确可听总间隙不可保证。
+ 
+-E. CosyVoice路径：明确位置break；窗口间transition显式静默。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：自然语义停顿优先；必要且已确认的位置才添加短break，并人工试听；不默认400ms，不叠transition。
+ 
+-F. 不能保证：break数值不等于含自然静默的总间隙。
++F. 不能保证：break数值不等于含自然静默的总间隙；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：连续叠加break和transition。
++G. 常见错误：连续叠加break和transition
+ 
+ ## D04 重音
+ 
+-A. 小白听起来：听不出这句最重要的词。
++A. 小白听感：听不出这句最重要的词
+ 
+-B. 直接告诉ChatGPT：“重点是“不用另外买”，其他词轻一点，不要全句用力。”
++B. 直接告诉ChatGPT：重点是“不用另外买”，其他词轻一点，不要全句用力。
+ 
+-C. 专业理解：焦点对比与信息层级。
++C. 专业理解：焦点对比与信息层级
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：焦点对比与信息层级由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction E2；范围rate/pitch E1候选辅助。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：没有精准逐字力度百分比接口。
++F. 不能保证：没有精准逐字力度百分比接口；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：每个卖点都标重音。
++G. 常见错误：每个卖点都标重音
+ 
+ ## D05 句尾
+ 
+-A. 小白听起来：每句都往上飘，或突然砸下去。
++A. 小白听感：每句都往上飘，或突然砸下去
+ 
+-B. 直接告诉ChatGPT：“这句最后自然收稳，不像主持人宣布，也别吞掉尾字。”
++B. 直接告诉ChatGPT：这句最后自然收稳，不像主持人宣布，也别吞掉尾字。
+ 
+-C. 专业理解：终止调型与尾音能量。
++C. 专业理解：终止调型与尾音能量
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：终止调型与尾音能量由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction指定句尾动作。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证精确尾音F0曲线。
++F. 不能保证：不能保证精确尾音F0曲线；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：所有句尾统一压低。
++G. 常见错误：所有句尾统一压低
+ 
+ ## D06 音高感觉
+ 
+-A. 小白听起来：声音太尖、太闷，人物年龄感变了。
++A. 小白听感：声音太尖、太闷，人物年龄感变了
+ 
+-B. 直接告诉ChatGPT：“保留这个人的声音，整体少一点尖亮，别变成低沉男播音。”
++B. 直接告诉ChatGPT：保留这个人的声音，整体少一点尖亮，别变成低沉男播音。
+ 
+-C. 专业理解：感知音区与声线身份区分。
++C. 专业理解：感知音区与声线身份区分
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：感知音区与声线身份区分由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：整体pitch E1；局部pitch候选；instruction E2。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：调pitch可能影响音色感，不能保证只改音高。
++F. 不能保证：调pitch可能影响音色感，不能保证只改音高；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把温柔直接等同低pitch。
++G. 常见错误：把温柔直接等同低pitch
+ 
+ ## D07 能量
+ 
+-A. 小白听起来：有气无力，或全程像吆喝。
++A. 小白听感：有气无力，或全程像吆喝
+ 
+-B. 直接告诉ChatGPT：“开头有精神，中间解释放松，价格处提一下，再自然收住。”
++B. 直接告诉ChatGPT：开头有精神，中间解释放松，价格处提一下，再自然收住。
+ 
+-C. 专业理解：激活水平与动态对比。
++C. 专业理解：激活水平与动态对比
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：激活水平与动态对比由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；明确volume仅控制整体幅度。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：提高volume不等于兴奋或有说服力。
++F. 不能保证：提高volume不等于兴奋或有说服力；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：靠加音量修复平读。
++G. 常见错误：靠加音量修复平读
+ 
+ ## D08 松弛
+ 
+-A. 小白听起来：字字绷紧，像努力背台词。
++A. 小白听感：字字绷紧，像努力背台词
+ 
+-B. 直接告诉ChatGPT：“像给熟人解释，允许轻重变化，吐字清楚但别字字端着。”
++B. 直接告诉ChatGPT：像给熟人解释，允许轻重变化，吐字清楚但别字字端着。
+ 
+-C. 专业理解：低紧张度、自然语义连接。
++C. 专业理解：低紧张度、自然语义连接
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：低紧张度、自然语义连接由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction关系与状态。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证真实临场感或自动口误。
++F. 不能保证：不能保证真实临场感或自动口误；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把松弛写成含糊、拖音。
++G. 常见错误：把松弛写成含糊、拖音
+ 
+ ## D09 提气
+ 
+-A. 小白听起来：重要句出来时没有精神。
++A. 小白听感：重要句出来时没有精神
+ 
+-B. 直接告诉ChatGPT：“到这句精神提起来，语气更笃定，别喊，不要加喘气声。”
++B. 直接告诉ChatGPT：到这句精神提起来，语气更笃定，别喊，不要加喘气声。
+ 
+-C. 专业理解：语势启动与能量提升。
++C. 专业理解：语势启动与能量提升
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：语势启动与能量提升由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；明确范围参数可辅助。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：无可验证的真实呼吸控制接口。
++F. 不能保证：无可验证的真实呼吸控制接口；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：自动塞吸气音或一律升pitch。
++G. 常见错误：自动塞吸气音或一律升pitch
+ 
+ ## D10 收住
+ 
+-A. 小白听起来：价格说完还一路喊，听着很硬。
++A. 小白听感：价格说完还一路喊，听着很硬
+ 
+-B. 直接告诉ChatGPT：““99元”说清楚后把劲收回来，接下一句像正常提醒。”
++B. 直接告诉ChatGPT：“99元”说清楚后把劲收回来，接下一句像正常提醒。
+ 
+-C. 专业理解：高潮后能量回落。
++C. 专业理解：高潮后能量回落
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：高潮后能量回落由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；已指定下一范围rate/pitch候选。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证精确能量包络。
++F. 不能保证：不能保证精确能量包络；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把收住理解成突然静音。
++G. 常见错误：把收住理解成突然静音
+ 
+ ## D11 压低
+ 
+-A. 小白听起来：想说悄悄话，却变成闷声播音。
++A. 小白听感：想说悄悄话，却变成闷声播音
+ 
+-B. 直接告诉ChatGPT：“这句像靠近朋友提醒，少一点外放，字要清楚。”
++B. 直接告诉ChatGPT：这句像靠近朋友提醒，少一点外放，字要清楚。
+ 
+-C. 专业理解：关系距离、音区和力度联合变化。
++C. 专业理解：关系距离、音区和力度联合变化
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：关系距离、音区和力度联合变化由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction为主；pitch/volume仅明确辅助。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证耳语或某个频率下降值。
++F. 不能保证：不能保证耳语或某个频率下降值；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：只拉低pitch就当亲密感。
++G. 常见错误：只拉低pitch就当亲密感
+ 
+ ## D12 反问
+ 
+-A. 小白听起来：疑问句像陈述，或像责骂人。
++A. 小白听感：疑问句像陈述，或像责骂人
+ 
+-B. 直接告诉ChatGPT：““你是不是也这样？”是带理解的轻反问，不是质问。”
++B. 直接告诉ChatGPT：“你是不是也这样？”是带理解的轻反问，不是质问。
+ 
+-C. 专业理解：疑问语势与关系立场。
++C. 专业理解：疑问语势与关系立场
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：疑问语势与关系立场由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction指定轻反问及非责备。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证固定上扬幅度。
++F. 不能保证：不能保证固定上扬幅度；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：见问号就全部挑高喊出来。
++G. 常见错误：见问号就全部挑高喊出来
+ 
+ ## D13 转折
+ 
+-A. 小白听起来：但是前后听不出方向变化。
++A. 小白听感：但是前后听不出方向变化
+ 
+-B. 直接告诉ChatGPT：““但是”前略留一下，后面是关键解释，语气转得自然。”
++B. 直接告诉ChatGPT：“但是”前略留一下，后面是关键解释，语气转得自然。
+ 
+-C. 专业理解：语义立场切换。
++C. 专业理解：语义立场切换
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义立场切换由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：break E0加instruction E2。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证推理关系自动被模型理解。
++F. 不能保证：不能保证推理关系自动被模型理解；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：所有转折词都强重音。
++G. 常见错误：所有转折词都强重音
+ 
+ ## D14 调侃
+ 
+-A. 小白听起来：本想轻松，却听成嘲讽。
++A. 小白听感：本想轻松，却听成嘲讽
+ 
+-B. 直接告诉ChatGPT：“这句带一点会心笑意，像吐槽自己的小习惯，不笑话观众。”
++B. 直接告诉ChatGPT：这句带一点会心笑意，像吐槽自己的小习惯，不笑话观众。
+ 
+-C. 专业理解：温和幽默与目标指向。
++C. 专业理解：温和幽默与目标指向
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：温和幽默与目标指向由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction描述关系、幅度和禁止项。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不保证笑意精确或无冒犯感。
++F. 不能保证：不保证笑意精确或无冒犯感；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：只写“搞笑一点”不说笑谁。
++G. 常见错误：只写“搞笑一点”不说笑谁
+ 
+ ## D15 熟人感
+ 
+-A. 小白听起来：像客服统一话术，离人很远。
++A. 小白听感：像客服统一话术，离人很远
+ 
+-B. 直接告诉ChatGPT：“像认识很久的朋友随口分享，真诚、有分寸，别推销口吻。”
++B. 直接告诉ChatGPT：像认识很久的朋友随口分享，真诚、有分寸，别推销口吻。
+ 
+-C. 专业理解：关系距离和交流目的。
++C. 专业理解：关系距离和交流目的
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：关系距离和交流目的由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction稳定同一人物关系。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：克隆同voice不保证熟人交流感。
++F. 不能保证：克隆同voice不保证熟人交流感；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：用过度亲昵称呼假装熟悉。
++G. 常见错误：用过度亲昵称呼假装熟悉
+ 
+ ## D16 专业解释
+ 
+-A. 小白听起来：像术语堆砌，听着懂但记不住。
++A. 小白听感：像术语堆砌，听着懂但记不住
+ 
+-B. 直接告诉ChatGPT：“先把原因讲清，再给结果，语气笃定但不端着，不要念报告。”
++B. 直接告诉ChatGPT：先把原因讲清，再给结果，语气笃定但不端着，不要念报告。
+ 
+-C. 专业理解：信息层次与可信状态。
++C. 专业理解：信息层次与可信状态
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：信息层次与可信状态由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；导演确认文本本身是否清楚。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：声音无法修复事实错误或复杂原稿。
++F. 不能保证：声音无法修复事实错误或复杂原稿；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：用播音腔冒充专业。
++G. 常见错误：用播音腔冒充专业
+ 
+ ## D17 戳痛
+ 
+-A. 小白听起来：像吓唬人、指责人，观众会防御。
++A. 小白听感：像吓唬人、指责人，观众会防御
+ 
+-B. 直接告诉ChatGPT：“指出这个真实麻烦，像理解对方，不夸大后果、不制造焦虑。”
++B. 直接告诉ChatGPT：指出这个真实麻烦，像理解对方，不夸大后果、不制造焦虑。
+ 
+-C. 专业理解：问题识别与共情立场。
++C. 专业理解：问题识别与共情立场
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：问题识别与共情立场由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction及已确认真实文本。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证共鸣或合规，不能虚构痛点。
++F. 不能保证：不能保证共鸣或合规，不能虚构痛点；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把戳痛等同羞辱和恐吓。
++G. 常见错误：把戳痛等同羞辱和恐吓
+ 
+ ## D18 数字爆点
+ 
+-A. 小白听起来：数字糊过去，或被喊成夸张广告。
++A. 小白听感：数字糊过去，或被喊成夸张广告
+ 
+-B. 直接告诉ChatGPT：““99”清楚突出一次，前后留对比，别把整句都喊高。”
++B. 直接告诉ChatGPT：“99”清楚突出一次，前后留对比，别把整句都喊高。
+ 
+-C. 专业理解：数字信息焦点与对比。
++C. 专业理解：数字信息焦点与对比
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：数字信息焦点与对比由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：say-as正确读法E0；instruction E2；范围rate候选。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：销售推进放在导演意图；数字有读错才用say-as/sub纠正，不用读法标签造高潮，不升pitch/volume。
+ 
+-F. 不能保证：读对数字不等于突出或促进成交。
++F. 不能保证：读对数字不等于突出或促进成交；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：整数误用currency，或每个数字都爆。
++G. 常见错误：整数误用currency，或每个数字都爆
+ 
+ ## D19 价格高潮
+ 
+-A. 小白听起来：报价没有亮点，或者像清仓叫卖。
++A. 小白听感：报价没有亮点，或者像清仓叫卖
+ 
+-B. 直接告诉ChatGPT：“到价格精神提一下，明确报完就收住，别加虚假的惊讶。”
++B. 直接告诉ChatGPT：到价格精神提一下，明确报完就收住，别加虚假的惊讶。
+ 
+-C. 专业理解：报价段局部能量峰值。
++C. 专业理解：报价段局部能量峰值
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：报价段局部能量峰值由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；明确break与范围rate/pitch候选。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：销售推进放在导演意图；数字有读错才用say-as/sub纠正，不用读法标签造高潮，不升pitch/volume。
+ 
+-F. 不能保证：不能保证价格吸引力或转化。
++F. 不能保证：不能保证价格吸引力或转化；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：用高音量掩盖价格无竞争力。
++G. 常见错误：用高音量掩盖价格无竞争力
+ 
+ ## D20 CTA
+ 
+-A. 小白听起来：结尾突然换成主播喊下单。
++A. 小白听感：结尾突然换成主播喊下单
+ 
+-B. 直接告诉ChatGPT：“顺着刚才的话提醒看尺寸和颜色，像帮对方下一步，不催促。”
++B. 直接告诉ChatGPT：顺着刚才的话提醒看尺寸和颜色，像帮对方下一步，不催促。
+ 
+-C. 专业理解：行为引导与人物状态延续。
++C. 专业理解：行为引导与人物状态延续
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：行为引导与人物状态延续由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；明确整Window rate可辅助。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：声音不能保证点击购买。
++F. 不能保证：声音不能保证点击购买；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：每条CTA都强迫限时催单。
++G. 常见错误：每条CTA都强迫限时催单
+ 
+ ## D21 广告腔
+ 
+-A. 小白听起来：每句话都在卖，像宣传片。
++A. 小白听感：每句话都在卖，像宣传片
+ 
+-B. 直接告诉ChatGPT：“删掉表演感，像真实使用后解释给朋友，卖点有层次，不夸张。”
++B. 直接告诉ChatGPT：删掉表演感，像真实使用后解释给朋友，卖点有层次，不夸张。
+ 
+-C. 专业理解：过度商业表演与均匀强调。
++C. 专业理解：过度商业表演与均匀强调
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：过度商业表演与均匀强调由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；必要时请用户确认文本改写。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：指令不能自动消除广告式原稿。
++F. 不能保证：指令不能自动消除广告式原稿；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：只说“自然”却保留夸张叫卖文字。
++G. 常见错误：只说“自然”却保留夸张叫卖文字
+ 
+ ## D22 播音腔
+ 
+-A. 小白听起来：吐字太整齐，像新闻播报。
++A. 小白听感：吐字太整齐，像新闻播报
+ 
+-B. 直接告诉ChatGPT：“不用主持人声线，语义连起来，清楚但不字字圆满。”
++B. 直接告诉ChatGPT：不用主持人声线，语义连起来，清楚但不字字圆满。
+ 
+-C. 专业理解：朗读规范化与角色距离。
++C. 专业理解：朗读规范化与角色距离
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：朗读规范化与角色距离由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；保持同一复刻音色。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不保证彻底消除样本自带播音习惯。
++F. 不能保证：不保证彻底消除样本自带播音习惯；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把清楚吐字当成必须去掉。
++G. 常见错误：把清楚吐字当成必须去掉
+ 
+ ## D23 念稿感
+ 
+-A. 小白听起来：像沿文字往下读，没有想说给谁。
++A. 小白听感：像沿文字往下读，没有想说给谁
+ 
+-B. 直接告诉ChatGPT：“这句是回答一个具体问题，先理解对方，再把重点说出来。”
++B. 直接告诉ChatGPT：这句是回答一个具体问题，先理解对方，再把重点说出来。
+ 
+-C. 专业理解：交流目的缺失、句式等距。
++C. 专业理解：交流目的缺失、句式等距
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：交流目的缺失、句式等距由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction指定对象与动作；导演核对文本。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证生成实时思考或随机临场。
++F. 不能保证：不能保证生成实时思考或随机临场；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：自动添加嗯啊和口误。
++G. 常见错误：自动添加嗯啊和口误
+ 
+ ## D24 AI平读感
+ 
+-A. 小白听起来：强弱和句尾都相似，情绪起伏无意义。
++A. 小白听感：强弱和句尾都相似，情绪起伏无意义
+ 
+-B. 直接告诉ChatGPT：“只突出一个核心短语，其他部分自然连说，别均匀强调。”
++B. 直接告诉ChatGPT：只突出一个核心短语，其他部分自然连说，别均匀强调。
+ 
+-C. 专业理解：焦点不足或动态缺乏语义对应。
++C. 专业理解：焦点不足或动态缺乏语义对应
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：焦点不足或动态缺乏语义对应由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；显式局部speak候选作对照。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证靠参数完全修复模型平读。
++F. 不能保证：不能保证靠参数完全修复模型平读；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：叠加大量相互矛盾的情绪指令。
++G. 常见错误：叠加大量相互矛盾的情绪指令
+ 
+ ## D25 前后人物状态不一致
+ 
+-A. 小白听起来：开头像朋友，后面突然像主播。
++A. 小白听感：开头像朋友，后面突然像主播
+ 
+-B. 直接告诉ChatGPT：“全篇都是同一个人同一次解释，价格和结尾也保持同样关系。”
++B. 直接告诉ChatGPT：全篇都是同一个人同一次解释，价格和结尾也保持同样关系。
+ 
+-C. 专业理解：跨Window关系状态与音色连续。
++C. 专业理解：跨Window关系状态与音色连续
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：跨Window关系状态与音色连续由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：锁voice E0配置；统一instruction框架E2；试听拼接。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：相同voice/seed不能保证状态完全连续。
++F. 不能保证：相同voice/seed不能保证状态完全连续；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：每段换一套人物设定。
++G. 常见错误：每段换一套人物设定
+ 
+ ## D26 连说
+ 
+-A. 小白听起来：词与词总断开，意思散了。
++A. 小白听感：词与词总断开，意思散了
+ 
+-B. 直接告诉ChatGPT：“这几个词是一整个意思，中间不要额外停，讲完再换气。”
++B. 直接告诉ChatGPT：这几个词是一整个意思，中间不要额外停，讲完再换气。
+ 
+-C. 专业理解：语义组完整性。
++C. 专业理解：语义组完整性
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义组完整性由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：撤销经确认不必要break；instruction。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不能保证消除模型自然停顿。
++F. 不能保证：不能保证消除模型自然停顿；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：软件自行去标点或裁静音。
++G. 常见错误：软件自行去标点或裁静音
+ 
+ ## D27 留白
+ 
+-A. 小白听起来：关键结论没空间被听见。
++A. 小白听感：关键结论没空间被听见
+ 
+-B. 直接告诉ChatGPT：“这句结论说完留一点，让人消化，再说下一句。”
++B. 直接告诉ChatGPT：这句结论说完留一点，让人消化，再说下一句。
+ 
+-C. 专业理解：信息处理时间与节奏空间。
++C. 专业理解：信息处理时间与节奏空间
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：信息处理时间与节奏空间由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E0：明确停顿结构；E2：语义气口近似；E3：精确可听总间隙不可保证。
+ 
+-E. CosyVoice路径：明确break或transition二选一。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：自然语义停顿优先；必要且已确认的位置才添加短break，并人工试听；不默认400ms，不叠transition。
+ 
+-F. 不能保证：听觉总空隙可能包含自然静默。
++F. 不能保证：听觉总空隙可能包含自然静默；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：留白越长越认为高级。
++G. 常见错误：留白越长越认为高级
+ 
+ ## D28 笃定
+ 
+-A. 小白听起来：像试探推销，或硬装权威。
++A. 小白听感：像试探推销，或硬装权威
+ 
+-B. 直接告诉ChatGPT：“只对已确认事实说得肯定，语气稳，不加不真实保证。”
++B. 直接告诉ChatGPT：只对已确认事实说得肯定，语气稳，不加不真实保证。
+ 
+-C. 专业理解：认知立场与语气稳定。
++C. 专业理解：认知立场与语气稳定
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：认知立场与语气稳定由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：instruction；事实边界由人确认。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
+ 
+-F. 不能保证：不保证声音可信即事实正确。
++F. 不能保证：不保证声音可信即事实正确；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：用肯定语气扩大产品承诺。
++G. 常见错误：用肯定语气扩大产品承诺
+ 
+ ## D29 气口
+ 
+-A. 小白听起来：一句话像永远不呼吸，或喘得太多。
++A. 小白听感：一句话像永远不呼吸，或喘得太多
+ 
+-B. 直接告诉ChatGPT：“按完整意思分气口，不要每几个字断，也不要刻意加呼吸声。”
++B. 直接告诉ChatGPT：按完整意思分气口，不要每几个字断，也不要刻意加呼吸声。
+ 
+-C. 专业理解：语义呼吸组与连续表达。
++C. 专业理解：语义呼吸组与连续表达
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义呼吸组与连续表达由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E0：明确停顿结构；E2：语义气口近似；E3：精确可听总间隙不可保证。
+ 
+-E. CosyVoice路径：明确break与已确认Window；instruction。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：自然语义停顿优先；必要且已确认的位置才添加短break，并人工试听；不默认400ms，不叠transition。
+ 
+-F. 不能保证：没有真实肺部呼吸控制，不能保证喘息位置。
++F. 不能保证：没有真实肺部呼吸控制，不能保证喘息位置；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：把每个逗号都设为吸气。
++G. 常见错误：把每个逗号都设为吸气
+ 
+ ## D30 咬字
+ 
+-A. 小白听起来：重点词糊，或字字像教学示范。
++A. 小白听感：重点词糊，或字字像教学示范
+ 
+-B. 直接告诉ChatGPT：“只有这个词要清楚，其他词正常说，别整段变成逐字朗读。”
++B. 直接告诉ChatGPT：只有这个词要清楚，其他词正常说，别整段变成逐字朗读。
+ 
+-C. 专业理解：构音清晰度与局部焦点。
++C. 专业理解：构音清晰度与局部焦点
+ 
+-D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：构音清晰度与局部焦点由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：phoneme纠错E0；instruction清晰度E2。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先区分读错与过度咬字。真读错时用phoneme；轻读/带过仅E2意图，不故意改错字。
+ 
+-F. 不能保证：读法纠正不保证力度、音质或重音。
++F. 不能保证：读法纠正不保证力度、音质或重音；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：用拼音标注解决所有音质问题。
++G. 常见错误：用拼音标注解决所有音质问题
+ 
+ ## D31 尾字吞掉
+ 
+-A. 小白听起来：最后一个字几乎听不到。
++A. 小白听感：最后一个字几乎听不到
+ 
+-B. 直接告诉ChatGPT：“最后的“选”完整说出来，然后自然结束，不突然截断。”
++B. 直接告诉ChatGPT：最后的“选”完整说出来，然后自然结束，不突然截断。
+ 
+-C. 专业理解：终止音节完整性和下载/截断排查。
++C. 专业理解：终止音节完整性和下载/截断排查
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：终止音节完整性和下载/截断排查由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
+ 
+-E. CosyVoice路径：先核音频完整；instruction E2；不自动补字。范围参数目前待Spike；执行以明确execution字段为准。
++E. CosyVoice路径：先区分读错与过度咬字。真读错时用phoneme；轻读/带过仅E2意图，不故意改错字。
+ 
+-F. 不能保证：不能保证仅指令修复音频传输截断。
++F. 不能保证：不能保证仅指令修复音频传输截断；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
+ 
+-G. 常见误用：没检查文件就强拉音量。
++G. 常见错误：没检查文件就强拉音量
+ 
+ ## D32 强调对比
+ 
+-A. 小白听起来：两个选择像同一件事，没有区别。
++A. 小白听感：两个选择像同一件事，没有区别
++
++B. 直接告诉ChatGPT：重点是“省空间”而不是“更大”，对比清楚但别贬低别人。
++
++C. 专业理解：焦点对立与语义关系
++
++D. E级：E2：导演语义近似；E0仅明确结构/读法；E1仅用户明确参数实验；E3：不能保证逐字声学曲线或此听感每次必达。
++
++E. CosyVoice路径：先保留连续原文和标点结构；确需时仅一个极短状态。不得把本词自动换成局部rate/pitch/volume，不为精细而多speak。
++
++F. 不能保证：没有任意逐字重音标记接口；本轮纯克隆基线相对自然，复杂指令可能降低自然度。
++
++G. 常见错误：把对比双方都同样喊重
++
++## D33 发音完成度 / 口语粗糙度
++
++A. 小白听感：每个字都标准完整、像语文朗读；想轻微连读、轻读、自然带过。
++
++B. 直接告诉ChatGPT：字要读对，但别每个字都读满；保持轻微连读和口语带过，不播音。
++
++C. 专业理解：音节完成度、弱化和口语共发音，不等于读错、口音或噪声。
++
++D. E级：E2 SEMANTIC / DIRECTOR INTENT；精确逐字完成度为E3。
++
++E. CosyVoice路径：优先原始连续文本；必要时只选“自然聊天”一个短状态；保存pronunciationCompletenessIntent，软件绝不读它推参数。
++
++F. 不能保证：当前没有硬参数；不保证连读位置/弱化幅度。
++
++G. 常见错误：伪造articulation/roughness参数；故意写错字、塞口误、增加噪声。
++
++## D34 诊断式确定感
++
++A. 小白听感：像有经验的人已经看清问题，平静但非常确定；没有怒气或喊叫。
++
++B. 直接告诉ChatGPT：“你就是坚持不了”要平静确定，低表演感，别喊、别夸张重音。
++
++C. 专业理解：低激活、高确定性，稍收住且焦点清楚；这里是声音比喻。
++
++D. E级：E2；精确重音和尾音曲线为E3。
++
++E. CosyVoice路径：优先L0；必要时短instruction“平静确定。”，只此一个核心状态。
++
++F. 不能保证：instruction会改变表演，不保证更自然。
++
++G. 常见错误：同时堆反问、激情、重音、销售力；用高pitch制造确定感。
++
++## D35 节奏型销售排比
++
++A. 小白听感：称呼抓注意、答案清楚，最后短促集中收束，不是四句一样用力。
++
++B. 直接告诉ChatGPT：懒宝宝/馋宝宝提气抓注意，早上喝/中午喝回正常；最后又懒又馋，一天两杯集中收束。
++
++C. 专业理解：排比的注意—答案—收束结构；销售节奏不等于机械语速倍率。
++
++D. E级：E2意图；真实参数实验才E1；精确节拍保证E3。
++
++E. CosyVoice路径：优先整段连续文本，保留意图显示，不拆四个speak，不自动rate=0.85/1.2。
++
++F. 不能保证：当前模型可能仍平读；整段短状态未必表达所有局部意图，未解决项如实保留。
++
++G. 常见错误：把每个称呼切成独立Window或用多speak、局部rate制造销售节拍。
+ 
+-B. 直接告诉ChatGPT：“重点是“省空间”而不是“更大”，对比清楚但别贬低别人。”
++## D36 稳 → 推 → 爆 → 松
+ 
+-C. 专业理解：焦点对立与语义关系。
++A. 小白听感：配方稳、单杯价格推进、总价惊叹、最后随口卸力；高潮后立刻松。
+ 
+-D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：焦点对立与语义关系由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++B. 直接告诉ChatGPT：专研配方认真可信；一杯不到一块钱推进；99块到手100杯价格高潮；每天喝也不心疼立即松下来。
+ 
+-E. CosyVoice路径：instruction E2；显式范围参数候选。范围参数目前待Spike；执行以明确execution字段为准。
++C. 专业理解：销售能量曲线与末句关系感回落，不是四句同一种促销声。
+ 
+-F. 不能保证：没有任意逐字重音标记接口。
++D. E级：E2；精确曲线E3。
+ 
+-G. 常见误用：把对比双方都同样喊重。
++E. CosyVoice路径：优先完整价格段连续生成；保存各意图范围。不能用say-as制造高潮或pitch/volume自动上拉。
+ 
+-## 确认与诊断
++F. 不能保证：单一短instruction无法保证四段起伏，宁可保留未解决意图再试听。
+ 
+-先讨论一个主要问题，再确认导演意图及近似限制。导演确认稿可由ChatGPT输出便于人阅读，但软件导入不要求另上传文件。粘贴Plan并明确确认其来自已确认导演方案，即可建立软件确认记录。诊断必须区分实际听过音频、仅用户反馈、仅文本；同一seed不保证逐采样相同。人物状态不足时先查样本适配与指令冲突，不继续堆叠参数。
++G. 常见错误：全段保持喊卖；最后一句继续高潮；为了曲线叠多参数。
+diff --git a/resources/real-speech-v2/docs/manual.md b/resources/real-speech-v2/docs/manual.md
+index 5f70af4..72d0ae5 100644
+--- a/resources/real-speech-v2/docs/manual.md
++++ b/resources/real-speech-v2/docs/manual.md
+@@ -1,3 +1,28 @@
++# 真人口播生产规则｜R3
++
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
++
++## Naturalness First / 最小干预
++
++优先顺序：原始连续文本与模型自然生成 → 经确认的标点/文本结构或一个极短状态 → 必要SSML结构 → 确有读错时的phoneme/hot_fix/sub/say-as → 用户明确实验的rate/pitch/多speak。不是每次依次叠满；基线较自然就保留。软件不改台词、不拆Window、不读取导演文字推参数。
++
++每增加一个控制层，必须证明带来听感收益；“更精细”不构成收益。Window切分也可能造成接缝，不把Window边界当无风险表演工具。
++
++| 复杂度 | 明确执行字段 | 生产规则 |
++|---|---|---|
++| L0 | 连续纯文本、默认参数 | 首选；仍可能平读，并非保证自然 |
++| L1 | 一个极短状态或单一结构/纠音控制 | 默认可用，必要时试听 |
++| L2 | instruction+单一SSML；两类控制 | controlReason必填，说明听感收益并验证 |
++| L3 | 多speak、非默认rate/pitch/volume、长指令或三层以上控制 | HIGH；experimental=true并在软件单独明确确认，禁止默认自动编译 |
++
++instruction默认空；需要时加权建议≤20（汉字计2、其他码点计1），只表达一个核心状态。这是保守PRODUCT_RECOMMENDED_RANGE，不是官方限额，也未证明为最佳阈值。官方MODEL_HARD_LIMIT仍为100。20以上为PRODUCT_DISCOURAGED；仅显式实验允许，软件不截断、不改写。软件核对instructionIntentCount=0/1，但不会解析句子判断是否真正单一状态，语义质量仍由导演和用户核对。
++
++break按语义使用，优先短停顿，建议80–200ms作为初始产品假设，非最优实测范围。400ms不是常用模板。E0是明确结构，不是实际总间隙严格等于数值；自然停顿可能叠入。每个break必须人工验证自然度，超建议值应说明理由。
++
++“激情→pitch升高、更快→rate升高、爆点→volume升高”禁止自动映射；这些默认是DIRECTOR INTENT。数字怎么卖与数字怎么读分开。sub仅文本别名，say-as仅读法，phoneme仅纠音，不能承担情绪/节奏/销售感；hot_fix未测试，暂不执行。
++
++## 现有操作说明（能力启用状态以本页上方及当前Profile为准）
++
+ # 真人口播 V2 第一阶段使用手册
+ 
+ 1. 在“模型与 API”配置阿里云北京账户及Workspace；复刻音色沿用已有音频模块。
+@@ -11,6 +36,9 @@
+ 9. 结果未知时禁止自动重发。先尝试从已有响应恢复下载，无额外TTS请求；没有响应时先核对控制台计费，再明确允许新请求。
+ 10. 旧v1.2.9任务入口只读，不改旧数据库、不删旧WAV。
+ 
+-本阶段Capability Spike尚未运行。待验证的instruction/SSML/局部speak等保留在协议和UI，真实请求出口暂停，不能通过Plan更改Profile来解禁。测试开发使用隔离模拟音频，不能当作模型能力证据。
++第一批Spike及人工试听已完成，当前按Profile的限定用途开放；多speak/局部rate/pitch需显式实验确认，未测能力仍阻断。Profile不能由Plan改写。本轮回归使用隔离模拟音频，不调用云端。
+ 
+ 文档按钮打开独立非模态窗口，主界面继续操作。同文档复用，不同文档可并开。顶部复制全文复制原Markdown，关闭仅关闭该文档。
++
++
++修复只改一个主要变量。诊断加入发音完成度/口语粗糙度；只保存在意图层，没有硬参数。旧2.0任务安全读取/试听/导出，不自动升级；重新编译2.1并确认新任务后执行。
+diff --git a/resources/real-speech-v2/docs/template.md b/resources/real-speech-v2/docs/template.md
+index a970bff..aa53a01 100644
+--- a/resources/real-speech-v2/docs/template.md
++++ b/resources/real-speech-v2/docs/template.md
+@@ -1,74 +1,74 @@
+-# 真人带货口播台词需求模板与示例
++# 真人口播生产规则｜R3
++
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
+ 
+-profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http`；version：`1.0.0-draft.2`。一起提供Manifest和导演沟通手册。以下示例是场景化演示，不是已发布案例、成交数据或产品功效证据。
++# 真人带货口播台词需求模板与示例
+ 
+-## 可直接复制的需求模板
++## Naturalness First / 最小干预
+ 
+-```text
+-请依据我附上的COSYVOICE_CAPABILITY_PROFILE和导演沟通手册，先与我讨论怎么演。
+-第一阶段只输出人类可读《真人口播导演确认稿》，不要输出机器JSON。
+-每个要求区分E0/E1/E2/E3。无法精确实现时，告诉我如何近似、代价及是否值得继续。
+-未经我明确回复“导演稿确认”，不得编译执行协议，不要伪造模型参数。
++优先顺序：原始连续文本与模型自然生成 → 经确认的标点/文本结构或一个极短状态 → 必要SSML结构 → 确有读错时的phoneme/hot_fix/sub/say-as → 用户明确实验的rate/pitch/多speak。不是每次依次叠满；基线较自然就保留。软件不改台词、不拆Window、不读取导演文字推参数。
+ 
+-原始口播稿（原样粘贴）：
+-【粘贴全文】
++每增加一个控制层，必须证明带来听感收益；“更精细”不构成收益。Window切分也可能造成接缝，不把Window边界当无风险表演工具。
+ 
+-使用场景：【如抖音30秒商品介绍/真人面对手机/无背景音乐】
+-人物身份/关系感：【如普通店主给老客户介绍；不知道可写“请建议”】
+-整体状态：【如松弛、直接、可信，有一点兴奋但不喊】
+-活人感目标：【如像我临场回答朋友问题，不像照稿读】
+-销售感目标：【如产品理由讲清，价格被记住，最后自然提醒】
+-开头意图：【如真正发问，不是大喊吸引人】
+-中段意图：【如耐心解释，不赶】
+-价格段意图：【如数字前悬一下，数字清楚，别喊】
+-CTA意图：【如顺手提醒看链接，不催】
+-明确不要：【如播音腔/广告配音/喊麦/夸张假笑】
+-我已经知道怎么演的句子：【原文+想法；没有写“无”】
+-我不知道怎么描述的句子：【原文+听起来哪里不舒服】
+-是否允许ChatGPT建议Window：【允许建议，须我确认/不允许】
+-是否允许修改标点：【允许建议，须我确认/不允许】
+-原稿是否锁定：【锁定字词/允许建议修改，但须我确认】
+-近似方案权限：【逐项告诉我并确认，不要静默替代】
+-复刻声音说明：【已有哪个音色；没有写“暂未选定”】
+-其他事实/限制：【产品、价格、库存、承诺等必须按我提供事实】
+-```
++| 复杂度 | 明确执行字段 | 生产规则 |
++|---|---|---|
++| L0 | 连续纯文本、默认参数 | 首选；仍可能平读，并非保证自然 |
++| L1 | 一个极短状态或单一结构/纠音控制 | 默认可用，必要时试听 |
++| L2 | instruction+单一SSML；两类控制 | controlReason必填，说明听感收益并验证 |
++| L3 | 多speak、非默认rate/pitch/volume、长指令或三层以上控制 | HIGH；experimental=true并在软件单独明确确认，禁止默认自动编译 |
+ 
+-不懂“能量”可直接填“想有精神但别喊”。空项只用合理的导演建议补齐，标明待确认，不默认获得改稿或拆Window授权。原稿锁定情况下即便只改标点，也应先获用户同意；合成读法变化另行展示Diff，原文保存不改。
++instruction默认空；需要时加权建议≤20（汉字计2、其他码点计1），只表达一个核心状态。这是保守PRODUCT_RECOMMENDED_RANGE，不是官方限额，也未证明为最佳阈值。官方MODEL_HARD_LIMIT仍为100。20以上为PRODUCT_DISCOURAGED；仅显式实验允许，软件不截断、不改写。软件核对instructionIntentCount=0/1，但不会解析句子判断是否真正单一状态，语义质量仍由导演和用户核对。
+ 
+-## 已填写示例：家居用品手机口播
++break按语义使用，优先短停顿，建议80–200ms作为初始产品假设，非最优实测范围。400ms不是常用模板。E0是明确结构，不是实际总间隙严格等于数值；自然停顿可能叠入。每个break必须人工验证自然度，超建议值应说明理由。
+ 
+-原稿：“台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。”
++“激情→pitch升高、更快→rate升高、爆点→volume升高”禁止自动映射；这些默认是DIRECTOR INTENT。数字怎么卖与数字怎么读分开。sub仅文本别名，say-as仅读法，phoneme仅纠音，不能承担情绪/节奏/销售感；hot_fix未测试，暂不执行。
+ 
+-场景：竖屏短视频，店主面对手机介绍自己售卖的收纳盒；样例前提是“这套99元”和台词场景均已由用户确认，真实项目需换成真实价格和事实。
++## 复制给ChatGPT的需求模板
+ 
+-人物关系：有使用经验的店主跟老客户聊天；整体状态直接、亲近。活人感目标：第一句真的问，中段一口气讲清自己的收纳方式，价格略提精神。销售目标：知道用途和价格，愿意点开看详情。CTA不逼单。不要主持人、硬广、夸张假笑。知道怎么演：最后一句像提醒；不知道怎么描述：“99元”现在听着没有重点。允许建议Window，但必须确认；原稿字词与标点锁定；近似要求逐项确认。
++任务名称：【】
++已确认的事实/价格/产品原文：【】
++原稿（保持原文）：【】
++说话人和关系：【】
++需要改善的位置/实际听感：【】
++目标导演意图：【】
++九维重点：【语义停顿/速度变化/重音/情绪/临场感/人物连续性/销售曲线/CTA/发音完成度】
++不希望：【播音腔、刻意反问、用力过头等】
++是否真的读错字或数字：【没有就不加纠音工具】
++实验模式：【默认关闭；仅明确测试参数时开启】
+ 
+-## 第一阶段《真人口播导演确认稿》完整示例
++请先沟通导演意图，等我确认再输出Plan2.1；连续文本与L0优先。B类导演描述不得原样全部塞instruction；必要时只一个极短核心状态。输出每Window风险和理由，复杂度≥L3必须HIGH/experimental并告知风险。不要为了更快/激情/爆点擅自换成rate/pitch/volume。显示未解决的局部表演意图，不伪造实现。
+ 
+-导演稿ID：D-DEMO-001；修订1；状态：**示例，待用户确认**；profile同文档页首。整体人物：同一个店主面对一个客户连续解释。全篇方向：问→解释→价格亮点→收住提醒，不把每句都做成高潮。
++## A：诊断式确定感
+ 
+-| 顺序/原文 | 语义作用与销售目的 | 人物状态与表演 | 重点/速度/停顿/情绪 | 全篇能量/推荐Window | 执行可信度与方式 |
+-|---|---|---|---|---|---|
+-| 1 台面总是乱？ | 提问共鸣，让对方继续听 | 真发问，熟人式关注 | 重点“乱”；不急；问完稍收 | 开场中等；GW001，与中段连说 | △E2反问Instruction；重点不保证逐字精准 |
+-| 2 我把常用的小东西放进这个收纳盒，拿起来更顺手。 | 说明使用方式，讲明购买理由 | 解释自己的做法，自然往下说 | 重点“拿起来更顺手”；连贯，逗号自然；不加机械break | 稍降，保持解释；GW001 | △E2自然解释；整Window rate可E1校准 |
+-| 3 今天这套99元。 | 价格信息与转化亮点 | 稍提精神，笃定但不喊 | 重点“99元”；数字读九十九；不拉长；价格前按需要短停 | 全篇相对高点；GW002 | ✅E0 cardinal读法；△E2数字重点；⚠独立Window有接缝代价 |
+-| 4 想看尺寸和颜色，点开商品链接慢慢选。 | 引导看详情，减少催单感 | 熟人提醒，收住 | 重点“尺寸和颜色”；自然稍收；不突然升音量 | 回落；GW003 | △E2克制提醒；✅整体rate E1只能整段 |
++少吃多动，谁不知道？
++问题是——
++你就是坚持不了。
+ 
+-锚点建议：A-OPEN引用GW001检验反问与聊天关系；A-PRICE引用GW002检验价格清晰和力度；A-CTA引用GW003检验收尾自然。此样例三个锚点只是台词需要，规则不强制三个。GW001完整保留反问和解释，避免每句独立导致人物重新起步。
++意图：像看清问题的人平静确定，低表演感，不责备、不喊。不为了反问与确定感堆强重音。首选整段原文L0；必要时仅“平静确定。”L1/E2，是否改善由试听决定。不能保证局部反问和最后重点都精确实现。
+ 
+-近似与待确认：数字重点只有语义指导，不是指定某字音高/力度；多Window不会共享模型隐藏状态，连续性需要用户听接缝。若用户更重连续感，可建议整篇一个Window，但需重新确认，软件不能自行改。
++## B：节奏型销售排比
+ 
+-确认栏：原稿锁定是否认可；Window是否认可；近似是否接受；anchor范围是否认可。收到“导演稿确认”后，记录用户确认文本及导演稿版本，再进入第二阶段。
++懒宝宝，早上喝。
++馋宝宝，中午喝。
++又懒、又馋——
++一天两杯。
+ 
+-## 与机器编译的交接
++导演意图：称呼抓注意/答案清楚；再次提气/回正常；最后快速集中收束。该节奏结构属意图，不能机械编译rate=0.85/1.2，也不切成四个speak。优先一个连续Window/L0，意图分范围显示；模型仍可能平读，记录待解决而非叠参数。
+ 
+-人类导演稿保存原文、逐块意图、Window和anchor建议以及E3处理。ChatGPT编译时引用确认稿ID/hash/确认记录。没有确认的E3不能偷偷写成已解决；影响目标Window的unresolved阻止其生成。后续修改台词或Window结构需要新的导演确认和Plan Revision，不能让局部Patch越权。
++## C：稳 → 推 → 爆 → 松
+ 
++专研配方，一杯不到一块钱。
++99块到手100杯。
++每天喝，也不心疼。
+ 
+-## R2评审修订（替代旧稿中冲突的准入与开发顺序）
++导演意图：“专研配方”稳/可信；“一杯不到一块钱”推动；“99块到手100杯”价格高潮；末句立即卸力像随口告诉你。最后一句不继续高潮。数字读法正确则不加say-as/sub，数字怎么卖不等于怎么读。优先整段L0；销售曲线E2，无精确硬参数，不把四句全部编译成促销声。
+ 
+-软件最短工作流：任务名称 → 复刻音色 → 粘贴Plan → 导入并校验。用户声明Plan来自已确认导演方案后，软件创建自己的确认记录；导演稿附件及documentHash均可选，不能强制上传。导演沟通阶段仍需确认方向，但这不是软件额外文件门槛。
++## 反馈与修复模板
+ 
+-开发顺序改为：R2设计评审 → 用户第二次确认 → 逐项明确批准付费Spike范围/请求上限/预算上限 → 隔离的Capability Spike → 效果报告及产品启用决策 → 一起冻结Capability Profile、Plan V2、Patch V2 → 获得正式开发授权后开始V2运行源码开发。设计批准不等于API扣费批准，也不等于正式开发批准。本轮没有进入Spike执行。
++当前Window/选中版本：【】
++我真实听到：【位置+现象】
++想保留：【人物状态/自然度】
++这一次只改变：【instruction 或 break 或 一种纠音工具等一个主要变量】
++请输出Patch2.1，changeIsolationPolicy=ONE_PRIMARY_VARIABLE_AT_A_TIME，展示Diff，保持lockedWindows和非目标不变。修改后追加版本，试听再决定下一个变化。不要一次改instruction+rate+pitch+break+speak。
+ 
+-intentRanges用于展示和诊断；软件不自行导演。候选SSML包含sub及连续speak局部rate/pitch；正式是否启用由Spike判断，不能预先排除。仅说明变更不重新生成；实际execution变更才创建生成任务。文档查看器继续采用08的独立non-modal BrowserWindow设计，新增词典和Spike帮助资料统一进入documentId注册表，全文复制原始Markdown。
++以上是声音方向示例，不是产品事实背书；原文事实由用户确认。本轮不再调用云端API，不执行第二批。
+diff --git a/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json b/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
+index 3df1941..2d9bdf3 100644
+--- a/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
++++ b/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
+@@ -8,7 +8,7 @@
+       "const": "REAL_SPEECH_EXECUTION_PATCH_V2"
+     },
+     "protocolVersion": {
+-      "const": "2.0"
++      "const": "2.1"
+     },
+     "patchId": {
+       "type": "string",
+@@ -145,6 +145,34 @@
+                   "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/intentRange"
+                 },
+                 "minItems": 0
++              },
++              "controlComplexity": {
++                "type": "string",
++                "enum": [
++                  "L0",
++                  "L1",
++                  "L2",
++                  "L3"
++                ]
++              },
++              "naturalnessRisk": {
++                "type": "string",
++                "enum": [
++                  "LOW",
++                  "MEDIUM",
++                  "HIGH"
++                ]
++              },
++              "experimental": {
++                "type": "boolean"
++              },
++              "controlReason": {
++                "type": "string"
++              },
++              "instructionIntentCount": {
++                "type": "integer",
++                "minimum": 0,
++                "maximum": 1
+               }
+             },
+             "required": [],
+@@ -222,7 +250,8 @@
+                   "speakerContinuity",
+                   "advertisingBroadcastTone",
+                   "salesDrive",
+-                  "ctaNaturalness"
++                  "ctaNaturalness",
++                  "pronunciationCompleteness"
+                 ]
+               },
+               "observation": {
+@@ -278,6 +307,9 @@
+         "additionalProperties": false
+       },
+       "minItems": 1
++    },
++    "changeIsolationPolicy": {
++      "const": "ONE_PRIMARY_VARIABLE_AT_A_TIME"
+     }
+   },
+   "required": [
+@@ -294,8 +326,9 @@
+     "changes",
+     "lockedWindows",
+     "diagnosis",
+-    "validationFocus"
++    "validationFocus",
++    "changeIsolationPolicy"
+   ],
+   "additionalProperties": false,
+-  "$comment": "R2: intentRanges replacement is limited to the same targeted window; display-only changes cannot create paid jobs."
++  "$comment": "R3 naturalness policy; explicit parameters only; no intent text inference. Old 2.0 is read-only, no automatic reinterpretation."
+ }
+diff --git a/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json b/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
+index fe00eff..72e1743 100644
+--- a/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
++++ b/resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
+@@ -8,7 +8,7 @@
+       "const": "REAL_SPEECH_EXECUTION_PLAN_V2"
+     },
+     "protocolVersion": {
+-      "const": "2.0"
++      "const": "2.1"
+     },
+     "capabilityProfileId": {
+       "type": "string",
+@@ -243,5 +243,5 @@
+     "intentRanges"
+   ],
+   "additionalProperties": false,
+-  "$comment": "R2 candidate: interpretation-only intentRanges never becomes API input; freeze after spike."
++  "$comment": "R3 naturalness policy; explicit parameters only; no intent text inference. Old 2.0 is read-only, no automatic reinterpretation."
+ }
+diff --git a/resources/real-speech-v2/schemas/common.schema.json b/resources/real-speech-v2/schemas/common.schema.json
+index 651bc52..ea3c2f4 100644
+--- a/resources/real-speech-v2/schemas/common.schema.json
++++ b/resources/real-speech-v2/schemas/common.schema.json
+@@ -159,12 +159,16 @@
+                   },
+                   "timeMs": {
+                     "type": "integer"
++                  },
++                  "purpose": {
++                    "const": "SEMANTIC_PAUSE"
+                   }
+                 },
+                 "required": [
+                   "kind",
+                   "offset",
+-                  "timeMs"
++                  "timeMs",
++                  "purpose"
+                 ],
+                 "additionalProperties": false
+               },
+@@ -196,6 +200,9 @@
+                   "ph": {
+                     "type": "string",
+                     "minLength": 1
++                  },
++                  "purpose": {
++                    "const": "PRONUNCIATION_CORRECTION"
+                   }
+                 },
+                 "required": [
+@@ -204,7 +211,8 @@
+                   "end",
+                   "text",
+                   "alphabet",
+-                  "ph"
++                  "ph",
++                  "purpose"
+                 ],
+                 "additionalProperties": false
+               },
+@@ -228,6 +236,9 @@
+                   },
+                   "interpretAs": {
+                     "type": "string"
++                  },
++                  "purpose": {
++                    "const": "READING_CORRECTION"
+                   }
+                 },
+                 "required": [
+@@ -235,7 +246,8 @@
+                   "start",
+                   "end",
+                   "text",
+-                  "interpretAs"
++                  "interpretAs",
++                  "purpose"
+                 ],
+                 "additionalProperties": false
+               },
+@@ -263,6 +275,9 @@
+                   },
+                   "confirmation": {
+                     "$ref": "#/$defs/confirmation"
++                  },
++                  "purpose": {
++                    "const": "TEXT_CORRECTION"
+                   }
+                 },
+                 "required": [
+@@ -271,7 +286,8 @@
+                   "end",
+                   "text",
+                   "alias",
+-                  "confirmation"
++                  "confirmation",
++                  "purpose"
+                 ],
+                 "additionalProperties": false
+               }
+@@ -642,6 +658,34 @@
+           },
+           "minItems": 0,
+           "uniqueItems": true
++        },
++        "controlComplexity": {
++          "type": "string",
++          "enum": [
++            "L0",
++            "L1",
++            "L2",
++            "L3"
++          ]
++        },
++        "naturalnessRisk": {
++          "type": "string",
++          "enum": [
++            "LOW",
++            "MEDIUM",
++            "HIGH"
++          ]
++        },
++        "experimental": {
++          "type": "boolean"
++        },
++        "controlReason": {
++          "type": "string"
++        },
++        "instructionIntentCount": {
++          "type": "integer",
++          "minimum": 0,
++          "maximum": 1
+         }
+       },
+       "required": [
+@@ -657,7 +701,12 @@
+         "hotFix",
+         "transition",
+         "executionConfidence",
+-        "lockedFields"
++        "lockedFields",
++        "controlComplexity",
++        "naturalnessRisk",
++        "experimental",
++        "controlReason",
++        "instructionIntentCount"
+       ],
+       "additionalProperties": false
+     },
+@@ -824,6 +873,10 @@
+         },
+         "unresolvedItemId": {
+           "$ref": "#/$defs/nullableId"
++        },
++        "pronunciationCompletenessIntent": {
++          "type": "string",
++          "description": "E2 display/diagnosis-only; never read by request builder"
+         }
+       },
+       "required": [
+@@ -844,5 +897,5 @@
+       "additionalProperties": false
+     }
+   },
+-  "$comment": "Design revision R2; not frozen. Director attachment optional. SSML candidates await Capability Spike. Model ranges remain Manifest-owned."
++  "$comment": "R3 naturalness policy; explicit parameters only; no intent text inference. Old 2.0 is read-only, no automatic reinterpretation."
+ }
+diff --git a/scripts/test-real-speech-ui.tsx b/scripts/test-real-speech-ui.tsx
+index 98834ce..fc13dce 100644
+--- a/scripts/test-real-speech-ui.tsx
++++ b/scripts/test-real-speech-ui.tsx
+@@ -4,8 +4,11 @@ import assert from "node:assert/strict";
+ import { readFileSync } from "node:fs";
+ import Page from "../src/features/realSpeech/Page.tsx";
+ const plan = JSON.parse(
+-  readFileSync("docs/real-speech-v2-design-r2/examples/plan.json", "utf8"),
++  readFileSync("resources/real-speech-v2/examples/plan.json", "utf8"),
+ );
++plan.intentRanges[0].pronunciationCompletenessIntent =
++  "轻读与自然带过，不改变正确读法";
++let previewPlan = plan;
+ let task: any = {
+   taskId: "ui-task",
+   name: "V2界面任务",
+@@ -58,7 +61,7 @@ Object.assign(window, {
+           return true;
+         case "preview":
+           return {
+-            plan,
++            plan: previewPlan,
+             planHash: "hash",
+             pending: plan.windows.map((w: any) => ({
+               windowId: w.windowId,
+@@ -67,6 +70,8 @@ Object.assign(window, {
+           };
+         case "import":
+           assert.equal(p.confirmed, true);
++          if (previewPlan.windows.some((w: any) => w.experimental))
++            assert.equal(p.experimentalConfirmed, true);
+           return structuredClone(task);
+         case "mutate": {
+           const w = task.windows.find((w: any) => w.windowId === p.windowId);
+@@ -89,9 +94,12 @@ Object.assign(window, {
+             diff: [{ field: "instruction", before: "旧", after: "新" }],
+             generateIds: ["GW002"],
+             previewHash: "preview",
++            primaryVariables: ["instruction"],
++            experimentalRequired: true,
+           };
+         case "patchApply":
+           assert.equal(p.confirmed, true);
++          assert.equal(p.experimentalConfirmed, true);
+           return {
+             task,
+             job: {
+@@ -163,6 +171,9 @@ await act(async () => confirm.click());
+ await click("保存执行方案");
+ assert.equal(document.querySelectorAll(".rs-v2-window").length, 3);
+ assert.ok(document.body.textContent?.includes("导演意图（只读）"));
++assert.ok(
++  document.body.textContent?.includes("发音完成度 / 口语粗糙度（E2，仅展示）"),
++);
+ await click("生成新音频版本", document.querySelector(".rs-v2-window")!);
+ assert.ok(document.body.textContent?.includes("等待Capability Spike验证"));
+ assert.deepEqual(
+@@ -185,6 +196,12 @@ await act(async () =>
+     card.querySelectorAll("input[type=checkbox]")[1] as HTMLInputElement
+   ).click(),
+ );
++assert.equal(apply.disabled, true, "普通Diff确认不能替代实验确认");
++await act(async () =>
++  (
++    card.querySelectorAll("input[type=checkbox]")[2] as HTMLInputElement
++  ).click(),
++);
+ await click("应用并生成新版本", card);
+ assert.equal(
+   calls.find((c) => c.action.endsWith(":patchApply")).p.windowId,
+@@ -213,6 +230,29 @@ assert.deepEqual(
+ await click("旧v1.2.9任务（只读）");
+ await click("旧任务只读");
+ assert.ok(document.body.textContent?.includes("旧数据库和原始音频保留"));
++previewPlan = JSON.parse(
++  readFileSync(
++    "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
++    "utf8",
++  ),
++);
++await change(
++  document.querySelector(".rs-v2-import textarea")!,
++  JSON.stringify(previewPlan),
++);
++await click("导入并校验方案");
++const experimentSave = [...document.querySelectorAll("button")].find(
++  (b) => b.textContent === "保存执行方案",
++)!;
++const importChecks = document.querySelectorAll<HTMLInputElement>(
++  ".rs-v2-import input[type=checkbox]",
++);
++assert.equal(importChecks.length, 2);
++await act(async () => importChecks[0].click());
++assert.equal(experimentSave.disabled, true, "普通导演确认不等于实验开启");
++await act(async () => importChecks[1].click());
++assert.equal(experimentSave.disabled, false);
++await click("保存执行方案");
+ await act(async () => root.unmount());
+ fail = true;
+ const second = createRoot(document.getElementById("root")!);
+diff --git a/scripts/test-v2-workflow-ui.tsx b/scripts/test-v2-workflow-ui.tsx
+index 2b804b2..5871743 100644
+--- a/scripts/test-v2-workflow-ui.tsx
++++ b/scripts/test-v2-workflow-ui.tsx
+@@ -10,7 +10,7 @@ const service = new RealSpeechV2Service(
+   mkdtempSync(join(tmpdir(), "ctg-v2-ui-workflow-")),
+ );
+ const plan = JSON.parse(
+-  readFileSync("docs/real-speech-v2-design-r2/examples/plan.json", "utf8"),
++  readFileSync("resources/real-speech-v2/examples/plan.json", "utf8"),
+ );
+ const fake = async (_body: any, path: string) => {
+   const n = 2400,
+@@ -139,7 +139,7 @@ const before = structuredClone(t.plan.windows[0]);
+ await click("锁定Window", card(0));
+ t = service.get(t.taskId);
+ const patch = JSON.parse(
+-  readFileSync("docs/real-speech-v2-design-r2/examples/patch.json", "utf8"),
++  readFileSync("resources/real-speech-v2/examples/patch.json", "utf8"),
+ );
+ patch.taskId = t.taskId;
+ patch.basePlanId = t.plan.planId;
+diff --git a/src/features/realSpeech/Page.tsx b/src/features/realSpeech/Page.tsx
+index 43aea9f..f93d5f4 100644
+--- a/src/features/realSpeech/Page.tsx
++++ b/src/features/realSpeech/Page.tsx
+@@ -31,6 +31,7 @@ export default function Page() {
+     ),
+     [preview, setPreview] = useState<Obj | null>(null),
+     [attested, setAttested] = useState(false),
++    [experimentalConfirmed, setExperimentalConfirmed] = useState(false),
+     [selected, setSelected] = useState<string[]>([]),
+     [feedback, setFeedback] = useState(""),
+     [goldenConfirmed, setGoldenConfirmed] = useState(false),
+@@ -119,8 +120,8 @@ export default function Page() {
+       )}
+       {notice && <p role="status">{notice}</p>}
+       <p className="rs-v2-note">
+-        软件只校验、执行和保留版本。待验证能力保留在Plan，真实生成出口等待Capability
+-        Spike。
++        自然度优先：默认连续文本和最少控制。短指令只表达一个状态；停顿服务语义。
++        多speak、局部rate/pitch及复杂叠加仅用于明确实验，软件不根据导演文字推导参数。
+       </p>
+       <section className="rs-v2-import">
+         <h3>导入执行方案</h3>
+@@ -155,6 +156,7 @@ export default function Page() {
+               setText(e.target.value);
+               setPreview(null);
+               setAttested(false);
++              setExperimentalConfirmed(false);
+             }}
+             rows={9}
+             spellCheck={false}
+@@ -182,7 +184,12 @@ export default function Page() {
+             <pre>{preview.plan.originalText}</pre>
+             {preview.pending.map((w: Obj) => (
+               <p key={w.windowId}>
+-                {w.windowId} 待验证：{w.capabilities.join("、") || "无"}
++                {w.windowId} · {w.controlComplexity} · 风险{" "}
++                {w.minimumNaturalnessRisk} · 待验证：
++                {w.capabilities.join("、") || "无"}
++                {(w.warnings || []).map((message: string) => (
++                  <span key={message}> · {message}</span>
++                ))}
+               </p>
+             ))}
+             <label>
+@@ -194,8 +201,25 @@ export default function Page() {
+               该Plan来自我已确认的导演方案
+             </label>
+             <p>导演稿附件可选，无需另上传。</p>
++            {preview.plan.windows.some((w: Obj) => w.experimental) && (
++              <label>
++                <input
++                  type="checkbox"
++                  checked={experimentalConfirmed}
++                  onChange={(e) => setExperimentalConfirmed(e.target.checked)}
++                />
++                我明确开启实验模式：该控制曾增加AI/TTS感或拼接感，仅用于实验
++              </label>
++            )}
+             <button
+-              disabled={busy || !attested || !name.trim() || !voiceRef}
++              disabled={
++                busy ||
++                !attested ||
++                !name.trim() ||
++                !voiceRef ||
++                (preview.plan.windows.some((w: Obj) => w.experimental) &&
++                  !experimentalConfirmed)
++              }
+               onClick={() =>
+                 run(async () => {
+                   const t = await api<Obj>("import", {
+@@ -203,6 +227,7 @@ export default function Page() {
+                     voiceRef,
+                     text,
+                     confirmed: attested,
++                    experimentalConfirmed,
+                   });
+                   setOld(null);
+                   setPreview(null);
+@@ -426,7 +451,7 @@ export default function Page() {
+                   导出所选Window诊断ZIP
+                 </button>
+                 <p>
+-                  包含WAV、Plan、当前参数、真实生成参数与选中版本；软件不自行诊断。
++                  包含WAV、Plan、当前参数、真实生成参数、选中版本与控制风险。请反馈语义停顿、重点、人物连续性、销售节奏、发音完成度/口语粗糙度；软件只打包，不自行诊断。
+                 </p>
+               </section>
+               <section>
+@@ -507,6 +532,7 @@ function WindowCard({
+   const [patch, setPatch] = useState(""),
+     [diff, setDiff] = useState<Obj | null>(null),
+     [confirmed, setConfirmed] = useState(false),
++    [experimentApproved, setExperimentApproved] = useState(false),
+     [a, setA] = useState(""),
+     [b, setB] = useState("");
+   const params = {
+@@ -517,6 +543,7 @@ function WindowCard({
+   useEffect(() => {
+     setDiff(null);
+     setConfirmed(false);
++    setExperimentApproved(false);
+   }, [task.planHash, task.taskRevision]);
+   const notes = task.plan.intentRanges.filter(
+     (n: Obj) => n.target.windowId === config.windowId,
+@@ -554,6 +581,12 @@ function WindowCard({
+             <p>
+               情绪：{n.emotionIntent}；关系：{n.relationshipIntent}
+             </p>
++            {n.pronunciationCompletenessIntent && (
++              <p>
++                发音完成度 / 口语粗糙度（E2，仅展示）：
++                {n.pronunciationCompletenessIntent}
++              </p>
++            )}
+             <p>
+               执行路径：
+               {n.adoptedExecution
+@@ -647,6 +680,23 @@ function WindowCard({
+           </div>
+         ))}
+       <h5>音频版本（时间倒序，原始文件保留）</h5>
++      <p>
++        控制复杂度：{config.controlComplexity || "旧协议未标注"} · 自然度风险：
++        {config.naturalnessRisk || "未标注"} · {config.controlReason}
++      </p>
++      {config.controlComplexity === "L3" && (
++        <p role="note">
++          该控制在第一批真实听感测试中曾明显增加AI/TTS感或拼接感，建议仅用于实验。
++        </p>
++      )}
++      {config.ssml.nodes.some((n: Obj) => n.kind === "break") && (
++        <p>
++          停顿必须首先服务语义；默认优先短停顿，400ms不是常用模板值。请人工验证自然度。
++        </p>
++      )}
++      <p>
++        参数修复一次只改变一个主要变量；“激情/更快/价格爆点”默认是导演意图，不能机械换成pitch/rate/volume。纠音标签只用于读法。
++      </p>
+       {versions.length === 0 && <p>尚无音频版本</p>}
+       {versions.map((v: Obj) => (
+         <div key={v.versionId} className="rs-v2-version">
+@@ -724,6 +774,7 @@ function WindowCard({
+             setPatch(e.target.value);
+             setDiff(null);
+             setConfirmed(false);
++            setExperimentApproved(false);
+           }}
+           rows={5}
+           placeholder="REAL_SPEECH_EXECUTION_PATCH_V2"
+@@ -752,6 +803,21 @@ function WindowCard({
+             {diff.generateIds.join("、") || "无（仅说明修订）"}
+           </p>
+           <pre>{dump(diff.diff)}</pre>
++          <p>
++            主要变量：
++            {(diff.primaryVariables || []).join("、") || "无（只改说明）"}
++            ；重新试听后再改变下一个变量。
++          </p>
++          {diff.experimentalRequired && (
++            <label>
++              <input
++                type="checkbox"
++                checked={experimentApproved}
++                onChange={(e) => setExperimentApproved(e.target.checked)}
++              />
++              我确认本次实验修复可能增加AI/TTS感或拼接感
++            </label>
++          )}
+           <label>
+             <input
+               type="checkbox"
+@@ -761,13 +827,19 @@ function WindowCard({
+             我确认以上Diff及目标范围
+           </label>
+           <button
+-            disabled={busy || !confirmed || state.locked}
++            disabled={
++              busy ||
++              !confirmed ||
++              state.locked ||
++              (diff.experimentalRequired && !experimentApproved)
++            }
+             onClick={() =>
+               run(() =>
+                 api("patchApply", {
+                   ...params,
+                   text: patch,
+                   confirmed,
++                  experimentalConfirmed: experimentApproved,
+                   previewHash: diff.previewHash,
+                 }),
+               )
+diff --git a/src/main/realSpeech/v2/service.ts b/src/main/realSpeech/v2/service.ts
+index 89cd8b3..23eca8f 100644
+--- a/src/main/realSpeech/v2/service.ts
++++ b/src/main/realSpeech/v2/service.ts
+@@ -31,6 +31,7 @@ import {
+   resolvePointer,
+ } from "./validator.ts";
+ import { buildRequest } from "./request.ts";
++import { controlAssessment, primaryVariableDiff } from "./productionPolicy.ts";
+ const exec = promisify(execFile);
+ const now = () => new Date().toISOString();
+ type Adapter = (body: Obj, path: string) => Promise<Obj>;
+@@ -190,6 +191,10 @@ export class RealSpeechV2Service {
+       pending: plan.windows.map((w: Obj) => ({
+         windowId: w.windowId,
+         capabilities: this.validator.pending(w),
++        ...controlAssessment(
++          w,
++          this.validator.profile.productPolicy.productionRules,
++        ),
+       })),
+     };
+   }
+@@ -198,6 +203,13 @@ export class RealSpeechV2Service {
+       throw Error("请填写任务名称并选择复刻音色");
+     if (p.confirmed !== true) throw Error("请明确确认Plan来自已确认导演方案");
+     const plan = structuredClone(this.preview(p.text).plan);
++    if (
++      plan.windows.some((w: Obj) => w.experimental) &&
++      p.experimentalConfirmed !== true
++    )
++      throw Error(
++        "实验方案须用户在软件中明确开启实验模式；Plan中的true不能替代用户确认",
++      );
+     plan.originalTextHash = sha256(plan.originalText);
+     const voiceBinding = this.app ? this.binding(p.voiceRef) : null;
+     if (
+@@ -218,6 +230,20 @@ export class RealSpeechV2Service {
+       createdAt: now(),
+       profileHash: planHash(this.validator.profile),
+       profileSnapshot: structuredClone(this.validator.profile),
++      experimentalApproval: plan.windows.some((w: Obj) => w.experimental)
++        ? {
++            enabled: true,
++            at: now(),
++            source: "local_user_explicit_experiment",
++            planHash: ph,
++            windows: plan.windows
++              .filter((w: Obj) => w.experimental)
++              .map((w: Obj) => ({
++                windowId: w.windowId,
++                configHash: planHash(w),
++              })),
++          }
++        : null,
+       confirmation: {
+         recordId: randomUUID(),
+         at: now(),
+@@ -468,6 +494,7 @@ export class RealSpeechV2Service {
+     const next = structuredClone(t.plan),
+       diff: Obj[] = [],
+       generateIds: string[] = [];
++    const primaryVariables = new Set<string>();
+     for (const ch of patch.changes) {
+       const { w, v } = this.selected(t, ch.windowId),
+         expect = patch.expectedVersions.find(
+@@ -574,15 +601,27 @@ export class RealSpeechV2Service {
+         });
+       }
+       if (!changed) throw Error("Patch没有真实变化");
++      for (const variable of primaryVariableDiff(t.plan.windows[index], config))
++        primaryVariables.add(variable);
+       if (before !== this.executionFingerprint(t, config))
+         generateIds.push(ch.windowId);
+     }
++    if (primaryVariables.size > 1)
++      throw Error(
++        "ONE_PRIMARY_VARIABLE_AT_A_TIME：一次Patch只能改变一个主要变量，实际为" +
++          [...primaryVariables].join("、"),
++      );
+     this.validator.validate(next);
+     return {
+       patch,
+       next,
+       diff,
+       generateIds,
++      primaryVariables: [...primaryVariables],
++      experimentalRequired: targets.some(
++        (id: string) =>
++          next.windows.find((w: Obj) => w.windowId === id)?.experimental,
++      ),
+       previewHash: planHash({ patch, next, revision: t.taskRevision }),
+       taskRevision: t.taskRevision,
+     };
+@@ -603,6 +642,8 @@ export class RealSpeechV2Service {
+       };
+     }
+     const preview = this.previewPatch(p);
++    if (preview.experimentalRequired && p.experimentalConfirmed !== true)
++      throw Error("实验修复须在软件中明确确认实验风险");
+     if (preview.previewHash !== p.previewHash)
+       throw Error("Diff已过期，请重新预览");
+     const t = this.get(p.taskId);
+@@ -611,6 +652,28 @@ export class RealSpeechV2Service {
+     next.planId = randomUUID();
+     t.plan = next;
+     t.planHash = planHash(next);
++    if (preview.experimentalRequired)
++      t.experimentalApproval = {
++        enabled: true,
++        at: now(),
++        source: "local_user_explicit_patch_experiment",
++        planHash: t.planHash,
++        windows: [
++          ...(t.experimentalApproval?.windows || []).filter(
++            (w: Obj) => !preview.patch.targetWindowIds.includes(w.windowId),
++          ),
++          ...next.windows
++            .filter(
++              (w: Obj) =>
++                w.experimental &&
++                preview.patch.targetWindowIds.includes(w.windowId),
++            )
++            .map((w: Obj) => ({
++              windowId: w.windowId,
++              configHash: planHash(w),
++            })),
++        ],
++      };
+     t.taskRevision++;
+     for (const id of preview.patch.targetWindowIds)
+       t.windows.find((w: Obj) => w.windowId === id).configRevision++;
+@@ -721,6 +784,13 @@ export class RealSpeechV2Service {
+       throw Error("受信Profile已变化，请重新确认方案");
+     const state = t.windows.find((w: Obj) => w.windowId === id),
+       config = t.plan.windows.find((w: Obj) => w.windowId === id);
++    if (
++      config.experimental &&
++      !t.experimentalApproval?.windows?.some(
++        (w: Obj) => w.windowId === id && w.configHash === planHash(config),
++      )
++    )
++      throw Error("实验配置没有对应的本地用户批准；不能依据Plan文字自行开启");
+     if (state.locked) throw Error("Window已锁定");
+     if (
+       state.attempts.some(
+@@ -988,6 +1058,22 @@ export class RealSpeechV2Service {
+     json("plan.json", t.plan);
+     json("capability-profile.json", t.profileSnapshot);
+     json("current-versions.json", rows);
++    json("production-policy.json", {
++      principle: "NATURALNESS_FIRST_MINIMAL_INTERVENTION",
++      changeIsolationPolicy: "ONE_PRIMARY_VARIABLE_AT_A_TIME",
++      experimentalApproval: t.experimentalApproval || null,
++      windows: rows.map((r: Obj) => ({
++        windowId: r.windowId,
++        declaredComplexity: r.currentConfig.controlComplexity,
++        declaredRisk: r.currentConfig.naturalnessRisk,
++        instructionIntentCount: r.currentConfig.instructionIntentCount,
++        controlReason: r.currentConfig.controlReason,
++        experimental: r.currentConfig.experimental,
++        pronunciationCompletenessIntent: t.plan.intentRanges
++          .filter((n: Obj) => n.target.windowId === r.windowId)
++          .map((n: Obj) => n.pronunciationCompletenessIntent || ""),
++      })),
++    });
+     json(
+       "intent-ranges.json",
+       t.plan.intentRanges.filter((n: Obj) => ids.includes(n.target.windowId)),
+@@ -1026,6 +1112,7 @@ export class RealSpeechV2Service {
+       "plan.json",
+       "capability-profile.json",
+       "current-versions.json",
++      "production-policy.json",
+       "intent-ranges.json",
+       "user-feedback.json",
+       "manifest.json",
+diff --git a/src/main/realSpeech/v2/validator.ts b/src/main/realSpeech/v2/validator.ts
+index 21ec068..a4164bd 100644
+--- a/src/main/realSpeech/v2/validator.ts
++++ b/src/main/realSpeech/v2/validator.ts
+@@ -1,4 +1,5 @@
+ import { buildRequest } from "./request.ts";
++import { validateProductionPolicy } from "./productionPolicy.ts";
+ import { createHash } from "node:crypto";
+ import { readFileSync } from "node:fs";
+ import { join } from "node:path";
+@@ -171,6 +172,7 @@ export class PlanValidator {
+       if (w.synthesisText !== w.original && !w.textApproval?.confirmation)
+         throw Error("改动合成文本须明确确认");
+       const e = w.execution;
++      validateProductionPolicy(w, this.profile.productPolicy.productionRules);
+       if (
+         e.languageHints.some(
+           (h: string) =>
+@@ -411,13 +413,15 @@ export class PlanValidator {
+       "seed",
+       ...(w.execution.instruction ? ["instruction"] : []),
+       ...(w.ssml.enabled ? ["ssml"] : []),
+-      ...(w.ssml.speakSegments.length
+-        ? [
+-            "parallelSpeak",
+-            "speakRangeRate",
+-            "speakRangePitch",
+-            "speakRangeVolume",
+-          ]
++      ...(w.ssml.speakSegments.length > 1 ? ["parallelSpeak"] : []),
++      ...(w.ssml.speakSegments.some((s: Obj) => s.rate !== 1)
++        ? ["speakRangeRate"]
++        : []),
++      ...(w.ssml.speakSegments.some((s: Obj) => s.pitch !== 1)
++        ? ["speakRangePitch"]
++        : []),
++      ...(w.ssml.speakSegments.some((s: Obj) => s.volume !== 50)
++        ? ["speakRangeVolume"]
+         : []),
+       ...w.ssml.nodes.map(
+         (n: Obj) =>
+@@ -429,23 +433,33 @@ export class PlanValidator {
+         ? ["hotFix"]
+         : []),
+     ];
++    const enabled = (state: string | undefined) =>
++      state?.startsWith("PRODUCT_ENABLED") ||
++      (w.experimental &&
++        [
++          "PRODUCT_DISABLED_BY_DEFAULT",
++          "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE",
++        ].includes(state || ""));
+     const pending = [...new Set(caps)].filter(
+       (k) =>
+-        this.profile.productPolicy.capabilityAvailability[k]?.state !==
+-        "PRODUCT_ENABLED",
++        !enabled(this.profile.productPolicy.capabilityAvailability[k]?.state),
+     );
+     if (
+       w.execution.instruction &&
+       w.ssml.enabled &&
+-      this.profile.productPolicy.combinationAvailability?.instructionWithSsml
+-        ?.state !== "PRODUCT_ENABLED"
++      !enabled(
++        this.profile.productPolicy.combinationAvailability?.instructionWithSsml
++          ?.state,
++      )
+     )
+       pending.push("instructionWithSsml");
+     if (
+       w.execution.instruction &&
+-      w.ssml.speakSegments.length &&
+-      this.profile.productPolicy.combinationAvailability
+-        ?.parallelSpeakWithInstruction?.state !== "PRODUCT_ENABLED"
++      w.ssml.speakSegments.length > 1 &&
++      !enabled(
++        this.profile.productPolicy.combinationAvailability
++          ?.parallelSpeakWithInstruction?.state,
++      )
+     )
+       pending.push("parallelSpeakWithInstruction");
+     return pending;
+diff --git a/tests/v2-real-speech.test.ts b/tests/v2-real-speech.test.ts
+index 18fd306..50fbf97 100644
+--- a/tests/v2-real-speech.test.ts
++++ b/tests/v2-real-speech.test.ts
+@@ -19,6 +19,10 @@ import {
+ } from "../src/main/realSpeech/v2/validator.ts";
+ import { buildRequest } from "../src/main/realSpeech/v2/request.ts";
+ import { readableBounds } from "../src/main/realSpeech/v2/documentBounds.ts";
++import {
++  controlAssessment,
++  primaryVariableDiff,
++} from "../src/main/realSpeech/v2/productionPolicy.ts";
+ import {
+   loadBatch,
+   dryRun,
+@@ -27,7 +31,7 @@ import {
+ } from "../src/main/realSpeech/v2/spike.ts";
+ const fixture = () =>
+   JSON.parse(
+-    readFileSync("docs/real-speech-v2-design-r2/examples/plan.json", "utf8"),
++    readFileSync("resources/real-speech-v2/examples/plan.json", "utf8"),
+   );
+ export function wav(path: string) {
+   const n = 2400,
+@@ -71,7 +75,7 @@ const patchFor = (
+   id = "patch-test",
+ ) => {
+   const p = JSON.parse(
+-    readFileSync("docs/real-speech-v2-design-r2/examples/patch.json", "utf8"),
++    readFileSync("resources/real-speech-v2/examples/patch.json", "utf8"),
+   );
+   p.patchId = id;
+   p.taskId = t.taskId;
+@@ -114,6 +118,12 @@ test("严格Schema、重复键、版本、字符边界及每Window意图", () =>
+   }
+   const p = fixture();
+   p.windows[0].execution.instruction = "慢".repeat(50);
++  Object.assign(p.windows[0], {
++    controlComplexity: "L3",
++    naturalnessRisk: "HIGH",
++    experimental: true,
++    controlReason: "仅官方边界实验",
++  });
+   v.validate(p);
+ });
+ test("读法、范围和执行引用拒绝非法结构", () => {
+@@ -125,7 +135,7 @@ test("读法、范围和执行引用拒绝非法结构", () => {
+   assert.throws(() => v.validate(x), /越权/);
+   const a = JSON.parse(
+     readFileSync(
+-      "docs/real-speech-v2-design-r2/examples/plan-with-speak-candidates.json",
++      "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
+       "utf8",
+     ),
+   );
+@@ -141,7 +151,7 @@ test("请求构建器不读取导演说明，sub和并列speak明确序列化",
+   assert.deepEqual(buildRequest(p.engine.model, "clone", p.windows[0]), before);
+   const sub = JSON.parse(
+     readFileSync(
+-      "docs/real-speech-v2-design-r2/examples/plan-with-sub-candidate.json",
++      "resources/real-speech-v2/examples/plan-with-sub-candidate.json",
+       "utf8",
+     ),
+   );
+@@ -151,7 +161,7 @@ test("请求构建器不读取导演说明，sub和并列speak明确序列化",
+   );
+   const ranges = JSON.parse(
+     readFileSync(
+-      "docs/real-speech-v2-design-r2/examples/plan-with-speak-candidates.json",
++      "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
+       "utf8",
+     ),
+   );
+@@ -185,21 +195,19 @@ test("无导演附件可执行导入，本地确认持久化，旧库只读不
+   const oldAudio = join(old, "legacy-audio.wav");
+   wav(oldAudio);
+   const legacyDb = new DatabaseSync(join(old, "real_speech.db"));
+-  legacyDb
+-    .prepare("UPDATE tasks SET data=? WHERE id=?")
+-    .run(
+-      JSON.stringify({
+-        taskId: "old",
+-        name: "旧任务",
+-        windows: [
+-          {
+-            windowId: "GW001",
+-            results: [{ id: "old-audio-v1", path: oldAudio, revision: 1 }],
+-          },
+-        ],
+-      }),
+-      "old",
+-    );
++  legacyDb.prepare("UPDATE tasks SET data=? WHERE id=?").run(
++    JSON.stringify({
++      taskId: "old",
++      name: "旧任务",
++      windows: [
++        {
++          windowId: "GW001",
++          results: [{ id: "old-audio-v1", path: oldAudio, revision: 1 }],
++        },
++      ],
++    }),
++    "old",
++  );
+   legacyDb.close();
+   const oldAudioHash = sha256(readFileSync(oldAudio));
+   assert.equal(s.legacyOutput("old", "old-audio-v1"), oldAudio);
+@@ -214,6 +222,12 @@ test("无导演附件可执行导入，本地确认持久化，旧库只读不
+ });
+ test("生成出口未验证能力默认阻断，无凭据读取或网络", async () => {
+   const { s, task } = setup();
++  task.plan.windows[0].hotFix.pronunciation = [
++    { word: "台面", pinyin: "tai2 mian4" },
++  ];
++  task.plan.windows[0].controlComplexity = "L2";
++  task.planHash = planHash(task.plan);
++  s.save(task);
+   const job = s.createJob({
+     taskId: task.taskId,
+     taskRevision: task.taskRevision,
+@@ -508,3 +522,320 @@ test("Spike获批模拟运输16次与持久化防重跑，依然零真实网络"
+   );
+   assert.equal(keys, 1);
+ });
++
++test("R3：L0基线、L2理由及L3风险不能虚报", () => {
++  const v = new PlanValidator();
++  const p = JSON.parse(
++    readFileSync(
++      "resources/real-speech-v2/examples/plan-l0-baseline.json",
++      "utf8",
++    ),
++  );
++  v.validate(p);
++  assert.equal(
++    controlAssessment(p.windows[0], v.profile.productPolicy.productionRules)
++      .controlComplexity,
++    "L0",
++  );
++  assert.deepEqual(v.pending(p.windows[0]), []);
++  const x = fixture();
++  x.windows[1].controlReason = "";
++  assert.throws(() => v.validate(x), /明确理由/);
++  const y = fixture();
++  y.windows[0].execution.pitch = 1.1;
++  assert.throws(() => v.validate(y), /controlComplexity/);
++  Object.assign(y.windows[0], {
++    controlComplexity: "L3",
++    naturalnessRisk: "HIGH",
++    experimental: false,
++  });
++  assert.throws(() => v.validate(y), /experimental/);
++  y.windows[0].experimental = true;
++  v.validate(y);
++});
++
++test("R3：短指令建议与官方100分离，纠音用途不可冒充销售表演", () => {
++  const v = new PlanValidator(),
++    p = fixture();
++  p.windows[0].execution.instruction = "慢".repeat(11);
++  assert.throws(() => v.validate(p), /L3/);
++  Object.assign(p.windows[0], {
++    controlComplexity: "L3",
++    naturalnessRisk: "HIGH",
++    experimental: true,
++  });
++  v.validate(p);
++  p.windows[0].execution.instruction = "慢".repeat(51);
++  assert.throws(() => v.validate(p), /100/);
++  const wrong = fixture();
++  wrong.windows[1].ssml.nodes[0].purpose = "SALES_CLIMAX";
++  assert.throws(() => v.validate(wrong), /constant/);
++});
++
++test("R3：每个候选示例可校验，单speak默认参数不误算多speak", () => {
++  const v = new PlanValidator();
++  for (const file of [
++    "plan.json",
++    "plan-with-sub-candidate.json",
++    "plan-with-speak-candidates.json",
++    "plan-with-optional-audit.json",
++    "plan-l0-baseline.json",
++  ])
++    v.validate(
++      JSON.parse(
++        readFileSync("resources/real-speech-v2/examples/" + file, "utf8"),
++      ),
++    );
++  const p = fixture(),
++    w = p.windows[0];
++  w.execution.instruction = "";
++  w.instructionIntentCount = 0;
++  w.ssml.enabled = true;
++  w.ssml.speakSegments = [
++    {
++      segmentId: "ONE",
++      start: 0,
++      end: [...w.synthesisText].length,
++      rate: 1,
++      pitch: 1,
++      volume: 50,
++    },
++  ];
++  w.controlComplexity = "L1";
++  v.validate(p);
++  assert.deepEqual(v.pending(w), []);
++});
++
++test("R3：实验Plan不能替代本地用户批准，批准绑定具体配置", async () => {
++  const s = new RealSpeechV2Service(
++    mkdtempSync(join(tmpdir(), "ctg-r3-experiment-")),
++  );
++  const p = JSON.parse(
++    readFileSync(
++      "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
++      "utf8",
++    ),
++  );
++  const input = {
++    name: "明确实验",
++    voiceRef: "TEST-CLONE",
++    text: JSON.stringify(p),
++    confirmed: true,
++  };
++  assert.throws(() => s.importPlan(input), /用户/);
++  const t = s.importPlan({ ...input, experimentalConfirmed: true });
++  const id = p.windows.find((w: any) => w.experimental).windowId;
++  assert.ok(t.experimentalApproval.windows.some((w: any) => w.windowId === id));
++  t.experimentalApproval = null;
++  s.save(t);
++  const j = s.createJob({
++    taskId: t.taskId,
++    taskRevision: t.taskRevision,
++    windowIds: [id],
++  });
++  let calls = 0;
++  const out = await s.runJob(j.jobId, async (body, path) => {
++    calls++;
++    return fake(body, path);
++  });
++  assert.equal(calls, 0);
++  assert.equal(
++    out.task.windows.find((w: any) => w.windowId === id).attempts.length,
++    0,
++  );
++  assert.match(out.job.error, /本地用户批准/);
++  s.close();
++});
++
++test("R3：Patch一个主要变量，SSML嵌套两种修改同样拒绝", () => {
++  const { s, task } = setup();
++  const p = patchFor(s, task, { instruction: "平静确定。", seed: 1234 });
++  assert.throws(
++    () => s.previewPatch({ taskId: task.taskId, text: JSON.stringify(p) }),
++    /ONE_PRIMARY_VARIABLE/,
++  );
++  const w = task.plan.windows[1],
++    after = structuredClone(w);
++  after.ssml.nodes.push({
++    kind: "break",
++    offset: 0,
++    timeMs: 100,
++    purpose: "SEMANTIC_PAUSE",
++  });
++  after.ssml.nodes[0].interpretAs = "digits";
++  assert.deepEqual(primaryVariableDiff(w, after), ["break", "sayAs"]);
++  const q = patchFor(s, task, { ssml: after.ssml });
++  assert.throws(
++    () => s.previewPatch({ taskId: task.taskId, text: JSON.stringify(q) }),
++    /ONE_PRIMARY_VARIABLE/,
++  );
++  const legal = patchFor(s, task, { instruction: "平静确定。" });
++  assert.deepEqual(
++    s.previewPatch({ taskId: task.taskId, text: JSON.stringify(legal) })
++      .primaryVariables,
++    ["instruction"],
++  );
++  s.close();
++});
++
++test("R3：发音完成度仅展示，不变更请求；原2.0不可静默升级", () => {
++  const v = new PlanValidator(),
++    p = fixture();
++  const before = buildRequest(p.engine.model, "clone", p.windows[0]);
++  p.intentRanges[0].pronunciationCompletenessIntent =
++    "轻读、带过，不要每字读满；偷偷改pitch也只能展示";
++  v.validate(p);
++  assert.deepEqual(buildRequest(p.engine.model, "clone", p.windows[0]), before);
++  assert.throws(
++    () =>
++      v.validate(
++        JSON.parse(
++          readFileSync(
++            "docs/real-speech-v2-design-r2/examples/plan.json",
++            "utf8",
++          ),
++        ),
++      ),
++    /constant/,
++  );
++});
++
++test("R3：局部rate和pitch不能藏在同一个ssml对象绕过隔离", () => {
++  const p = JSON.parse(
++    readFileSync(
++      "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
++      "utf8",
++    ),
++  );
++  const w = p.windows[0],
++    next = structuredClone(w);
++  next.ssml.speakSegments[0].rate = 0.8;
++  next.ssml.speakSegments[0].pitch = 1.1;
++  assert.deepEqual(primaryVariableDiff(w, next).sort(), [
++    "localPitch",
++    "localRate",
++  ]);
++  const s = new RealSpeechV2Service(
++    mkdtempSync(join(tmpdir(), "ctg-r3-local-patch-")),
++  );
++  const t = s.importPlan({
++    name: "实验隔离",
++    voiceRef: "TEST-CLONE",
++    text: JSON.stringify(p),
++    confirmed: true,
++    experimentalConfirmed: true,
++  });
++  const patch = patchFor(s, t, { ssml: next.ssml });
++  patch.targetWindowIds = ["GW001"];
++  patch.changes[0].windowId = "GW001";
++  patch.expectedVersions = [
++    {
++      windowId: "GW001",
++      configRevision: 1,
++      selectedVersionId: null,
++      selectedVersionHash: null,
++    },
++  ];
++  patch.changes[0].executionConfidence = w.executionConfidence;
++  assert.throws(
++    () => s.previewPatch({ taskId: t.taskId, text: JSON.stringify(patch) }),
++    /ONE_PRIMARY_VARIABLE/,
++  );
++  s.close();
++});
++
++test("R3：运行文档、Profile、Schema及词典镜像一致", () => {
++  const source = "resources/real-speech-v2/",
++    review = "docs/real-speech-v2-production-r3/";
++  for (const name of [
++    "COSYVOICE_CAPABILITY_PROFILE.v1.json",
++    "schemas/common.schema.json",
++    "schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
++    "schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
++    ...[
++      "manual",
++      "director",
++      "template",
++      "compiler",
++      "capability",
++      "diagnosis",
++    ].map((n) => "docs/" + n + ".md"),
++  ])
++    assert.equal(
++      readFileSync(source + name, "utf8"),
++      readFileSync(review + name, "utf8"),
++      name,
++    );
++  const dictionary = JSON.parse(
++    readFileSync(review + "director-dictionary.json", "utf8"),
++  );
++  assert.equal(dictionary.entries.length, 36);
++  for (const entry of dictionary.entries)
++    for (const key of "ABCDEFG") assert.ok(entry[key].trim());
++  const manifest = JSON.parse(
++    readFileSync(review + "evidence/batch1-record-manifest.json", "utf8"),
++  );
++  assert.equal(manifest.cases.length, 16);
++  assert.equal(
++    manifest.cases.find((c: any) => c.caseId === "04").status,
++    "LOCAL_BLOCKED_NOT_SENT",
++  );
++});
++
++test("R3：实验Patch批准仅限目标Window，不能顺带批准其他配置", () => {
++  const s = new RealSpeechV2Service(
++    mkdtempSync(join(tmpdir(), "ctg-r3-scope-")),
++  );
++  const p = JSON.parse(
++    readFileSync(
++      "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
++      "utf8",
++    ),
++  );
++  Object.assign(p.windows[1], {
++    experimental: true,
++    controlComplexity: "L3",
++    naturalnessRisk: "HIGH",
++    controlReason: "明确参数实验",
++  });
++  p.windows[1].execution.rate = 1.1;
++  const t = s.importPlan({
++    name: "实验范围",
++    voiceRef: "TEST-CLONE",
++    text: JSON.stringify(p),
++    confirmed: true,
++    experimentalConfirmed: true,
++  });
++  // A prior rollback may leave a different experimental config without valid approval.
++  t.experimentalApproval.windows = t.experimentalApproval.windows.filter(
++    (w: any) => w.windowId !== "GW001",
++  );
++  s.save(t);
++  const patch = patchFor(s, t, { seed: 1234 });
++  patch.changes[0].executionConfidence = t.plan.windows[1].executionConfidence;
++  const text = JSON.stringify(patch),
++    preview = s.previewPatch({ taskId: t.taskId, text });
++  assert.throws(
++    () =>
++      s.applyPatch({
++        taskId: t.taskId,
++        text,
++        previewHash: preview.previewHash,
++        confirmed: true,
++      }),
++    /实验修复/,
++  );
++  const result = s.applyPatch({
++    taskId: t.taskId,
++    text,
++    previewHash: preview.previewHash,
++    confirmed: true,
++    experimentalConfirmed: true,
++  });
++  assert.deepEqual(
++    result.task.experimentalApproval.windows.map((w: any) => w.windowId),
++    ["GW002"],
++  );
++  assert.deepEqual(result.task.plan.windows[0], t.plan.windows[0]);
++  s.close();
++});
+diff --git a/src/main/realSpeech/v2/productionPolicy.ts b/src/main/realSpeech/v2/productionPolicy.ts
+new file mode 100644
+index 0000000..4e11379
+--- /dev/null
++++ b/src/main/realSpeech/v2/productionPolicy.ts
+@@ -0,0 +1,152 @@
++import type { Obj } from "../../../features/realSpeech/domain.ts";
++import { isDeepStrictEqual } from "node:util";
++
++export const weightedInstructionLength = (text: string) =>
++  [...text].reduce((n, c) => n + (/\p{Script=Han}/u.test(c) ? 2 : 1), 0);
++
++/** Only declared execution fields determine risk; director text is never interpreted. */
++export function controlAssessment(w: Obj, rules: Obj) {
++  const e = w.execution;
++  const segments = w.ssml.speakSegments;
++  const kinds = new Set(w.ssml.nodes.map((n: Obj) => n.kind));
++  const weightedLength = weightedInstructionLength(e.instruction);
++  const instruction = Boolean(e.instruction);
++  const ssml = w.ssml.enabled;
++  const hotFix = Boolean(
++    w.hotFix.pronunciation.length || w.hotFix.replace.length,
++  );
++  const transition = w.transition.pauseMs > 0;
++  const groups =
++    Number(instruction) + Number(ssml) + Number(hotFix) + Number(transition);
++  const high =
++    segments.length > 1 ||
++    segments.some(
++      (s: Obj) => s.rate !== 1 || s.pitch !== 1 || s.volume !== 50,
++    ) ||
++    e.rate !== 1 ||
++    e.pitch !== 1 ||
++    e.volume !== 50 ||
++    weightedLength > rules.instructionRecommendedWeightedMax ||
++    groups >= 3 ||
++    kinds.size >= 3;
++  const complexity = high
++    ? "L3"
++    : groups >= 2 || kinds.size > 1
++      ? "L2"
++      : groups || segments.length
++        ? "L1"
++        : "L0";
++  const risk =
++    complexity === "L3"
++      ? "HIGH"
++      : instruction || w.ssml.nodes.length || complexity === "L2"
++        ? "MEDIUM"
++        : "LOW";
++  const warnings: string[] = [];
++  if (complexity === "L3")
++    warnings.push(
++      "该控制在第一批真实听感测试中曾明显增加AI/TTS感或拼接感，建议仅用于实验。",
++    );
++  if (weightedLength > rules.instructionRecommendedWeightedMax)
++    warnings.push(
++      "长指令高风险；推荐加权长度不超过20，这是产品建议，不是官方上限。",
++    );
++  if (w.ssml.nodes.some((n: Obj) => n.kind === "break"))
++    warnings.push("停顿必须服务语义；需人工验证自然度，400ms不是常用模板值。");
++  if (instruction && ssml)
++    warnings.push("控制叠加须证明听感收益，不能因为更精细就叠加。");
++  return {
++    controlComplexity: complexity,
++    minimumNaturalnessRisk: risk,
++    weightedInstructionLength: weightedLength,
++    warnings,
++  };
++}
++
++export function validateProductionPolicy(w: Obj, rules: Obj) {
++  const result = controlAssessment(w, rules);
++  if (w.controlComplexity !== result.controlComplexity)
++    throw Error(
++      "controlComplexity与明确执行字段不一致：" + result.controlComplexity,
++    );
++  const ranks: Record<string, number> = { LOW: 0, MEDIUM: 1, HIGH: 2 };
++  if (ranks[w.naturalnessRisk] < ranks[result.minimumNaturalnessRisk])
++    throw Error("naturalnessRisk低估控制风险");
++  if (
++    result.controlComplexity === "L3" &&
++    (!w.experimental || w.naturalnessRisk !== "HIGH")
++  )
++    throw Error("L3必须experimental=true且naturalnessRisk=HIGH");
++  if (
++    (result.controlComplexity === "L2" ||
++      result.controlComplexity === "L3" ||
++      w.experimental) &&
++    !w.controlReason.trim()
++  )
++    throw Error("L2/L3或实验控制必须提供明确理由");
++  if (
++    w.ssml.nodes.some(
++      (n: Obj) =>
++        n.kind === "break" &&
++        (n.timeMs < rules.breakRecommendedMs[0] ||
++          n.timeMs > rules.breakRecommendedMs[1]),
++    ) &&
++    !w.controlReason.trim()
++  )
++    throw Error("超出产品建议的停顿必须说明语义理由；400ms不是默认模板");
++  if (w.instructionIntentCount !== Number(Boolean(w.execution.instruction)))
++    throw Error(
++      "instructionIntentCount须为空指令0或单一核心状态1；软件不自行判断导演语义",
++    );
++  return result;
++}
++
++/** Compare effective variable families, not merely the number of Patch keys. */
++export function primaryVariableDiff(before: Obj, after: Obj) {
++  const same = isDeepStrictEqual;
++  const changed: string[] = [];
++  for (const k of ["instruction", "rate", "pitch", "volume", "seed"])
++    if (!same(before.execution[k], after.execution[k])) changed.push(k);
++  if (before.synthesisText !== after.synthesisText) changed.push("text");
++  for (const kind of ["break", "phoneme", "sub", "sayAs"])
++    if (
++      !same(
++        before.ssml.nodes.filter((n: Obj) => n.kind === kind),
++        after.ssml.nodes.filter((n: Obj) => n.kind === kind),
++      )
++    )
++      changed.push(kind);
++  if (
++    before.ssml.enabled !== after.ssml.enabled ||
++    !same(
++      before.ssml.speakSegments.map((s: Obj) => [s.segmentId, s.start, s.end]),
++      after.ssml.speakSegments.map((s: Obj) => [s.segmentId, s.start, s.end]),
++    )
++  )
++    changed.push("speakStructure");
++  for (const [field, initial, family] of [
++    ["rate", 1, "localRate"],
++    ["pitch", 1, "localPitch"],
++    ["volume", 50, "localVolume"],
++  ] as const) {
++    const values = (w: Obj) =>
++      w.ssml.speakSegments
++        .filter((s: Obj) => s[field] !== initial)
++        .map((s: Obj) => [s.segmentId, s.start, s.end, s[field]]);
++    if (!same(values(before), values(after))) changed.push(family);
++  }
++  if (!same(before.hotFix.pronunciation, after.hotFix.pronunciation))
++    changed.push("hotFixPronunciation");
++  if (!same(before.hotFix.replace, after.hotFix.replace))
++    changed.push("hotFixReplace");
++  if (!same(before.transition, after.transition)) changed.push("transition");
++  // Enabling the SSML envelope only to carry one node family is supporting metadata.
++  if (
++    changed.includes("speakStructure") &&
++    same(before.ssml.speakSegments, after.ssml.speakSegments) &&
++    changed.filter((k) => ["break", "phoneme", "sub", "sayAs"].includes(k))
++      .length === 1
++  )
++    changed.splice(changed.indexOf("speakStructure"), 1);
++  return changed;
++}
+diff --git a/resources/real-speech-v2/examples/patch.json b/resources/real-speech-v2/examples/patch.json
+new file mode 100644
+index 0000000..51fce8f
+--- /dev/null
++++ b/resources/real-speech-v2/examples/patch.json
+@@ -0,0 +1,74 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PATCH_V2",
++  "protocolVersion": "2.1",
++  "patchId": "PATCH-DEMO-001",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.3",
++  "basePlanId": "PLAN-DEMO-001",
++  "basePlanHash": "bdb84662a74e7dc1141f2e7863097b5bc1f47574faec7181ae2102af6e06da66",
++  "taskId": "TASK-DEMO-001",
++  "targetWindowIds": [
++    "GW002"
++  ],
++  "expectedVersions": [
++    {
++      "windowId": "GW002",
++      "configRevision": 1,
++      "selectedVersionId": null,
++      "selectedVersionHash": null
++    }
++  ],
++  "changes": [
++    {
++      "windowId": "GW002",
++      "set": {
++        "instruction": "平静确定。"
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格更克制、数字清楚",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义近似",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "沿用既有cardinal",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ]
++    }
++  ],
++  "lockedWindows": [],
++  "diagnosis": {
++    "evidenceBasis": "text_only",
++    "listenedVersionIds": [],
++    "summary": "结构示例：尚无实际WAV，不能声称听过；展示限定价格Window的参数修订。",
++    "issues": [
++      {
++        "windowId": "GW002",
++        "dimension": "salesDrive",
++        "observation": "仅提出更克制的候选Instruction，实际效果待生成试听。",
++        "certainty": "unverified"
++      }
++    ]
++  },
++  "validationFocus": [
++    {
++      "windowId": "GW002",
++      "focus": "数字是否清楚、价格重点是否自然；不得改变其他Window"
++    }
++  ],
++  "changeIsolationPolicy": "ONE_PRIMARY_VARIABLE_AT_A_TIME"
++}
+diff --git a/resources/real-speech-v2/examples/plan-l0-baseline.json b/resources/real-speech-v2/examples/plan-l0-baseline.json
+new file mode 100644
+index 0000000..24b9fbb
+--- /dev/null
++++ b/resources/real-speech-v2/examples/plan-l0-baseline.json
+@@ -0,0 +1,315 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.1",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.3",
++  "planId": "PLAN-L0-BASELINE-001",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "BASE-GW001",
++          "intent": "连续文本基线，局部导演表演意图未强行编译",
++          "capability": "seed",
++          "level": "E1",
++          "implementation": "仅保存默认seed，不承担表演",
++          "targetPaths": [
++            "/windows/0/execution/seed"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L0",
++      "naturalnessRisk": "LOW",
++      "experimental": false,
++      "controlReason": "原始连续文本基线，先试听再决定是否增加控制",
++      "instructionIntentCount": 0
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "BASE-GW002",
++          "intent": "连续文本基线，局部导演表演意图未强行编译",
++          "capability": "seed",
++          "level": "E1",
++          "implementation": "仅保存默认seed，不承担表演",
++          "targetPaths": [
++            "/windows/1/execution/seed"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L0",
++      "naturalnessRisk": "LOW",
++      "experimental": false,
++      "controlReason": "原始连续文本基线，先试听再决定是否增加控制",
++      "instructionIntentCount": 0
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "BASE-GW003",
++          "intent": "连续文本基线，局部导演表演意图未强行编译",
++          "capability": "seed",
++          "level": "E1",
++          "implementation": "仅保存默认seed，不承担表演",
++          "targetPaths": [
++            "/windows/2/execution/seed"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L0",
++      "naturalnessRisk": "LOW",
++      "experimental": false,
++      "controlReason": "原始连续文本基线，先试听再决定是否增加控制",
++      "instructionIntentCount": 0
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [],
++      "limitation": "导演意图只展示；基线未保证局部节奏/情绪实现",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [],
++      "limitation": "导演意图只展示；基线未保证局部节奏/情绪实现",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [],
++      "limitation": "导演意图只展示；基线未保证局部节奏/情绪实现",
++      "unresolvedItemId": null
++    }
++  ]
++}
+diff --git a/resources/real-speech-v2/examples/plan-with-optional-audit.json b/resources/real-speech-v2/examples/plan-with-optional-audit.json
+new file mode 100644
+index 0000000..dfa2b67
+--- /dev/null
++++ b/resources/real-speech-v2/examples/plan-with-optional-audit.json
+@@ -0,0 +1,369 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.1",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.3",
++  "planId": "PLAN-DEMO-OPTIONAL-AUDIT",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan",
++    "documentId": "D-DEMO-001",
++    "documentVersion": "1",
++    "documentHash": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sayAs",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "interpretAs": "cardinal",
++            "purpose": "READING_CORRECTION"
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L2",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sayAs",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+diff --git a/resources/real-speech-v2/examples/plan-with-speak-candidates.json b/resources/real-speech-v2/examples/plan-with-speak-candidates.json
+new file mode 100644
+index 0000000..ead1b71
+--- /dev/null
++++ b/resources/real-speech-v2/examples/plan-with-speak-candidates.json
+@@ -0,0 +1,390 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.1",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.3",
++  "planId": "PLAN-DEMO-SPEAK-CANDIDATE",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [],
++        "speakSegments": [
++          {
++            "segmentId": "S1",
++            "start": 0,
++            "end": 6,
++            "rate": 1,
++            "pitch": 1,
++            "volume": 50
++          },
++          {
++            "segmentId": "S2",
++            "start": 6,
++            "end": 29,
++            "rate": 0.9,
++            "pitch": 1.05,
++            "volume": 50
++          }
++        ]
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L3",
++      "naturalnessRisk": "HIGH",
++      "experimental": true,
++      "controlReason": "保留旧候选结构作为明确参数实验，不用于默认销售表演",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sayAs",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "interpretAs": "cardinal",
++            "purpose": "READING_CORRECTION"
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L2",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        },
++        {
++          "capability": "speakRangeRate",
++          "confidence": "E1",
++          "fieldRefs": [
++            "/windows/0/ssml/speakSegments/1/rate"
++          ]
++        }
++      ],
++      "limitation": "候选结构样例，等待Spike；目前正式产品禁止执行，不是合格音频。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sayAs",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+diff --git a/resources/real-speech-v2/examples/plan-with-sub-candidate.json b/resources/real-speech-v2/examples/plan-with-sub-candidate.json
+new file mode 100644
+index 0000000..32ab396
+--- /dev/null
++++ b/resources/real-speech-v2/examples/plan-with-sub-candidate.json
+@@ -0,0 +1,370 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.1",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.3",
++  "planId": "PLAN-DEMO-SUB-CANDIDATE",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sub",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "alias": "九十九",
++            "confirmation": {
++              "referenceId": "SUB-DEMO-CONFIRM",
++              "userStatement": "确认99读作九十九；仅结构示例"
++            },
++            "purpose": "TEXT_CORRECTION"
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L2",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sub",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+diff --git a/resources/real-speech-v2/examples/plan.json b/resources/real-speech-v2/examples/plan.json
+new file mode 100644
+index 0000000..cd47325
+--- /dev/null
++++ b/resources/real-speech-v2/examples/plan.json
+@@ -0,0 +1,366 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.1",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.3",
++  "planId": "PLAN-DEMO-001",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sayAs",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "interpretAs": "cardinal",
++            "purpose": "READING_CORRECTION"
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L2",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "自然解释。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ],
++      "controlComplexity": "L1",
++      "naturalnessRisk": "MEDIUM",
++      "experimental": false,
++      "controlReason": "仅保留一个短状态；有额外控制时须单独说明收益",
++      "instructionIntentCount": 1
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sayAs",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+diff --git a/resources/real-speech-v2/spike/batch1-human-listening.md b/resources/real-speech-v2/spike/batch1-human-listening.md
+new file mode 100644
+index 0000000..8e3c1ce
+--- /dev/null
++++ b/resources/real-speech-v2/spike/batch1-human-listening.md
+@@ -0,0 +1,853 @@
++# 真人口播生产规则｜R3
++
++协议2.1；Capability Profile 1.0.0-draft.3。依据：黄明昊修正版 + cosyvoice-v3.5-plus + 北京地域，第一批15次云端请求及老唐人工试听。范围有限，不能外推所有音色。官方支持事实与本产品推荐分开；不以听感不好推断模型不支持。
++
++# 第一批Spike人工听感结论与生产决策
++
++来源：老唐真实人工试听，本轮用户提供原文如下。主观结论不是模型所有音色的普遍定律。
++
++技术交叉核对：01/05 PCM完全一致；用户感受05较慢保留为主观观察，不改写为客观差异。11/12/16 PCM完全一致；say-as风险反馈仍保存，但不能仅凭本例断言标签造成异常。03使用50个“慢”而非正常长复杂导演句，不能单独证明所有长指令必差；长指令高风险是保守生产决策。02/14 PCM一致。本轮新增云端请求0。
++
++原始16项记录（15云端+04本地）仍在本机数据目录，manifest记录文件哈希。仓库不复制签名下载URL/密钥/大音频，未修改任何原始记录。
++
++## 用户试听结论与要求（原文）
++
++第一批 CosyVoice 3.5 Plus Capability Spike 已完成。
++
++现在停止继续调用真实 API，不执行第二批 Spike。
++
++接下来不是继续测试模型，而是把第一批真实人工听感结论正式吸收到：
++
++1. COSYVOICE_CAPABILITY_PROFILE
++2. 《ChatGPT真人口播导演意图沟通手册》
++3. 《真人带货口播台词需求模板与示例》
++4. 《ChatGPT → CosyVoice执行协议编译规范》
++5. REAL_SPEECH_EXECUTION_PLAN_V2
++6. REAL_SPEECH_EXECUTION_PATCH_V2
++7. 软件真人口播 UI 中与能力提示、参数编辑、诊断相关的说明
++
++本轮核心目标：
++
++把第一批真实试听发现固化成 V2 的“生产规则”。
++
++重点不是：
++“API支持什么参数”。
++
++而是：
++“哪些能力虽然API支持，但用于真人带货口播会降低活人感，因此生产系统应该怎样限制使用”。
++
++==================================================
++一、第一批人工听感结论
++==================================================
++
++以下结论来自真实复刻音色 + cosyvoice-v3.5-plus + 人工试听。
++
++--------------------------------
++Case 01｜纯克隆基线
++--------------------------------
++
++结果：
++- 当前反而是整批中相对最自然的一类；
++- 真人感 4/5，自然度 4/5；
++- 仍有明显AI/TTS念稿感；
++- 节奏整体偏平；
++- 重点不明显；
++- 销售感偏弱；
++- 但明显优于复杂 instruction 版本。
++
++特别观察：
++
++用户认为：
++“发音过于标准”本身可能就是AI感来源之一。
++
++真人说话可能需要：
++- 不完全标准的音节完成度；
++- 轻微连读；
++- 某些字自然带过；
++- 轻微口语粗糙感；
++- 不要每个字都像语文标准朗读。
++
++需要把这一维度正式加入：
++
++【发音完成度 / 口语粗糙度】
++
++注意：
++这不是让模型念错字，
++也不是软件伪造口音参数。
++
++它属于导演意图 / E2语义控制，
++当前没有精确硬参数。
++
++--------------------------------
++Case 02｜短 instruction
++--------------------------------
++
++结果：
++- 与 Case01 相比变化明显；
++- 但反问刻意；
++- 重音过猛；
++- 情绪过度；
++- 局部变化突兀；
++- 销售感太硬；
++- 真人感反而下降。
++
++结论：
++
++Instruction 可以改变表演，
++但不能因为“能改变”就认为“适合生产”。
++
++生产规则：
++
++默认禁止复杂表演 instruction。
++
++如果使用：
++- 必须极短；
++- 一次只表达一个核心状态；
++- 不堆多个情绪形容词；
++- 不同时要求反问 + 兴奋 + 重音 + 销售感 + 节奏变化。
++
++--------------------------------
++Case 03｜长 instruction
++--------------------------------
++
++结果：
++- 明显播音腔；
++- 做作；
++- 节奏突兀；
++- 情绪不自然；
++- 真人感 1/5。
++
++结论：
++
++长复杂 instruction 在当前真人带货生产中应视为高风险能力。
++
++即使官方允许100 weighted chars，
++也不代表产品应该充分使用上限。
++
++请增加：
++
++PRODUCT_RECOMMENDED_RANGE
++
++推荐值应显著短于官方硬上限。
++
++具体推荐长度先基于本轮经验设计，
++不要冒充官方限制。
++
++官方100 weighted仍保留为 MODEL_HARD_LIMIT。
++
++--------------------------------
++Case 04｜instruction 101超限
++--------------------------------
++
++技术结论：
++
++- 本地成功拦截；
++- 未发云端；
++- 该能力属于协议安全校验通过。
++
++这是技术通过项，
++不属于真人听感项。
++
++--------------------------------
++Case 05｜单 speak
++--------------------------------
++
++结果：
++- 尚可；
++- 与基线相比没有明显核心收益；
++- 节奏变慢；
++- 情绪仍平。
++
++结论：
++
++single <speak> 可作为结构载体使用，
++但不应被描述为“提升活人感能力”。
++
++--------------------------------
++Case 06｜break 400ms
++--------------------------------
++
++结果：
++- 停顿确实发生；
++- 但400ms偏长；
++- 听感刻意；
++- 情绪错位；
++- 真人感没有提升。
++
++结论：
++
++SSML break 属于 E0 / 精确结构能力，
++但：
++
++“精确执行 ≠ 自然”。
++
++新增生产原则：
++
++停顿数值必须首先服务语义，
++不能为了“让真人感更强”机械加长停顿。
++
++默认应优先短停顿。
++
++不要把 400ms 当成常用模板值。
++
++--------------------------------
++Case 07｜instruction + SSML
++--------------------------------
++
++结果：
++- 比单独 break 更做作；
++- 情绪不符合当前卖货节奏。
++
++结论：
++
++多个控制能力叠加不会自动提高真人感。
++
++新增原则：
++
++【控制叠加惩罚原则】
++
++每增加一个控制层，
++都必须证明带来真实听感收益。
++
++禁止为了“更精细”同时叠：
++instruction
+++ SSML
+++ rate
+++ pitch
+++ 多 speak
++
++--------------------------------
++Case 08｜连续多个 speak
++--------------------------------
++
++结果：
++- 明显拼接感；
++- AI/TTS感增加；
++- 节奏太平；
++- 能量/人物状态不连续；
++- 销售感生硬。
++
++结论：
++
++连续多 <speak> 虽然技术接受，
++但当前在真人带货主链中：
++
++PRODUCT_DISABLED_BY_DEFAULT
++
++不是 MODEL_UNSUPPORTED。
++
++Capability Profile必须区分：
++
++MODEL_SUPPORTED = true
++
++PRODUCT_ENABLED = false
++
++reason =
++“真人连续表达产生明显拼接/能量断裂风险”
++
++只有明确实验场景才允许开启。
++
++--------------------------------
++Case 09｜局部 rate=0.85
++--------------------------------
++
++结果：
++- 像人为拉慢；
++- AI感增强；
++- 重点位置错误；
++- 情绪错位；
++- 能量跳变。
++
++结论：
++
++局部 rate 虽然 API 支持，
++但当前不适合作为真人节奏设计工具。
++
++生产规则：
++
++默认禁止使用明显局部 rate 改变来制造表演。
++
++除非用户明确实验或特殊发音需求。
++
++特别注意：
++
++用户真正想要的不是：
++
++“某一段机械变慢”
++
++而是：
++
++“真人销售节奏发生变化”。
++
++这是完全不同的目标。
++
++--------------------------------
++Case 10｜局部 pitch=1.1
++--------------------------------
++
++结果：
++- 明显AI感；
++- 不适合真人口播。
++
++结论：
++
++局部 pitch 用于制造情绪：
++
++PRODUCT_DISABLED_BY_DEFAULT
++
++保留模型支持事实，
++但编译器禁止自动使用它表达：
++- 激情
++- 惊叹
++- 调侃
++- 重音
++- 高潮
++
++--------------------------------
++Case 11｜sub
++--------------------------------
++
++结果：
++- 不提升活人感；
++- 只应作为文本/读法纠正能力。
++
++结论：
++
++sub：
++E0文本/发音工具。
++
++禁止拿它承担表演控制。
++
++--------------------------------
++Case 12｜say-as cardinal
++--------------------------------
++
++结果：
++- 读法存在异常风险；
++- 整体平；
++- 销售表达不自然。
++
++结论：
++
++say-as只能解决“语义/数字怎么读”。
++
++不得用于：
++- 制造价格高潮；
++- 制造数字卖点；
++- 提升销售感。
++
++数字“怎么卖”必须和数字“怎么读”区分。
++
++--------------------------------
++Case 13｜phoneme
++--------------------------------
++
++结果：
++- 发音控制有价值；
++- 这一组相对自然；
++- 但前段仍平。
++
++结论：
++
++phoneme保留。
++
++角色：
++
++只做发音修正。
++
++不能承担：
++- 情绪
++- 节奏
++- 销售感
++
++--------------------------------
++Case 14｜同 seed 重复
++--------------------------------
++
++结果：
++- 与 Case02 几乎一致。
++
++结论：
++
++seed 对复现已有版本有实际价值。
++
++保留：
++
++- A/B
++- 复现
++- Golden版本
++- 修复比较
++
++但不要声称 seed 可以解决真人感。
++
++--------------------------------
++Case 15 / Case16｜纯文本基线
++--------------------------------
++
++结果：
++- 仍有AI/TTS感；
++- 念稿；
++- 节奏平；
++- 重点错误；
++- 销售节奏不足。
++
++说明：
++
++当前问题并不是“缺少更多参数”。
++
++即使不加参数，
++CosyVoice自身仍存在：
++- 语音过于标准；
++- 重音语义理解不足；
++- 销售节奏理解不足；
++- 真实人类临场表达不足。
++
++因此：
++
++系统目标不能变成“不断叠控制参数”。
++
++==================================================
++二、正式增加：
++Naturalness First 原则
++==================================================
++
++把以下原则提升为 ChatGPT协议编译规范的最高优先级之一：
++
++【Naturalness First / 最小干预原则】
++
++ChatGPT编译导演意图时，
++必须按以下优先顺序尝试：
++
++第一优先：
++原始连续文本 + 模型自然生成
++
++第二优先：
++只使用标点 / 文本结构 / 极短Instruction
++
++第三优先：
++必要SSML结构控制
++
++第四优先：
++特殊发音工具
++phoneme / hot_fix / sub / say-as
++
++最后才考虑：
++rate / pitch / 多speak等高风险控制
++
++原则：
++
++不是问：
++“我还能增加哪些控制参数？”
++
++而是问：
++“实现这个导演意图，最少需要多少控制？”
++
++如果基线已经较自然：
++宁可少调，不要多调。
++
++==================================================
++三、增加：
++控制复杂度风险等级
++==================================================
++
++建议增加：
++
++CONTROL_COMPLEXITY
++
++L0
++纯文本/默认生成
++
++L1
++极短Instruction或单一安全结构控制
++
++L2
++Instruction + 单一SSML控制
++
++L3
++局部rate/pitch/多speak/多层叠加
++
++生产规则：
++
++默认优先 L0/L1。
++
++L2必须有明确理由。
++
++L3默认禁止自动编译，
++必须用户显式开启实验模式。
++
++==================================================
++四、重新定义“活人感”
++==================================================
++
++在现有维度：
++
++1. 语义停顿
++2. 速度变化
++3. 重音层级
++4. 情绪变化
++5. 聊天/临场感
++6. 人物连续性
++7. 销售能量曲线
++8. CTA自然度
++
++基础上正式增加：
++
++9. 发音完成度 / 口语粗糙度
++
++定义：
++
++真人并不会把每一个字都完整、标准、等权重地朗读出来。
++
++关注：
++
++- 连读
++- 轻读
++- 自然带过
++- 句尾弱化
++- 音节完成度变化
++- 轻微口语习惯
++- 非播音式标准发音
++
++注意：
++
++当前 CosyVoice 没有对应硬参数。
++
++必须标记为：
++
++E2 SEMANTIC / DIRECTOR INTENT
++
++不得伪造参数。
++
++==================================================
++五、正式增加导演词条
++==================================================
++
++把以下真实用户表达正式加入
++《ChatGPT真人口播导演意图沟通手册》。
++
++--------------------------------
++词条：
++诊断式确定感
++--------------------------------
++
++用户描述：
++
++“像一个有经验的老医生看完以后，已经知道问题在哪里，然后平静但非常确定地告诉你。”
++
++不是：
++愤怒
++喊
++播音
++强重音
++
++适合：
++
++“你就是坚持不了。”
++
++核心：
++
++- 低表演感
++- 高确定性
++- 平静
++- 稍微收住
++- 重点明确
++- 不夸张
++
++执行可信度：
++
++E2
++
++优先：
++短Instruction近似
++
++禁止：
++高pitch
++过度重音
++强情绪词堆叠
++
++--------------------------------
++词条：
++节奏型销售排比
++--------------------------------
++
++真实需求示例：
++
++懒宝宝 → 高一点能量、快速抓注意
++早上喝 → 回正常节奏、答案清楚
++
++馋宝宝 → 再次提气
++中午喝 → 回正常
++
++又懒又馋，一天两杯 →
++快速、集中、达人直播间式收束
++
++注意：
++
++这是“节奏结构”，
++不是机械 rate 改速。
++
++当前不应自动编译成：
++rate=0.85 / 1.2
++
++主要属于：
++导演意图层。
++
++--------------------------------
++词条：
++稳 → 推 → 爆 → 松
++--------------------------------
++
++用于价格段：
++
++专研配方
++→ 认真可信
++
++一杯不到一块钱
++→ 开始加强销售推动
++
++99块到手100杯
++→ 价格高潮 / 惊叹
++
++每天喝也不心疼
++→ 立即卸掉卖货力，像随口告诉用户
++
++特别重要：
++
++最后一句不是继续高潮。
++
++这是典型真人销售节奏。
++
++不能把四句话都用同一种“促销声音”念。
++
++==================================================
++六、修改 ChatGPT 编译原则
++==================================================
++
++以后 ChatGPT 收到：
++
++“这里更激情”
++“这里更快”
++“这里更有价格爆点”
++
++禁止机械翻译：
++
++激情 → pitch提高
++更快 → rate提高
++爆点 → volume提高
++
++必须先判断：
++
++这是：
++
++导演语义需求
++还是
++真实硬参数需求。
++
++默认解释为：
++
++DIRECTOR INTENT
++
++然后优先通过：
++
++- 文本结构
++- 标点
++- Window边界
++- 极短Instruction
++
++进行近似。
++
++只有用户明确要求：
++“我要测试参数变化”
++
++才允许进入高风险参数控制。
++
++==================================================
++七、Capability Profile状态调整
++==================================================
++
++请根据本轮结果重新定义：
++
++instruction：
++MODEL_SUPPORTED
++PRODUCT_ENABLED
++但默认：
++SHORT_ONLY
++SINGLE_INTENT_ONLY
++
++long instruction：
++MODEL_SUPPORTED
++PRODUCT_DISCOURAGED
++
++multi speak：
++MODEL_SUPPORTED
++PRODUCT_DISABLED_BY_DEFAULT
++
++local rate：
++MODEL_SUPPORTED
++PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE
++
++local pitch：
++MODEL_SUPPORTED
++PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE
++
++break：
++MODEL_SUPPORTED
++PRODUCT_ENABLED
++但增加：
++NATURALNESS_VALIDATION_REQUIRED
++
++sub：
++MODEL_SUPPORTED
++PRODUCT_ENABLED_FOR_TEXT_ONLY
++
++say-as：
++MODEL_SUPPORTED
++PRODUCT_ENABLED_FOR_READING_ONLY
++
++phoneme：
++MODEL_SUPPORTED
++PRODUCT_ENABLED_FOR_PRONUNCIATION_ONLY
++
++seed：
++MODEL_SUPPORTED
++PRODUCT_ENABLED_FOR_REPRODUCIBILITY
++
++==================================================
++八、Plan V2调整
++==================================================
++
++Plan V2中增加：
++
++controlComplexity:
++L0 | L1 | L2 | L3
++
++naturalnessRisk:
++LOW | MEDIUM | HIGH
++
++如果某个 Window 使用：
++
++multi-speak
++local rate
++local pitch
++复杂控制叠加
++
++必须标记：
++
++controlComplexity >= L3
++naturalnessRisk = HIGH
++
++默认编译器不得自动产生 L3。
++
++除非：
++
++experimental = true
++
++或用户明确批准。
++
++==================================================
++九、Patch V2调整
++==================================================
++
++局部修复时：
++
++默认只允许一次改变一个主要变量。
++
++例如：
++
++先改 Instruction
++
++重新试听
++
++仍不满意：
++
++再改 break
++
++禁止一次Patch同时：
++
++instruction
+++ rate
+++ pitch
+++ break
+++ speak结构
++
++全部一起变化。
++
++原因：
++
++无法知道到底哪个变化导致听感变好或变差。
++
++增加：
++
++changeIsolationPolicy:
++ONE_PRIMARY_VARIABLE_AT_A_TIME
++
++==================================================
++十、UI提示
++==================================================
++
++如果用户手工启用：
++
++- multi speak
++- local rate
++- local pitch
++- L3复杂控制
++
++UI明确提示：
++
++“该控制在第一批真实听感测试中曾明显增加AI/TTS感或拼接感，建议仅用于实验。”
++
++但不要禁止高级用户手工使用。
++
++==================================================
++十一、不要做的事情
++==================================================
++
++本轮：
++
++禁止继续调用 CosyVoice API。
++
++禁止第二批 Spike。
++
++不要因为这些结论删除模型能力。
++
++需要的是：
++
++MODEL CAPABILITY
++和
++PRODUCT RECOMMENDATION
++
++明确分离。
++
++不要把：
++
++“本轮听起来不好”
++
++误写成：
++
++“模型不支持”。
++
++==================================================
++十二、本轮交付
++==================================================
++
++现在请完成：
++
++1. 更新 COSYVOICE_CAPABILITY_PROFILE
++2. 更新《ChatGPT真人口播导演意图沟通手册》
++3. 更新《真人带货口播台词需求模板与示例》
++4. 更新《ChatGPT → CosyVoice执行协议编译规范》
++5. 更新 Plan V2 Schema
++6. 更新 Patch V2 Schema
++7. 更新相关 UI 能力说明
++8. 增加本轮 Spike 人工听感结论文档
++9. 保留16个Case原始测试记录
++10. 完成所有本地测试
++
++完成后：
++
++输出完整修改清单和关键Diff。
++
++暂时不要开始第二批Spike。
++
++不要自动继续下一阶段。
++等待用户确认。
+\ No newline at end of file

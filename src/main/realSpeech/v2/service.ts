@@ -31,6 +31,7 @@ import {
   resolvePointer,
 } from "./validator.ts";
 import { buildRequest } from "./request.ts";
+import { controlAssessment, primaryVariableDiff } from "./productionPolicy.ts";
 const exec = promisify(execFile);
 const now = () => new Date().toISOString();
 type Adapter = (body: Obj, path: string) => Promise<Obj>;
@@ -190,6 +191,10 @@ export class RealSpeechV2Service {
       pending: plan.windows.map((w: Obj) => ({
         windowId: w.windowId,
         capabilities: this.validator.pending(w),
+        ...controlAssessment(
+          w,
+          this.validator.profile.productPolicy.productionRules,
+        ),
       })),
     };
   }
@@ -198,7 +203,14 @@ export class RealSpeechV2Service {
       throw Error("请填写任务名称并选择复刻音色");
     if (p.confirmed !== true) throw Error("请明确确认Plan来自已确认导演方案");
     const plan = structuredClone(this.preview(p.text).plan);
-    plan.originalTextHash = sha256(plan.originalText);
+    if (
+      plan.windows.some((w: Obj) => w.experimental) &&
+      p.experimentalConfirmed !== true
+    )
+      throw Error(
+        "实验方案须用户在软件中明确开启实验模式；Plan中的true不能替代用户确认",
+      );
+    // Keep the imported Plan immutable; its own hash is recorded separately.
     const voiceBinding = this.app ? this.binding(p.voiceRef) : null;
     if (
       plan.voiceRequirements.requestedVoiceRef &&
@@ -218,6 +230,20 @@ export class RealSpeechV2Service {
       createdAt: now(),
       profileHash: planHash(this.validator.profile),
       profileSnapshot: structuredClone(this.validator.profile),
+      experimentalApproval: plan.windows.some((w: Obj) => w.experimental)
+        ? {
+            enabled: true,
+            at: now(),
+            source: "local_user_explicit_experiment",
+            planHash: ph,
+            windows: plan.windows
+              .filter((w: Obj) => w.experimental)
+              .map((w: Obj) => ({
+                windowId: w.windowId,
+                configHash: planHash(w),
+              })),
+          }
+        : null,
       confirmation: {
         recordId: randomUUID(),
         at: now(),
@@ -468,6 +494,7 @@ export class RealSpeechV2Service {
     const next = structuredClone(t.plan),
       diff: Obj[] = [],
       generateIds: string[] = [];
+    const primaryVariables = new Set<string>();
     for (const ch of patch.changes) {
       const { w, v } = this.selected(t, ch.windowId),
         expect = patch.expectedVersions.find(
@@ -574,15 +601,27 @@ export class RealSpeechV2Service {
         });
       }
       if (!changed) throw Error("Patch没有真实变化");
+      for (const variable of primaryVariableDiff(t.plan.windows[index], config))
+        primaryVariables.add(variable);
       if (before !== this.executionFingerprint(t, config))
         generateIds.push(ch.windowId);
     }
+    if (primaryVariables.size > 1)
+      throw Error(
+        "ONE_PRIMARY_VARIABLE_AT_A_TIME：一次Patch只能改变一个主要变量，实际为" +
+          [...primaryVariables].join("、"),
+      );
     this.validator.validate(next);
     return {
       patch,
       next,
       diff,
       generateIds,
+      primaryVariables: [...primaryVariables],
+      experimentalRequired: targets.some(
+        (id: string) =>
+          next.windows.find((w: Obj) => w.windowId === id)?.experimental,
+      ),
       previewHash: planHash({ patch, next, revision: t.taskRevision }),
       taskRevision: t.taskRevision,
     };
@@ -603,6 +642,8 @@ export class RealSpeechV2Service {
       };
     }
     const preview = this.previewPatch(p);
+    if (preview.experimentalRequired && p.experimentalConfirmed !== true)
+      throw Error("实验修复须在软件中明确确认实验风险");
     if (preview.previewHash !== p.previewHash)
       throw Error("Diff已过期，请重新预览");
     const t = this.get(p.taskId);
@@ -611,6 +652,28 @@ export class RealSpeechV2Service {
     next.planId = randomUUID();
     t.plan = next;
     t.planHash = planHash(next);
+    if (preview.experimentalRequired)
+      t.experimentalApproval = {
+        enabled: true,
+        at: now(),
+        source: "local_user_explicit_patch_experiment",
+        planHash: t.planHash,
+        windows: [
+          ...(t.experimentalApproval?.windows || []).filter(
+            (w: Obj) => !preview.patch.targetWindowIds.includes(w.windowId),
+          ),
+          ...next.windows
+            .filter(
+              (w: Obj) =>
+                w.experimental &&
+                preview.patch.targetWindowIds.includes(w.windowId),
+            )
+            .map((w: Obj) => ({
+              windowId: w.windowId,
+              configHash: planHash(w),
+            })),
+        ],
+      };
     t.taskRevision++;
     for (const id of preview.patch.targetWindowIds)
       t.windows.find((w: Obj) => w.windowId === id).configRevision++;
@@ -721,6 +784,13 @@ export class RealSpeechV2Service {
       throw Error("受信Profile已变化，请重新确认方案");
     const state = t.windows.find((w: Obj) => w.windowId === id),
       config = t.plan.windows.find((w: Obj) => w.windowId === id);
+    if (
+      config.experimental &&
+      !t.experimentalApproval?.windows?.some(
+        (w: Obj) => w.windowId === id && w.configHash === planHash(config),
+      )
+    )
+      throw Error("实验配置没有对应的本地用户批准；不能依据Plan文字自行开启");
     if (state.locked) throw Error("Window已锁定");
     if (
       state.attempts.some(
@@ -988,6 +1058,22 @@ export class RealSpeechV2Service {
     json("plan.json", t.plan);
     json("capability-profile.json", t.profileSnapshot);
     json("current-versions.json", rows);
+    json("production-policy.json", {
+      principle: "NATURALNESS_FIRST_MINIMAL_INTERVENTION",
+      changeIsolationPolicy: "ONE_PRIMARY_VARIABLE_AT_A_TIME",
+      experimentalApproval: t.experimentalApproval || null,
+      windows: rows.map((r: Obj) => ({
+        windowId: r.windowId,
+        declaredComplexity: r.currentConfig.controlComplexity,
+        declaredRisk: r.currentConfig.naturalnessRisk,
+        instructionIntentCount: r.currentConfig.instructionIntentCount,
+        controlReason: r.currentConfig.controlReason,
+        experimental: r.currentConfig.experimental,
+        pronunciationCompletenessIntent: t.plan.intentRanges
+          .filter((n: Obj) => n.target.windowId === r.windowId)
+          .map((n: Obj) => n.pronunciationCompletenessIntent || ""),
+      })),
+    });
     json(
       "intent-ranges.json",
       t.plan.intentRanges.filter((n: Obj) => ids.includes(n.target.windowId)),
@@ -1026,6 +1112,7 @@ export class RealSpeechV2Service {
       "plan.json",
       "capability-profile.json",
       "current-versions.json",
+      "production-policy.json",
       "intent-ranges.json",
       "user-feedback.json",
       "manifest.json",

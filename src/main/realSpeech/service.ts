@@ -25,6 +25,7 @@ import {
   CASE_CHECKS,
   FIELDS,
   COSYVOICE_35_PLUS,
+  APP_VERSION,
   type Obj,
 } from "../../features/realSpeech/domain.ts";
 import { HttpClient, secureURL } from "../providers/http.ts";
@@ -529,7 +530,7 @@ export class RealSpeechService {
     if (p.attachments && !targetWindow && t.final?.path && existsSync(t.final.path))
       copyFileSync(t.final.path, join(dir, "current-final.wav"));
     const voice = this.app?.audio.voices().find((v) => v.id === t.voiceRef);
-    const text = `${targetWindow ? `只优化窗口 ${targetWindow.windowId}，必须返回仅针对该窗口的局部修订，其他窗口和Phrase保持不变。\n` : ""}# ChatGPT 真人口播 ${p.kind} Task\n软件版本1.2.9；不改原稿，不改音色。不猜发音“破平台食谱”。\n${count ? "音频附件包已准备；剪贴板不包含音频，需用户另行附上。" : "本次仅复制文字，未附音频；不得声称已听过音频。"}\n导演参考字段不会直接传入模型；关键表演要求须写入窗口instruction，整体rate不是句内速度。初始seed固定0。\n当前能力：${JSON.stringify({ actions: ACTIONS, fields: FIELDS, model: COSYVOICE_35_PLUS.model, region: COSYVOICE_35_PLUS.region, rate: COSYVOICE_35_PLUS.rate, pitch: COSYVOICE_35_PLUS.pitch, volume: COSYVOICE_35_PLUS.volume, seed: COSYVOICE_35_PLUS.seed, sampleRate: COSYVOICE_35_PLUS.sampleRate, format: COSYVOICE_35_PLUS.format, ssml: "仅真实支持的SSML；当前UI只编译Unit后break，不接受任意XML", pronunciation: "hot_fix拼音", instruction: `Han<=${COSYVOICE_35_PLUS.instructionHanSafetyMax} weighted<=${COSYVOICE_35_PLUS.providerInstructionWeightedMax}` })}\n任务上下文：\n\`\`\`json\n${JSON.stringify(scrub({ ...safe, voiceName: voice?.name, windows: t.windows.map((w: Obj) => ({ ...w, instructionCounts: instructionCount(w.instruction) })) }), null, 2)}\n\`\`\`\n请返回 ${p.kind === "Director" ? "CHATGPT_DIRECTOR_PLAN_V1" : "CHATGPT_EXECUTION_PLAN_V1"}。\n${protocol}\n${detail}`;
+    const text = `${targetWindow ? `只优化窗口 ${targetWindow.windowId}，必须返回仅针对该窗口的局部修订，其他窗口和Phrase保持不变。\n` : ""}# ChatGPT 真人口播 ${p.kind} Task\n软件版本${APP_VERSION}；不改原稿，不改音色。不猜发音“破平台食谱”。\n${count ? "音频附件包已准备；剪贴板不包含音频，需用户另行附上。" : "本次仅复制文字，未附音频；不得声称已听过音频。"}\n导演参考字段不会直接传入模型；关键表演要求须写入窗口instruction，整体rate不是句内速度。初始seed固定0。\n当前能力：${JSON.stringify({ actions: ACTIONS, fields: FIELDS, model: COSYVOICE_35_PLUS.model, region: COSYVOICE_35_PLUS.region, rate: COSYVOICE_35_PLUS.rate, pitch: COSYVOICE_35_PLUS.pitch, volume: COSYVOICE_35_PLUS.volume, seed: COSYVOICE_35_PLUS.seed, sampleRate: COSYVOICE_35_PLUS.sampleRate, format: COSYVOICE_35_PLUS.format, ssml: "仅真实支持的SSML；当前UI只编译Unit后break，不接受任意XML", pronunciation: "hot_fix拼音", instruction: `Han<=${COSYVOICE_35_PLUS.instructionHanSafetyMax} weighted<=${COSYVOICE_35_PLUS.providerInstructionWeightedMax}` })}\n任务上下文：\n\`\`\`json\n${JSON.stringify(scrub({ ...safe, voiceName: voice?.name, windows: t.windows.map((w: Obj) => ({ ...w, instructionCounts: instructionCount(w.instruction) })) }), null, 2)}\n\`\`\`\n请返回 ${p.kind === "Director" ? "CHATGPT_DIRECTOR_PLAN_V1" : "CHATGPT_EXECUTION_PLAN_V1"}。\n${protocol}\n${detail}`;
     writeFileSync(join(dir, "CHATGPT_TASK.md"), text, { flag: "wx" });
     return { text, dir, task: t };
   }

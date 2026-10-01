@@ -4,8 +4,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import Page from "../src/features/realSpeech/Page.tsx";
 const plan = JSON.parse(
-  readFileSync("docs/real-speech-v2-design-r2/examples/plan.json", "utf8"),
+  readFileSync("resources/real-speech-v2/examples/plan.json", "utf8"),
 );
+plan.intentRanges[0].pronunciationCompletenessIntent =
+  "轻读与自然带过，不改变正确读法";
+let previewPlan = plan;
 let task: any = {
   taskId: "ui-task",
   name: "V2界面任务",
@@ -58,7 +61,7 @@ Object.assign(window, {
           return true;
         case "preview":
           return {
-            plan,
+            plan: previewPlan,
             planHash: "hash",
             pending: plan.windows.map((w: any) => ({
               windowId: w.windowId,
@@ -67,6 +70,8 @@ Object.assign(window, {
           };
         case "import":
           assert.equal(p.confirmed, true);
+          if (previewPlan.windows.some((w: any) => w.experimental))
+            assert.equal(p.experimentalConfirmed, true);
           return structuredClone(task);
         case "mutate": {
           const w = task.windows.find((w: any) => w.windowId === p.windowId);
@@ -89,9 +94,12 @@ Object.assign(window, {
             diff: [{ field: "instruction", before: "旧", after: "新" }],
             generateIds: ["GW002"],
             previewHash: "preview",
+            primaryVariables: ["instruction"],
+            experimentalRequired: true,
           };
         case "patchApply":
           assert.equal(p.confirmed, true);
+          assert.equal(p.experimentalConfirmed, true);
           return {
             task,
             job: {
@@ -163,6 +171,9 @@ await act(async () => confirm.click());
 await click("保存执行方案");
 assert.equal(document.querySelectorAll(".rs-v2-window").length, 3);
 assert.ok(document.body.textContent?.includes("导演意图（只读）"));
+assert.ok(
+  document.body.textContent?.includes("发音完成度 / 口语粗糙度（E2，仅展示）"),
+);
 await click("生成新音频版本", document.querySelector(".rs-v2-window")!);
 assert.ok(document.body.textContent?.includes("等待Capability Spike验证"));
 assert.deepEqual(
@@ -183,6 +194,12 @@ assert.equal(apply.disabled, true);
 await act(async () =>
   (
     card.querySelectorAll("input[type=checkbox]")[1] as HTMLInputElement
+  ).click(),
+);
+assert.equal(apply.disabled, true, "普通Diff确认不能替代实验确认");
+await act(async () =>
+  (
+    card.querySelectorAll("input[type=checkbox]")[2] as HTMLInputElement
   ).click(),
 );
 await click("应用并生成新版本", card);
@@ -213,6 +230,29 @@ assert.deepEqual(
 await click("旧v1.2.9任务（只读）");
 await click("旧任务只读");
 assert.ok(document.body.textContent?.includes("旧数据库和原始音频保留"));
+previewPlan = JSON.parse(
+  readFileSync(
+    "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
+    "utf8",
+  ),
+);
+await change(
+  document.querySelector(".rs-v2-import textarea")!,
+  JSON.stringify(previewPlan),
+);
+await click("导入并校验方案");
+const experimentSave = [...document.querySelectorAll("button")].find(
+  (b) => b.textContent === "保存执行方案",
+)!;
+const importChecks = document.querySelectorAll<HTMLInputElement>(
+  ".rs-v2-import input[type=checkbox]",
+);
+assert.equal(importChecks.length, 2);
+await act(async () => importChecks[0].click());
+assert.equal(experimentSave.disabled, true, "普通导演确认不等于实验开启");
+await act(async () => importChecks[1].click());
+assert.equal(experimentSave.disabled, false);
+await click("保存执行方案");
 await act(async () => root.unmount());
 fail = true;
 const second = createRoot(document.getElementById("root")!);

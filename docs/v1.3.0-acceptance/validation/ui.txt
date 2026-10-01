@@ -1,0 +1,76 @@
+
+> chigetang-agent@1.3.0 test:ui
+> node scripts/run-ui-tests.mjs
+
+PASS app opens on one-click generation by default
+PASS 旧一键生成只保留 v124 导入入口
+PASS app switches to video generation after explicit navigation
+PASS generation page remains unchanged and starts empty
+PASS 11k editor draft autosaves through application to SQLite
+PASS 任务 page renders
+PASS 资产库 page renders
+PASS Prompt page renders
+PASS 模型与 API page renders
+PASS 设置 page renders
+PASS 旧统计路由在模型与 API 中打开统计 tab
+PASS no invalid nested buttons
+PASS 生成工作台保留 Seedance 并显示引擎模型账户选择
+PASS theme applies globally
+PASS template dialog opens
+PASS current version and New Task navigation
+PASS new task saves prior workspace and opens blank independent draft
+PASS visual asset picker shows image/video metadata
+PASS image filter
+PASS video filter
+PASS multiselect reuses image/video IDs without importing again
+PASS @ opens bound material menu
+PASS keyboard selects Video1 and inserts bound highlighted token
+PASS @ search filters selected assets
+PASS mouse selects Image1 with stable ID
+PASS WAN estimate remains visible in compact footer
+PASS all ratio diagrams use actual width/height relationships
+PASS 内部兼容克隆仍可打开独立未提交草稿
+PASS v105 task center excludes drafts and preserves them in workspace storage
+PASS current queue exposes delete control
+PASS queue click opens the selected task without bypassing the button
+PASS current task detail contains delete operation
+PASS current task deletion hides task, preserves materials and billing
+PASS billing center shows today yesterday month estimates and actual split
+PASS account connection diagnostics show correct ws workspace/region, no secret
+PASS generate button enqueues once and resets submitted workspace without cloud charges
+PASS reset requires duration selection and generation page hides model controls
+PASS v104 Ctrl Enter cannot submit duration zero
+PASS v104 tab rename Enter saves to SQLite
+PASS v104 tab rename Escape preserves original
+PASS v104 tab rename blur saves
+PASS v104 usage selection persists asset default by ID
+PASS v104 thumbnail opens internal preview
+PASS v104 second preview click closes
+PASS v104 accounting modal persists confirmed cost and audit
+PASS v104 accounting modal undo preserves audit
+PASS v109 audio workspace is fixed to one model and opens one config
+PASS v105 unified tasks default to all and contain no drafts
+PASS v105 asset sidebar quick filters select one shared asset page
+PASS 修复版资产库统一入口，不再增加侧栏重复类型入口
+PASS v106 sidebar and visible asset tabs stay synchronized
+PASS v106 asset page tab updates the sidebar selection
+PASS v105 settings exposes independent paths and tray preference
+PASS v109 sidebar keeps the existing logo asset at its original size
+PASS v109 clone home fixes the model and exposes three-stage workflow
+PASS v109 clone modal shows all three explicit stages
+PASS v109 creation submits official defaults and preserves API/reference
+PASS v109 generation is fixed to CosyVoice and starts with one complete config
+PASS v109 can add an independent second config with a different seed
+PASS v123 navigation removes long video and keeps other menu ordering
+PASS transcription page renders the requested title and three header actions
+PASS v123 oneclick list shows actual creation date and explicit pending states
+PASS v123 reads metadata instead of request params and handles missing output
+PASS v123 folder entry only uses existing open API
+PASS v123 resizing is constrained and saved independently of drafts
+PASS v123 video task heading is unified
+PASS v128 无效模型提供修复入口且保留草稿
+PASS v128 引擎选择修复无效模型
+PASS v128 切换可灵保留Prompt和素材并使用模型参数
+PASS v128 小工具两张卡片，初始待处理，无文件不可开始
+PASS v128 复刻使用独立页面，编译入口移至新页面
+UI unit checks: 71 passed. jsdom DOM tests, not visual or Windows tests.

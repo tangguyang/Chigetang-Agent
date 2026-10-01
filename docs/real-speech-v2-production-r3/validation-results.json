@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-01",
+  "environment": {
+    "os": "Windows 11 Pro 10.0.26200",
+    "node": "24.19.0",
+    "electron": "44.3.0"
+  },
+  "newCloudRequests": 0,
+  "secondSpikeRun": false,
+  "sourceCommitOrPush": false,
+  "tests": {
+    "typecheck": "PASS",
+    "npmTest": {
+      "passed": 178,
+      "failed": 0
+    },
+    "uiRegression": {
+      "passed": 71,
+      "failed": 0
+    },
+    "repair2": {
+      "corePassed": 53,
+      "ui": "PASS",
+      "sqliteMockWavWorkflow": "PASS"
+    },
+    "newUIExperimentConfirmations": "PASS",
+    "nativeElectronDocuments": "PASS",
+    "build": "PASS",
+    "bundleRealMp4": "PASS",
+    "runtimeDocSchemaProfileMirror": "PASS",
+    "finalWorkflowAfterExperimentScopeFix": "PASS"
+  },
+  "evidence": {
+    "caseRecords": 16,
+    "filesHashChecked": 46,
+    "originalApiCallsStill": 15,
+    "rawRecordsUnchanged": true
+  },
+  "limits": [
+    "No new cloud/audio evaluation in this revision",
+    "Windows10 and physical multi-DPI not tested",
+    "20 weighted chars / 80-200ms are product hypotheses, not optimized official ranges",
+    "Old2.0/draft.2 read-only; no silent protocol upgrade"
+  ]
+}

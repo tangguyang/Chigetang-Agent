@@ -1,0 +1,333 @@
+{
+  "schema": "BATCH1_EVIDENCE_PRESERVATION_V1",
+  "rawRecordsLocation": "D:\\吃个糖Agent数据库\\real-speech-v2\\spike\\c6502fbb188c128c61094306e71fe894fe4be81c7ee0692f42888905d9781dac",
+  "rawRecordsModified": false,
+  "cases": [
+    {
+      "caseId": "01",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "01-request.json",
+          "sha256": "1437ce1dacfad17640e8522078227d666cb4e4da557636a4f79415800a8b1798",
+          "bytes": 427
+        },
+        {
+          "name": "01-response.json",
+          "sha256": "fe83f63324c620c359a2e1c579883fefe29d51f8c382679309c3dabb4242acd1",
+          "bytes": 599
+        },
+        {
+          "name": "01.wav",
+          "sha256": "4371bf1fcecea8da93113143839d7abd611d94e0d995273a3494ead8151124eb",
+          "bytes": 407084
+        }
+      ]
+    },
+    {
+      "caseId": "02",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "02-request.json",
+          "sha256": "eb6451dc62fdd37813fd721d8ca30c7f7ecf75b9b89a26a5b7f26be516aea2ad",
+          "bytes": 514
+        },
+        {
+          "name": "02-response.json",
+          "sha256": "f9cdb01c3248f965503ab5f4943c6c59fe73df9dd8bba240653ded9867a56ca2",
+          "bytes": 603
+        },
+        {
+          "name": "02.wav",
+          "sha256": "b9adf1226cfb2c5d49d473772aa88d6853a8261d14f3fee50227a130b43c790f",
+          "bytes": 506924
+        }
+      ]
+    },
+    {
+      "caseId": "03",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "03-request.json",
+          "sha256": "1b2aef2913d2cf74e98e33bbb9c79eb17ca238fafe0a7759a48fafd4eff214fa",
+          "bytes": 577
+        },
+        {
+          "name": "03-response.json",
+          "sha256": "895af5b7060dfabbc105c8fd670f23fa940846bd65f363e9ae29b9826f53fe70",
+          "bytes": 599
+        },
+        {
+          "name": "03.wav",
+          "sha256": "0f6d236fde2735ea74392c0544db55113d28ee0d031f07b5c928a58d6fe61937",
+          "bytes": 591404
+        }
+      ]
+    },
+    {
+      "caseId": "04",
+      "status": "LOCAL_BLOCKED_NOT_SENT",
+      "files": [
+        {
+          "name": "case04-local.json",
+          "sha256": "0df1831d0805290d44a535647bda6cef38752cbcf1a2777b521117ff6180cb48",
+          "bytes": 572
+        }
+      ]
+    },
+    {
+      "caseId": "05",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "05-request.json",
+          "sha256": "b1aed45f7437a0823cc86ebc8c647fdf9464bf3832a002916f5e26a8c174c698",
+          "bytes": 441
+        },
+        {
+          "name": "05-response.json",
+          "sha256": "32eba5bfae15fba0257d0bbcf70af7a0491f91aaa8491bd7ee0c5b17c911c245",
+          "bytes": 599
+        },
+        {
+          "name": "05.wav",
+          "sha256": "4371bf1fcecea8da93113143839d7abd611d94e0d995273a3494ead8151124eb",
+          "bytes": 407084
+        }
+      ]
+    },
+    {
+      "caseId": "06",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "06-request.json",
+          "sha256": "a6d686b827d06eb92684dd7c26ba7cada1a98132bcbee36f79c8a268b22bddef",
+          "bytes": 464
+        },
+        {
+          "name": "06-response.json",
+          "sha256": "9f9389a6f687f74b900dbe436ce66c5abd37c0e2b1a10d16f2c95a9217642b99",
+          "bytes": 599
+        },
+        {
+          "name": "06.wav",
+          "sha256": "a5b2aa8b694840bbe7aef9f5c2050e26d4d1d70bba80eb7975fc1811c15cf2dc",
+          "bytes": 545324
+        }
+      ]
+    },
+    {
+      "caseId": "07",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "07-request.json",
+          "sha256": "7fb5b7ae920a0e99cf701d5323f3a4cf377b919c1c37b6338189cb1aa9149ed2",
+          "bytes": 551
+        },
+        {
+          "name": "07-response.json",
+          "sha256": "ea064a9ea32bf163c797be534aaee15a09df65027f05ff2d881d455fb967d093",
+          "bytes": 599
+        },
+        {
+          "name": "07.wav",
+          "sha256": "2a80d688ec55c47ebf28f8c7f2819797fd0ba6387ad0428ae5b47dd0ba84dac3",
+          "bytes": 614444
+        }
+      ]
+    },
+    {
+      "caseId": "08",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "08-request.json",
+          "sha256": "d69462c92fd1712e48553ba39d2bf9e5fbcdee3d061bb78fd3badcd20586b211",
+          "bytes": 595
+        },
+        {
+          "name": "08-response.json",
+          "sha256": "e706d25de3a084c93450e23543df5027ca1e80171d6d6007fd52891fb8d5a070",
+          "bytes": 603
+        },
+        {
+          "name": "08.wav",
+          "sha256": "da793eea5ea3f96286f7f2906e98e279dc78999f06a16ad65beff4fa425ccd2a",
+          "bytes": 652844
+        }
+      ]
+    },
+    {
+      "caseId": "09",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "09-request.json",
+          "sha256": "d8a559b345bb392e83fe0ce8a7a722f5a173d83abda091746b0350f4ccb6b689",
+          "bytes": 598
+        },
+        {
+          "name": "09-response.json",
+          "sha256": "b93a45d5cb53437b8870c9e36ece2d8d5832f4d3afec0a38c7967caaa991173e",
+          "bytes": 603
+        },
+        {
+          "name": "09.wav",
+          "sha256": "6ffd4aa3ab0caa978c9d5306e589cfdb7a19ec2e36466f08a0eff0b13950831b",
+          "bytes": 673200
+        }
+      ]
+    },
+    {
+      "caseId": "10",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "10-request.json",
+          "sha256": "f724b0ba76b5a88bd9fd39a076734ab7239764faee584c3fedf7210d409b4583",
+          "bytes": 597
+        },
+        {
+          "name": "10-response.json",
+          "sha256": "8060c1deae61e1ce73541a8c79649497bda3d79686ed362bcca993ef66b2a5e7",
+          "bytes": 601
+        },
+        {
+          "name": "10.wav",
+          "sha256": "7e13f366450a602e893ce9fae85e610e84724b9c94cbb2f4443090e696517449",
+          "bytes": 639824
+        }
+      ]
+    },
+    {
+      "caseId": "11",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "11-request.json",
+          "sha256": "668a58c0983d6b1af26586fc2a4d46bf59eb9580dc7fb96060440d2d67d54ab3",
+          "bytes": 489
+        },
+        {
+          "name": "11-response.json",
+          "sha256": "08d3849ed71607f50b881064d7cf88a454b4e38660aaf064522a9201b56d9321",
+          "bytes": 601
+        },
+        {
+          "name": "11.wav",
+          "sha256": "baa046302faf368d744d3d7da0901a3100987bc0efb4e2476e709157f971873c",
+          "bytes": 683564
+        }
+      ]
+    },
+    {
+      "caseId": "12",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "12-request.json",
+          "sha256": "0338b10d890d71b63e6704f4f61c78e2ea25874d3b2243562dd9291166579d3f",
+          "bytes": 544
+        },
+        {
+          "name": "12-response.json",
+          "sha256": "d06923e93b809dd3c479cac0a57976e2021fd479eb19be4b5ae4ed2967623607",
+          "bytes": 599
+        },
+        {
+          "name": "12.wav",
+          "sha256": "baa046302faf368d744d3d7da0901a3100987bc0efb4e2476e709157f971873c",
+          "bytes": 683564
+        }
+      ]
+    },
+    {
+      "caseId": "13",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "13-request.json",
+          "sha256": "2ab318397dc91891a3fa8d0d38c6014bbee42af2b8bbc696fb4e7d4c57a48d4c",
+          "bytes": 512
+        },
+        {
+          "name": "13-response.json",
+          "sha256": "a4ee33eed44b3e89f4b3332ed7c95987d38f9ef1a9acc915587a22449eaa89a9",
+          "bytes": 599
+        },
+        {
+          "name": "13.wav",
+          "sha256": "858697c53edddc875337c14cb83df91687e0b6465683badc42aecd59c2163ef5",
+          "bytes": 752684
+        }
+      ]
+    },
+    {
+      "caseId": "14",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "14-request.json",
+          "sha256": "eb6451dc62fdd37813fd721d8ca30c7f7ecf75b9b89a26a5b7f26be516aea2ad",
+          "bytes": 514
+        },
+        {
+          "name": "14-response.json",
+          "sha256": "e29162b4d8606e0c93de7957d9ed9c2faa20dcef61a8854cfbf837ccfac58fd8",
+          "bytes": 603
+        },
+        {
+          "name": "14.wav",
+          "sha256": "b9adf1226cfb2c5d49d473772aa88d6853a8261d14f3fee50227a130b43c790f",
+          "bytes": 506924
+        }
+      ]
+    },
+    {
+      "caseId": "15",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "15-request.json",
+          "sha256": "6101733350b0485265f3b9692200789df43269b50e1f7f77549ac86ed89c941e",
+          "bytes": 444
+        },
+        {
+          "name": "15-response.json",
+          "sha256": "95b9c4a030dd68ee415988100fe8ba2d6ae50d7ddc38a8f41902ef90ce9ebbf1",
+          "bytes": 601
+        },
+        {
+          "name": "15.wav",
+          "sha256": "3d48082d93f49148203133219e1b7c91f95c936e4003b58bbb1f311e1a5ace4c",
+          "bytes": 629804
+        }
+      ]
+    },
+    {
+      "caseId": "16",
+      "status": "HTTP200_WAV_SAVED",
+      "files": [
+        {
+          "name": "16-request.json",
+          "sha256": "93c67c251966360a747b4dbcd9210d54705565311fdaf840b933f62da5330524",
+          "bytes": 444
+        },
+        {
+          "name": "16-response.json",
+          "sha256": "7052d36c34d6289b4058e4f36b30c5827ca77724183375e4e21d7666797fae04",
+          "bytes": 601
+        },
+        {
+          "name": "16.wav",
+          "sha256": "baa046302faf368d744d3d7da0901a3100987bc0efb4e2476e709157f971873c",
+          "bytes": 683564
+        }
+      ]
+    }
+  ]
+}

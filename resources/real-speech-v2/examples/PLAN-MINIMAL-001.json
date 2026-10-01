@@ -1,0 +1,115 @@
+{
+  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
+  "protocolVersion": "2.1",
+  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+  "capabilityVersion": "1.0.0-draft.3",
+  "planId": "PLAN-MINIMAL-001",
+  "parentPlanId": null,
+  "originalText": "这是验收示例。",
+  "originalTextHash": null,
+  "engine": {
+    "name": "aliyun-cosyvoice",
+    "model": "cosyvoice-v3.5-plus",
+    "region": "cn-beijing",
+    "transport": "http"
+  },
+  "voiceRequirements": {
+    "kind": "cloned",
+    "targetModel": "cosyvoice-v3.5-plus",
+    "continuity": "same_voice_all_windows",
+    "requestedVoiceRef": null
+  },
+  "directorReference": null,
+  "windows": [
+    {
+      "windowId": "GW001",
+      "start": 0,
+      "end": 7,
+      "original": "这是验收示例。",
+      "synthesisText": "这是验收示例。",
+      "textApproval": {
+        "changed": false,
+        "reason": "原样文本",
+        "confirmation": null
+      },
+      "execution": {
+        "instruction": "",
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "format": "wav",
+        "sampleRate": 48000,
+        "languageHints": [
+          "zh"
+        ]
+      },
+      "ssml": {
+        "enabled": false,
+        "nodes": [],
+        "speakSegments": []
+      },
+      "pronunciation": [],
+      "hotFix": {
+        "pronunciation": [],
+        "replace": []
+      },
+      "transition": {
+        "kind": "silence",
+        "pauseMs": 0
+      },
+      "executionConfidence": [
+        {
+          "intentId": "I1",
+          "intent": "仅记录明确seed，不承诺真人感",
+          "capability": "seed",
+          "level": "E1",
+          "implementation": "明确执行字段",
+          "targetPaths": [
+            "/windows/0/execution/seed"
+          ],
+          "approximation": null
+        }
+      ],
+      "lockedFields": [
+        "/original",
+        "/start",
+        "/end"
+      ],
+      "controlComplexity": "L0",
+      "naturalnessRisk": "LOW",
+      "experimental": false,
+      "controlReason": "最小合法结构示例，不是Golden Case导演Plan",
+      "instructionIntentCount": 0
+    }
+  ],
+  "rehearsalAnchors": [],
+  "unresolvedItems": [],
+  "lockedFields": [
+    "/originalText",
+    "/engine",
+    "/voiceRequirements"
+  ],
+  "intentRanges": [
+    {
+      "intentId": "I1",
+      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
+      "target": {
+        "windowId": "GW001",
+        "start": 0,
+        "end": 7,
+        "targetText": "这是验收示例。"
+      },
+      "emphasisTerms": [],
+      "humanIntent": "仅原样连续文本基线",
+      "pacingIntent": "",
+      "pauseIntent": "",
+      "emotionIntent": "",
+      "relationshipIntent": "",
+      "requestedConfidence": "E2",
+      "adoptedExecution": [],
+      "limitation": "不保证真人感或局部表演",
+      "unresolvedItemId": null
+    }
+  ]
+}

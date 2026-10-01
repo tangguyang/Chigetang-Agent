@@ -1,0 +1,4 @@
+
+> chigetang-agent@1.2.9 typecheck
+> tsc --noEmit
+

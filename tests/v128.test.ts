@@ -17,7 +17,16 @@ import { HttpClient } from '../src/main/providers/http.ts';
 import type { Snapshot } from '../src/shared/types.ts';
 import { pageNumbers } from '../src/renderer/tools/pdf.ts';
 const hash=(b:Buffer)=>createHash('sha256').update(b).digest('hex');
-test('v128 旧一键生成调用链逐文件与上传 v124 完全一致',()=>{for(const [path,digest] of Object.entries(JSON.parse(readFileSync('legacy-v124-sha256.json','utf8'))))assert.equal(hash(readFileSync(path)),digest,path);});
+test('v128 旧一键生成调用链与上传 v124 一致，仅允许产品版本升级',()=>{
+ for(const [path,digest] of Object.entries(JSON.parse(readFileSync('legacy-v124-sha256.json','utf8')))){
+  let bytes=readFileSync(path);
+  if(path==='src/shared/brand.ts'){
+   assert.match(bytes.toString(),/version: "1\.3\.0"/);
+   bytes=Buffer.from(bytes.toString().replace('version: "1.3.0"','version: "1.2.3"'));
+  }
+  assert.equal(hash(bytes),digest,path);
+ }
+});
 test('v128 本地 MP4/MOV/MKV → MP3/WAV，中文路径、无音轨、错误文件、输出目录',async()=>{
  const root=mkdtempSync(join(tmpdir(),'中文工具-'));const tools=new LocalTools(()=>undefined);
  for(const extension of ['mp4','mov','mkv']){const source=join(root,'中文视频.'+extension);execFileSync('ffmpeg',['-nostdin','-v','error','-f','lavfi','-i','color=size=320x240:rate=25','-f','lavfi','-i','sine=frequency=440:sample_rate=44100','-t','1','-c:v','libx264','-c:a','aac',source]);for(const format of ['mp3','wav']){const r=await tools.audio(source,format);assert(existsSync(r.files[0]));const probe=JSON.parse(execFileSync('ffprobe',['-v','error','-show_streams','-of','json',r.files[0]],{encoding:'utf8'}));assert.equal(probe.streams.length,1);assert.equal(probe.streams[0].codec_name,format==='mp3'?'mp3':'pcm_s16le');let opened='';await tools.open(r.folder,async p=>{opened=p;return '';});assert.equal(opened,r.folder);await assert.rejects(tools.open(r.folder,async()=> 'OS error'),/OS error/);}}

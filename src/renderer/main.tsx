@@ -173,7 +173,7 @@ function App() {
         </nav>
         <div className="sidebar-bottom">
           <small>
-            {brand.name} <span>V{state.boot.version}</span>
+            {brand.name} <span>v{state.boot.version}</span>
           </small>
         </div>
         <div

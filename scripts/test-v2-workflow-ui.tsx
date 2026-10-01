@@ -10,7 +10,7 @@ const service = new RealSpeechV2Service(
   mkdtempSync(join(tmpdir(), "ctg-v2-ui-workflow-")),
 );
 const plan = JSON.parse(
-  readFileSync("docs/real-speech-v2-design-r2/examples/plan.json", "utf8"),
+  readFileSync("resources/real-speech-v2/examples/plan.json", "utf8"),
 );
 const fake = async (_body: any, path: string) => {
   const n = 2400,
@@ -139,7 +139,7 @@ const before = structuredClone(t.plan.windows[0]);
 await click("锁定Window", card(0));
 t = service.get(t.taskId);
 const patch = JSON.parse(
-  readFileSync("docs/real-speech-v2-design-r2/examples/patch.json", "utf8"),
+  readFileSync("resources/real-speech-v2/examples/patch.json", "utf8"),
 );
 patch.taskId = t.taskId;
 patch.basePlanId = t.plan.planId;

@@ -1,0 +1,68 @@
+
+> chigetang-agent@1.3.0 test:repair2
+> node --experimental-strip-types --test tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v129-media.test.ts && node scripts/run-real-speech-ui.mjs && node scripts/run-repair-ui.mjs && node scripts/run-repair2-workflow-ui.mjs
+
+✔ 完整HTTP适配器模拟→下载→真实ffprobe/FFmpeg→48kWAV→拼接→Golden门禁 (809.7861ms)
+✔ 云端成功下载失败保存remote证据，恢复仅GET不再付费 (355.2528ms)
+✔ 两个窗口实际拼接增加指定停顿，重拼接不调用TTS (622.6972ms)
+✔ 修复：7.8秒及范围外有效试演可确认，缺失文件与无效时长拒绝 (45.0448ms)
+✔ 修复：参数变化后旧試演不能放行；新试演失败撤销原通过 (32.7542ms)
+✔ 修复：第二窗口試演采用自己的参数；跨窗口拒绝且不调用模型 (20.7346ms)
+✔ 修复：新建与修改原稿保留历史结果；删除原稿变更前待修复动作 (18.8733ms)
+✔ 修复：音频幂等入库→删除任务→重启→独立资产与来源快照仍可访问 (61.1564ms)
+✔ 修复：资产同步失败禁止删除，文件缺失保留独立记录 (18.3357ms)
+✔ 修复：数据库升级重复打开不丢数据，旧无绑定通过状态撤销 (18.5037ms)
+✔ 统一资产库：类型、分组、搜索、分页、隐藏恢复与普通任务原详情 (143.8578ms)
+✔ 复制请求：默认文字导出不复制WAV，绑定更新且声明未附音频 (21.1876ms)
+✔ 相同音频多版本：首份文件丢失后改用仍存在的副本，保留全部来源 (54.1949ms)
+✔ 修复2：原稿修改保留当前段历史，重生成继续revision且旧WAV不变 (36.6833ms)
+✔ 修复2：跨多句的导演Phrase局部改字保留其他Phrase身份 (0.3018ms)
+✔ 修复2：未知结果不能靠修改参数、音色或原稿绕过计费确认 (49.034ms)
+✔ 修复2：首轮试演不再是正式窗口生成的全局Gate (15.4357ms)
+✔ 修复2：本段修改保存后可直接重生成且旧音频不覆盖 (20.7207ms)
+✔ 修复2：修改一个窗口不会把人工生产流程锁死 (20.4973ms)
+✔ 修复2：Instruction双门槛继续严格执行 (0.8373ms)
+✔ 修复2：原稿局部修改保留未变化Unit与未受影响窗口结果 (21.6158ms)
+✔ 修复2：阶段二 REAL_SPEECH_PERFORMANCE_PLAN_V1 可直接导入无需旧导出上下文 (15.4979ms)
+✔ 修复2：阶段二导入必须逐字覆盖当前原稿且严格锁定模型能力 (13.2647ms)
+✔ 修复2：Phrase导演标注可人工修改保存且不强制重生成 (12.3286ms)
+✔ 修复2：同段多版本倒序可选，切换当前版本恢复对应快照且旧文件保留 (20.6819ms)
+✔ 修复2：阶段二导入后改原稿保留未变化Phrase元数据，单句修改保留Phrase身份并升revision (13.1045ms)
+✔ Instruction 40汉字 (1.5953ms)
+✔ Instruction 41汉字 (0.255ms)
+✔ Instruction 50汉字 (0.1096ms)
+✔ Instruction 39汉字标点 (0.0973ms)
+✔ Instruction 40汉字非汉超限 (0.161ms)
+✔ Instruction 英文数字空格 (0.0689ms)
+✔ Instruction emoji (0.1071ms)
+✔ Instruction Han扩展 (0.0965ms)
+✔ 严格Director与Execution示例 (25.125ms)
+✔ 拒绝旧/危险字段 taskId (14.477ms)
+✔ 拒绝旧/危险字段 taskRevision (12.7818ms)
+✔ 拒绝旧/危险字段 exportId (13.7967ms)
+✔ 拒绝旧/危险字段 contextHash (12.7961ms)
+✔ 拒绝旧/危险字段 apiKey (12.2945ms)
+✔ 拒绝多协议、语法错、未知schema、嵌套未知字段、过长指令、未知Unit/Beat (14.4527ms)
+✔ 重复planId/planHash，事务不改变原稿 (14.4436ms)
+✔ 未知Window、越权、参数类型、NO_CHANGE和RECONCAT_ONLY (12.7638ms)
+✔ 双击只请求一次，confirmed不可覆盖，快照与新revision (24.0322ms)
+✔ ambiguous timeout不重试且unknown_result不可自动再发 (17.3863ms)
+✔ 崩溃恢复generating→interrupted，unknown_result保留 (16.595ms)
+✔ 独立DB损坏不会修改旧库 (1.9194ms)
+✔ 数据库事务rollback (12.1813ms)
+✔ Unit稳定、纯文本长度和dangerous XML拦截 (11.8357ms)
+✔ 三篇真实台词协议E2E（模拟TTS；不代表真人听感） (66.6757ms)
+✔ JOINT_REPAIR必须相邻，合并后方案事务执行，三轮停止 (12.5647ms)
+✔ 手动超限在提交前拦截，原稿更新使旧方案失效，试演未知不补发 (13.8597ms)
+✔ 已应用修复只执行一次，成功后消耗pendingAction并记录After (15.9742ms)
+ℹ tests 53
+ℹ suites 0
+ℹ pass 53
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2029.331
+PASS V2 UI：首页导入确认、只读意图、多Window、单段/多段框架、Patch Diff确认、诊断、独立文档调用、旧任务只读、错误隔离
+PASS 非口播修复版UI回归：统一资产入口、复刻标题手册（旧口播交互由V2测试替代）
+PASS V2 UI+SQLite+模拟WAV集成：导入→多段生成→锁保护Patch→V1/V2选择与回滚→真实FFmpeg拼接→诊断ZIP→Golden；零付费网络

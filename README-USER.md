@@ -1,3 +1,15 @@
+# 吃个糖 Agent v1.3.0
+
+当前正式版本为 v1.3.0，真人口播采用 V2.1 / R3。请读 `v1.3.0-Release-Notes.md`、`v1.3.0-Upgrade-Guide.md` 和 `docs/v1.3.0-acceptance/README.md`。
+
+Windows x64 绿色版使用独立程序目录和独立数据目录 `D:\吃个糖Agent数据库-v1.3.0`；本机已通过一致性快照复用原有安全账户、Workspace、Region 和真实复刻音色。旧绿色版、旧数据库、旧 WAV 保留原样。
+
+运行协议：`REAL_SPEECH_EXECUTION_PLAN_V2` / `2.1` / `aliyun.cosyvoice-v3.5-plus.cn-beijing.http` / `1.0.0-draft.3`。此次只验收最小 Plan 导入，未调用云端 TTS、未生成 Golden Case。
+
+以下内容是原有历史说明，不代表 v1.3.0 当前版本和验收结论。
+
+---
+
 # 吃个糖Agent v1.2.7
 
 第二阶段本地任务编译。升级与验收请见 `v1.2.7-Upgrade-Guide.md`、`v1.2.7-Release-Notes.md`、`docs/v1.2.7/TEST-REPORT.md`。将 Windows 压缩包完整解压到新的程序目录，运行 `吃个糖Agent.exe`；既有 `D:\吃个糖Agent数据库` 保持原位。

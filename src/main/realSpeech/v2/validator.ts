@@ -1,4 +1,5 @@
 import { buildRequest } from "./request.ts";
+import { validateProductionPolicy } from "./productionPolicy.ts";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -171,6 +172,7 @@ export class PlanValidator {
       if (w.synthesisText !== w.original && !w.textApproval?.confirmation)
         throw Error("改动合成文本须明确确认");
       const e = w.execution;
+      validateProductionPolicy(w, this.profile.productPolicy.productionRules);
       if (
         e.languageHints.some(
           (h: string) =>
@@ -411,13 +413,15 @@ export class PlanValidator {
       "seed",
       ...(w.execution.instruction ? ["instruction"] : []),
       ...(w.ssml.enabled ? ["ssml"] : []),
-      ...(w.ssml.speakSegments.length
-        ? [
-            "parallelSpeak",
-            "speakRangeRate",
-            "speakRangePitch",
-            "speakRangeVolume",
-          ]
+      ...(w.ssml.speakSegments.length > 1 ? ["parallelSpeak"] : []),
+      ...(w.ssml.speakSegments.some((s: Obj) => s.rate !== 1)
+        ? ["speakRangeRate"]
+        : []),
+      ...(w.ssml.speakSegments.some((s: Obj) => s.pitch !== 1)
+        ? ["speakRangePitch"]
+        : []),
+      ...(w.ssml.speakSegments.some((s: Obj) => s.volume !== 50)
+        ? ["speakRangeVolume"]
         : []),
       ...w.ssml.nodes.map(
         (n: Obj) =>
@@ -429,23 +433,33 @@ export class PlanValidator {
         ? ["hotFix"]
         : []),
     ];
+    const enabled = (state: string | undefined) =>
+      state?.startsWith("PRODUCT_ENABLED") ||
+      (w.experimental &&
+        [
+          "PRODUCT_DISABLED_BY_DEFAULT",
+          "PRODUCT_DISABLED_BY_DEFAULT_FOR_PERFORMANCE",
+        ].includes(state || ""));
     const pending = [...new Set(caps)].filter(
       (k) =>
-        this.profile.productPolicy.capabilityAvailability[k]?.state !==
-        "PRODUCT_ENABLED",
+        !enabled(this.profile.productPolicy.capabilityAvailability[k]?.state),
     );
     if (
       w.execution.instruction &&
       w.ssml.enabled &&
-      this.profile.productPolicy.combinationAvailability?.instructionWithSsml
-        ?.state !== "PRODUCT_ENABLED"
+      !enabled(
+        this.profile.productPolicy.combinationAvailability?.instructionWithSsml
+          ?.state,
+      )
     )
       pending.push("instructionWithSsml");
     if (
       w.execution.instruction &&
-      w.ssml.speakSegments.length &&
-      this.profile.productPolicy.combinationAvailability
-        ?.parallelSpeakWithInstruction?.state !== "PRODUCT_ENABLED"
+      w.ssml.speakSegments.length > 1 &&
+      !enabled(
+        this.profile.productPolicy.combinationAvailability
+          ?.parallelSpeakWithInstruction?.state,
+      )
     )
       pending.push("parallelSpeakWithInstruction");
     return pending;

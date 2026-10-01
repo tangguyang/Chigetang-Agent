@@ -1,0 +1,7 @@
+
+Error occurred in handler for 'speech-document:copy': Error: 模拟剪贴板失败
+    at import_electron2.clipboard.writeText (D:\Codex\吃个糖Agent项目\scripts\.v2-doc-tests.cjs:290:13)
+    at D:\Codex\吃个糖Agent项目\scripts\.v2-doc-tests.cjs:106:33
+    at Session.<anonymous> (node:electron/js2c/browser_init:2:123833)
+    at Session.emit (node:events:514:28)
+PASS Electron独立文档窗口：non-modal、并开/复用、完整复制、固定工具栏、小窗口按钮、复制错误、关闭隔离及安全preload

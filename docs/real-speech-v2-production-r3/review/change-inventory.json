@@ -1,0 +1,343 @@
+{
+  "files": [
+    {
+      "path": "docs/real-speech-v2-production-r3/COSYVOICE_CAPABILITY_PROFILE.v1.json",
+      "kind": "new",
+      "sha256": "f5c790f7ec501c1ea1dace2526c84c1c4d1ce40e9827c36314b575840f906b59",
+      "bytes": 29786
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/README.md",
+      "kind": "new",
+      "sha256": "fd34f40e09b02035db3637a878e5e223aa0fd765182ffea2e105f0895478928b",
+      "bytes": 2498
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/director-dictionary.json",
+      "kind": "new",
+      "sha256": "7d1124985380f27769f2d6c643f015eb175a0699f3601554bd3977794b5e5e35",
+      "bytes": 27181
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/docs/capability.md",
+      "kind": "new",
+      "sha256": "96277228fd5eb9af38b76292b6a92638ad117b85fde27f7d5784458d21ff2b83",
+      "bytes": 4602
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/docs/compiler.md",
+      "kind": "new",
+      "sha256": "26c598f6b54da80865a39999b18df25baac3f744e72375eac6d76ddef0c851be",
+      "bytes": 8729
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/docs/diagnosis.md",
+      "kind": "new",
+      "sha256": "16e49ba693df83288cd2d1ded0533d7b7324ad508e2b0867e09b8c704c3afa59",
+      "bytes": 3737
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/docs/director.md",
+      "kind": "new",
+      "sha256": "b1f6d0df1d4f4076f557e9cc45cc7220ef9de5d08c7c3563cf7257c3ef876420",
+      "bytes": 30092
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/docs/manual.md",
+      "kind": "new",
+      "sha256": "6cc2536d6fc3f31c70d9994756dc416c24b70c6a68657a9a366d3349cce9b428",
+      "bytes": 4804
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/docs/template.md",
+      "kind": "new",
+      "sha256": "e1b9aaef923c7905e57b81ae23a42234df17847e3af760733f92146ec448240d",
+      "bytes": 5419
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/evidence/batch1-record-manifest.json",
+      "kind": "new",
+      "sha256": "66e0bb1fb53b48fa22a3f936030d8328aecd9819e02bedf0433c77b180bc6edf",
+      "bytes": 9817
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/examples/patch.json",
+      "kind": "new",
+      "sha256": "3f273cf2e224737aed3e5f9d16e517f36315f160202f1c0ae5751e8cffac464a",
+      "bytes": 2129
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/examples/plan-l0-baseline.json",
+      "kind": "new",
+      "sha256": "2a9aea3a044eefef965ba19533c2f90dc701104204b0568edb64f0b7f0e9a55d",
+      "bytes": 9205
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/examples/plan-with-optional-audit.json",
+      "kind": "new",
+      "sha256": "11168e6a08ab11154d52de320715c67362267bece44270b3e52602ae1a679a75",
+      "bytes": 10571
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/examples/plan-with-speak-candidates.json",
+      "kind": "new",
+      "sha256": "a62baab7b11480c3c813c0a4103c2e827ce6890065a08cfd936fa5cff18acb93",
+      "bytes": 11016
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/examples/plan-with-sub-candidate.json",
+      "kind": "new",
+      "sha256": "3289b3d6bd6cf27ca13df514f7ab578fcf7cece6c19f246bfb3a949f7ae37558",
+      "bytes": 10580
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/examples/plan.json",
+      "kind": "new",
+      "sha256": "cc3960044fdba78a0ac714fe79ef7176cecac2975839e30117d0e4f556d0397c",
+      "bytes": 10409
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/review/runtime-and-source.patch",
+      "kind": "new",
+      "sha256": "18f87ed4eeb1f2d750fe51a61c0f9bd79cd122a1ea7012cd3ba742c4341e5d7c",
+      "bytes": 253902
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
+      "kind": "new",
+      "sha256": "c4442ba0dbba66ed539f7d6b1f56b4a77c928360df5337773e3dadfd14eaf369",
+      "bytes": 9383
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
+      "kind": "new",
+      "sha256": "9c2fe5f7698e68b0944f6b4f5c63d764b21dcdd4e44e07d8c93aba1d01eab851",
+      "bytes": 6127
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/schemas/common.schema.json",
+      "kind": "new",
+      "sha256": "a76d0ca2a137c4c656057a270d5ce9efdf971d4f4f5107c42a2491c93c0dd9af",
+      "bytes": 22409
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation-results.json",
+      "kind": "new",
+      "sha256": "994fcfb92a0ab4e750a42b172984088275c9d96118764cfbdc55e0d287a0d0ac",
+      "bytes": 1184
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/build.txt",
+      "kind": "new",
+      "sha256": "309092a5f83841f785202f6dc6a8b83722d49591937d5386c824523cf5da173b",
+      "bytes": 1169
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/bundle.txt",
+      "kind": "new",
+      "sha256": "ccdafec29372203ca65a10324bb135f2c3f61e2af746ee692fabf9ff6e2eacb7",
+      "bytes": 147
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/native.txt",
+      "kind": "new",
+      "sha256": "e0b40ca6ca73e9ad2a65778671fe33011b02d2b1d5ea933bc0693b44f21a51d2",
+      "bytes": 538
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/new-ui.txt",
+      "kind": "new",
+      "sha256": "7f537f7a07adc14e31ead7d0e353c2bf494c65579e8664101dca116d2c352dae",
+      "bytes": 164
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/repair2.txt",
+      "kind": "new",
+      "sha256": "b6e31db07cb8a9c1050517751def15e2ae4456c089a7a1a51fab4deb61eb551a",
+      "bytes": 5037
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/tests.txt",
+      "kind": "new",
+      "sha256": "dfa09f6a7f9a30d8f6ec933985ca2f40001fedb5627e57188d2ddb10ba265fcd",
+      "bytes": 16361
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/typecheck.txt",
+      "kind": "new",
+      "sha256": "9cf379a8d4b1d14c8eb08e0a696851726778d275e162e075caaca5a55830b95e",
+      "bytes": 55
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/ui.txt",
+      "kind": "new",
+      "sha256": "2b3542269933a7daff8f8b7aa06e580676f1826d25f07839f5d382a4c80393bb",
+      "bytes": 4138
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/validation/workflow-final.txt",
+      "kind": "new",
+      "sha256": "482c2ca90de9a16052a05cf5b7bba94ce38165f1951730d8946e1fa1b40d6fbb",
+      "bytes": 159
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/关键Diff.md",
+      "kind": "new",
+      "sha256": "bebf57547674627c4db35ace96cf42a03b72ef677237ca8b40b11759cd380356",
+      "bytes": 3647
+    },
+    {
+      "path": "docs/real-speech-v2-production-r3/第一批Spike人工听感结论.md",
+      "kind": "new",
+      "sha256": "b6f48d3929ea2f389fec24bef22412ffebbd6c582d7225ecb2a2e05363f33a40",
+      "bytes": 17574
+    },
+    {
+      "path": "resources/real-speech-v2/COSYVOICE_CAPABILITY_PROFILE.v1.json",
+      "kind": "modified",
+      "sha256": "f5c790f7ec501c1ea1dace2526c84c1c4d1ce40e9827c36314b575840f906b59",
+      "bytes": 29786
+    },
+    {
+      "path": "resources/real-speech-v2/docs/capability.md",
+      "kind": "modified",
+      "sha256": "96277228fd5eb9af38b76292b6a92638ad117b85fde27f7d5784458d21ff2b83",
+      "bytes": 4602
+    },
+    {
+      "path": "resources/real-speech-v2/docs/compiler.md",
+      "kind": "modified",
+      "sha256": "26c598f6b54da80865a39999b18df25baac3f744e72375eac6d76ddef0c851be",
+      "bytes": 8729
+    },
+    {
+      "path": "resources/real-speech-v2/docs/diagnosis.md",
+      "kind": "modified",
+      "sha256": "16e49ba693df83288cd2d1ded0533d7b7324ad508e2b0867e09b8c704c3afa59",
+      "bytes": 3737
+    },
+    {
+      "path": "resources/real-speech-v2/docs/director.md",
+      "kind": "modified",
+      "sha256": "b1f6d0df1d4f4076f557e9cc45cc7220ef9de5d08c7c3563cf7257c3ef876420",
+      "bytes": 30092
+    },
+    {
+      "path": "resources/real-speech-v2/docs/manual.md",
+      "kind": "modified",
+      "sha256": "6cc2536d6fc3f31c70d9994756dc416c24b70c6a68657a9a366d3349cce9b428",
+      "bytes": 4804
+    },
+    {
+      "path": "resources/real-speech-v2/docs/template.md",
+      "kind": "modified",
+      "sha256": "e1b9aaef923c7905e57b81ae23a42234df17847e3af760733f92146ec448240d",
+      "bytes": 5419
+    },
+    {
+      "path": "resources/real-speech-v2/examples/patch.json",
+      "kind": "new",
+      "sha256": "3f273cf2e224737aed3e5f9d16e517f36315f160202f1c0ae5751e8cffac464a",
+      "bytes": 2129
+    },
+    {
+      "path": "resources/real-speech-v2/examples/plan-l0-baseline.json",
+      "kind": "new",
+      "sha256": "2a9aea3a044eefef965ba19533c2f90dc701104204b0568edb64f0b7f0e9a55d",
+      "bytes": 9205
+    },
+    {
+      "path": "resources/real-speech-v2/examples/plan-with-optional-audit.json",
+      "kind": "new",
+      "sha256": "11168e6a08ab11154d52de320715c67362267bece44270b3e52602ae1a679a75",
+      "bytes": 10571
+    },
+    {
+      "path": "resources/real-speech-v2/examples/plan-with-speak-candidates.json",
+      "kind": "new",
+      "sha256": "a62baab7b11480c3c813c0a4103c2e827ce6890065a08cfd936fa5cff18acb93",
+      "bytes": 11016
+    },
+    {
+      "path": "resources/real-speech-v2/examples/plan-with-sub-candidate.json",
+      "kind": "new",
+      "sha256": "3289b3d6bd6cf27ca13df514f7ab578fcf7cece6c19f246bfb3a949f7ae37558",
+      "bytes": 10580
+    },
+    {
+      "path": "resources/real-speech-v2/examples/plan.json",
+      "kind": "new",
+      "sha256": "cc3960044fdba78a0ac714fe79ef7176cecac2975839e30117d0e4f556d0397c",
+      "bytes": 10409
+    },
+    {
+      "path": "resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
+      "kind": "modified",
+      "sha256": "c4442ba0dbba66ed539f7d6b1f56b4a77c928360df5337773e3dadfd14eaf369",
+      "bytes": 9383
+    },
+    {
+      "path": "resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
+      "kind": "modified",
+      "sha256": "9c2fe5f7698e68b0944f6b4f5c63d764b21dcdd4e44e07d8c93aba1d01eab851",
+      "bytes": 6127
+    },
+    {
+      "path": "resources/real-speech-v2/schemas/common.schema.json",
+      "kind": "modified",
+      "sha256": "a76d0ca2a137c4c656057a270d5ce9efdf971d4f4f5107c42a2491c93c0dd9af",
+      "bytes": 22409
+    },
+    {
+      "path": "resources/real-speech-v2/spike/batch1-human-listening.md",
+      "kind": "new",
+      "sha256": "b6f48d3929ea2f389fec24bef22412ffebbd6c582d7225ecb2a2e05363f33a40",
+      "bytes": 17574
+    },
+    {
+      "path": "scripts/test-real-speech-ui.tsx",
+      "kind": "modified",
+      "sha256": "03e18254cc89aa4f76d50dda0c35f028987da4eb0daf4c3ee0f14f3ab22544e6",
+      "bytes": 9107
+    },
+    {
+      "path": "scripts/test-v2-workflow-ui.tsx",
+      "kind": "modified",
+      "sha256": "a3b4d9dd1801471d50ec8586794badf1456a9cc21e586b6b2ede254ca251a506",
+      "bytes": 6696
+    },
+    {
+      "path": "src/features/realSpeech/Page.tsx",
+      "kind": "modified",
+      "sha256": "2a8268ef2d9ea1a8abd4569b919710c261c409c155d3c6fab7fc03ffcc983536",
+      "bytes": 28055
+    },
+    {
+      "path": "src/main/realSpeech/v2/productionPolicy.ts",
+      "kind": "new",
+      "sha256": "cd1224e06274778ca7c7185727da4a7d9aa9b8661a911beb53272a281d31e2ca",
+      "bytes": 5760
+    },
+    {
+      "path": "src/main/realSpeech/v2/service.ts",
+      "kind": "modified",
+      "sha256": "6836e567c549f67afb4f419d450a3d52a1b450aed2daebcf4e8215f3719b622e",
+      "bytes": 39500
+    },
+    {
+      "path": "src/main/realSpeech/v2/validator.ts",
+      "kind": "modified",
+      "sha256": "5b606297c32ffd778445a4996bc1ecea5ccf3bac41f2c89b5c76d6f130cbba85",
+      "bytes": 16528
+    },
+    {
+      "path": "tests/v2-real-speech.test.ts",
+      "kind": "modified",
+      "sha256": "e0de7510c9b054601e9d60648b09e19943354f9fc43532ed319803b08d067288",
+      "bytes": 26117
+    }
+  ],
+  "count": 56,
+  "unrelatedUserTemplateIncluded": false,
+  "gitCommitOrPush": false
+}

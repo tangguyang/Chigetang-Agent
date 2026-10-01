@@ -1,0 +1,32 @@
+{
+  "typecheck": "PASS",
+  "fullTests": {
+    "status": "PASS",
+    "passed": 179,
+    "failed": 0
+  },
+  "v2TargetedIncludingSchemaPlanPatchIntentRanges": {
+    "status": "PASS",
+    "passed": 23,
+    "failed": 0
+  },
+  "generalUi": {
+    "status": "PASS",
+    "passed": 71
+  },
+  "v129MediaAndMigrationRegression": {
+    "status": "PASS",
+    "passed": 53
+  },
+  "v2UiAndOfflineWorkflow": "PASS",
+  "nativeElectronDocumentWindows": "PASS",
+  "build": "PASS",
+  "windowsX64Package": "PASS",
+  "exePeVersionAndBundledHashes": "PASS",
+  "packagedExeRealUi": "PASS",
+  "bundleRealMp4": "PASS",
+  "windows11": "PASS (10.0.26200)",
+  "windows10": "NOT_TESTED",
+  "paidTtsRequests": 0,
+  "fee": 0
+}

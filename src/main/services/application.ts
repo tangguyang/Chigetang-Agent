@@ -514,7 +514,7 @@ export class Application {
       draft,
       root: this.root,
       installPath: this.programPath,
-      version: "1.2.9",
+      version: brand.version,
     };
   }
   saveDraft(draft: Draft) {

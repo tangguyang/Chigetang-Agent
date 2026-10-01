@@ -7,6 +7,7 @@ import {
   readFileSync,
   rmSync,
   existsSync,
+  renameSync,
 } from "node:fs";
 import { resolve, join } from "node:path";
 const source = JSON.parse(readFileSync("package.json", "utf8"));
@@ -29,7 +30,7 @@ writeFileSync(
 );
 const dirs = await packager({
   dir: stage,
-  out: "release",
+  out: `release/v${source.version}`,
   platform: "win32",
   arch: "x64",
   name: source.productName,
@@ -49,12 +50,15 @@ const dirs = await packager({
   },
   appVersion: source.version,
 });
-for (const dir of dirs) {
+for (const packedDir of dirs) {
+  const dir = resolve(`release/v${source.version}/${source.productName}-v${source.version}-Windows-x64-绿色版`);
+  if (existsSync(dir)) throw new Error(`Existing delivery must be preserved: ${dir}`);
+  renameSync(packedDir, dir);
   for (const f of [
     "HANDOFF.md",
     "README.md",
     "README-USER.md",
-    "README-v1.2.9.md",
+
     `v${source.version}-Release-Notes.md`,
     `v${source.version}-Upgrade-Guide.md`,
     "CHANGELOG.md",
@@ -78,6 +82,11 @@ for (const dir of dirs) {
   for (const f of [
     manifest.main,
     "dist/preload.cjs",
+    "dist/speech-document-preload.cjs",
+    "resources/real-speech-v2/COSYVOICE_CAPABILITY_PROFILE.v1.json",
+    "resources/real-speech-v2/schemas/common.schema.json",
+    "resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
+    "resources/real-speech-v2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
     "dist/renderer/index.html",
     "resources/MediaInfoModule.wasm",
     "resources/ffprobe.exe",

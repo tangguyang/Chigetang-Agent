@@ -31,6 +31,7 @@ export default function Page() {
     ),
     [preview, setPreview] = useState<Obj | null>(null),
     [attested, setAttested] = useState(false),
+    [experimentalConfirmed, setExperimentalConfirmed] = useState(false),
     [selected, setSelected] = useState<string[]>([]),
     [feedback, setFeedback] = useState(""),
     [goldenConfirmed, setGoldenConfirmed] = useState(false),
@@ -119,8 +120,8 @@ export default function Page() {
       )}
       {notice && <p role="status">{notice}</p>}
       <p className="rs-v2-note">
-        软件只校验、执行和保留版本。待验证能力保留在Plan，真实生成出口等待Capability
-        Spike。
+        自然度优先：默认连续文本和最少控制。短指令只表达一个状态；停顿服务语义。
+        多speak、局部rate/pitch及复杂叠加仅用于明确实验，软件不根据导演文字推导参数。
       </p>
       <section className="rs-v2-import">
         <h3>导入执行方案</h3>
@@ -155,6 +156,7 @@ export default function Page() {
               setText(e.target.value);
               setPreview(null);
               setAttested(false);
+              setExperimentalConfirmed(false);
             }}
             rows={9}
             spellCheck={false}
@@ -182,7 +184,12 @@ export default function Page() {
             <pre>{preview.plan.originalText}</pre>
             {preview.pending.map((w: Obj) => (
               <p key={w.windowId}>
-                {w.windowId} 待验证：{w.capabilities.join("、") || "无"}
+                {w.windowId} · {w.controlComplexity} · 风险{" "}
+                {w.minimumNaturalnessRisk} · 待验证：
+                {w.capabilities.join("、") || "无"}
+                {(w.warnings || []).map((message: string) => (
+                  <span key={message}> · {message}</span>
+                ))}
               </p>
             ))}
             <label>
@@ -194,8 +201,25 @@ export default function Page() {
               该Plan来自我已确认的导演方案
             </label>
             <p>导演稿附件可选，无需另上传。</p>
+            {preview.plan.windows.some((w: Obj) => w.experimental) && (
+              <label>
+                <input
+                  type="checkbox"
+                  checked={experimentalConfirmed}
+                  onChange={(e) => setExperimentalConfirmed(e.target.checked)}
+                />
+                我明确开启实验模式：该控制曾增加AI/TTS感或拼接感，仅用于实验
+              </label>
+            )}
             <button
-              disabled={busy || !attested || !name.trim() || !voiceRef}
+              disabled={
+                busy ||
+                !attested ||
+                !name.trim() ||
+                !voiceRef ||
+                (preview.plan.windows.some((w: Obj) => w.experimental) &&
+                  !experimentalConfirmed)
+              }
               onClick={() =>
                 run(async () => {
                   const t = await api<Obj>("import", {
@@ -203,6 +227,7 @@ export default function Page() {
                     voiceRef,
                     text,
                     confirmed: attested,
+                    experimentalConfirmed,
                   });
                   setOld(null);
                   setPreview(null);
@@ -426,7 +451,7 @@ export default function Page() {
                   导出所选Window诊断ZIP
                 </button>
                 <p>
-                  包含WAV、Plan、当前参数、真实生成参数与选中版本；软件不自行诊断。
+                  包含WAV、Plan、当前参数、真实生成参数、选中版本与控制风险。请反馈语义停顿、重点、人物连续性、销售节奏、发音完成度/口语粗糙度；软件只打包，不自行诊断。
                 </p>
               </section>
               <section>
@@ -507,6 +532,7 @@ function WindowCard({
   const [patch, setPatch] = useState(""),
     [diff, setDiff] = useState<Obj | null>(null),
     [confirmed, setConfirmed] = useState(false),
+    [experimentApproved, setExperimentApproved] = useState(false),
     [a, setA] = useState(""),
     [b, setB] = useState("");
   const params = {
@@ -517,6 +543,7 @@ function WindowCard({
   useEffect(() => {
     setDiff(null);
     setConfirmed(false);
+    setExperimentApproved(false);
   }, [task.planHash, task.taskRevision]);
   const notes = task.plan.intentRanges.filter(
     (n: Obj) => n.target.windowId === config.windowId,
@@ -554,6 +581,12 @@ function WindowCard({
             <p>
               情绪：{n.emotionIntent}；关系：{n.relationshipIntent}
             </p>
+            {n.pronunciationCompletenessIntent && (
+              <p>
+                发音完成度 / 口语粗糙度（E2，仅展示）：
+                {n.pronunciationCompletenessIntent}
+              </p>
+            )}
             <p>
               执行路径：
               {n.adoptedExecution
@@ -575,6 +608,11 @@ function WindowCard({
         <summary>明确执行参数</summary>
         <pre>
           {dump({
+            controlComplexity: config.controlComplexity,
+            naturalnessRisk: config.naturalnessRisk,
+            experimental: config.experimental,
+            instructionIntentCount: config.instructionIntentCount,
+            lockedFields: config.lockedFields,
             execution: config.execution,
             ssml: config.ssml,
             hotFix: config.hotFix,
@@ -647,6 +685,23 @@ function WindowCard({
           </div>
         ))}
       <h5>音频版本（时间倒序，原始文件保留）</h5>
+      <p>
+        控制复杂度：{config.controlComplexity || "旧协议未标注"} · 自然度风险：
+        {config.naturalnessRisk || "未标注"} · {config.controlReason}
+      </p>
+      {config.controlComplexity === "L3" && (
+        <p role="note">
+          该控制在第一批真实听感测试中曾明显增加AI/TTS感或拼接感，建议仅用于实验。
+        </p>
+      )}
+      {config.ssml.nodes.some((n: Obj) => n.kind === "break") && (
+        <p>
+          停顿必须首先服务语义；默认优先短停顿，400ms不是常用模板值。请人工验证自然度。
+        </p>
+      )}
+      <p>
+        参数修复一次只改变一个主要变量；“激情/更快/价格爆点”默认是导演意图，不能机械换成pitch/rate/volume。纠音标签只用于读法。
+      </p>
       {versions.length === 0 && <p>尚无音频版本</p>}
       {versions.map((v: Obj) => (
         <div key={v.versionId} className="rs-v2-version">
@@ -724,6 +779,7 @@ function WindowCard({
             setPatch(e.target.value);
             setDiff(null);
             setConfirmed(false);
+            setExperimentApproved(false);
           }}
           rows={5}
           placeholder="REAL_SPEECH_EXECUTION_PATCH_V2"
@@ -752,6 +808,21 @@ function WindowCard({
             {diff.generateIds.join("、") || "无（仅说明修订）"}
           </p>
           <pre>{dump(diff.diff)}</pre>
+          <p>
+            主要变量：
+            {(diff.primaryVariables || []).join("、") || "无（只改说明）"}
+            ；重新试听后再改变下一个变量。
+          </p>
+          {diff.experimentalRequired && (
+            <label>
+              <input
+                type="checkbox"
+                checked={experimentApproved}
+                onChange={(e) => setExperimentApproved(e.target.checked)}
+              />
+              我确认本次实验修复可能增加AI/TTS感或拼接感
+            </label>
+          )}
           <label>
             <input
               type="checkbox"
@@ -761,13 +832,19 @@ function WindowCard({
             我确认以上Diff及目标范围
           </label>
           <button
-            disabled={busy || !confirmed || state.locked}
+            disabled={
+              busy ||
+              !confirmed ||
+              state.locked ||
+              (diff.experimentalRequired && !experimentApproved)
+            }
             onClick={() =>
               run(() =>
                 api("patchApply", {
                   ...params,
                   text: patch,
                   confirmed,
+                  experimentalConfirmed: experimentApproved,
                   previewHash: diff.previewHash,
                 }),
               )
