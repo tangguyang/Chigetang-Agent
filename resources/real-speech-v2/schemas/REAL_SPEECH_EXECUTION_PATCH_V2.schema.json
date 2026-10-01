@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chigetang.local/schemas/real-speech/v2/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
+  "title": "REAL_SPEECH_EXECUTION_PATCH_V2",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "REAL_SPEECH_EXECUTION_PATCH_V2"
+    },
+    "protocolVersion": {
+      "const": "2.0"
+    },
+    "patchId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "capabilityProfileId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "capabilityVersion": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "basePlanId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "basePlanHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "taskId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "targetWindowIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "expectedVersions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "windowId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "configRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "selectedVersionId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "selectedVersionHash": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "windowId",
+          "configRevision",
+          "selectedVersionId",
+          "selectedVersionHash"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "windowId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "set": {
+            "type": "object",
+            "properties": {
+              "instruction": {
+                "type": "string"
+              },
+              "rate": {
+                "type": "number"
+              },
+              "pitch": {
+                "type": "number"
+              },
+              "volume": {
+                "type": "integer"
+              },
+              "seed": {
+                "type": "integer"
+              },
+              "synthesisText": {
+                "type": "string",
+                "minLength": 1
+              },
+              "textApproval": {
+                "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/textApproval"
+              },
+              "ssml": {
+                "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/ssml"
+              },
+              "pronunciation": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/pronunciation"
+                },
+                "minItems": 0
+              },
+              "hotFix": {
+                "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/hotFix"
+              },
+              "transition": {
+                "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/transition"
+              },
+              "intentRanges": {
+                "type": "array",
+                "items": {
+                  "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/intentRange"
+                },
+                "minItems": 0
+              }
+            },
+            "required": [],
+            "additionalProperties": false,
+            "minProperties": 1
+          },
+          "executionConfidence": {
+            "type": "array",
+            "items": {
+              "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/confidence"
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "windowId",
+          "set",
+          "executionConfidence"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "lockedWindows": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "diagnosis": {
+      "type": "object",
+      "properties": {
+        "evidenceBasis": {
+          "type": "string",
+          "enum": [
+            "audio_listened",
+            "user_feedback_only",
+            "text_only"
+          ]
+        },
+        "listenedVersionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issues": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "windowId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+              },
+              "dimension": {
+                "type": "string",
+                "enum": [
+                  "cameraPresence",
+                  "readingFeel",
+                  "semanticPause",
+                  "paceVariation",
+                  "emphasisHierarchy",
+                  "emotionVariation",
+                  "speakerContinuity",
+                  "advertisingBroadcastTone",
+                  "salesDrive",
+                  "ctaNaturalness"
+                ]
+              },
+              "observation": {
+                "type": "string",
+                "minLength": 1
+              },
+              "certainty": {
+                "type": "string",
+                "enum": [
+                  "observed",
+                  "inferred",
+                  "unverified"
+                ]
+              }
+            },
+            "required": [
+              "windowId",
+              "dimension",
+              "observation",
+              "certainty"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "evidenceBasis",
+        "listenedVersionIds",
+        "summary",
+        "issues"
+      ],
+      "additionalProperties": false
+    },
+    "validationFocus": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "windowId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "focus": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "windowId",
+          "focus"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema",
+    "protocolVersion",
+    "patchId",
+    "capabilityProfileId",
+    "capabilityVersion",
+    "basePlanId",
+    "basePlanHash",
+    "taskId",
+    "targetWindowIds",
+    "expectedVersions",
+    "changes",
+    "lockedWindows",
+    "diagnosis",
+    "validationFocus"
+  ],
+  "additionalProperties": false,
+  "$comment": "R2: intentRanges replacement is limited to the same targeted window; display-only changes cannot create paid jobs."
+}

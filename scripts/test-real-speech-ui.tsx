@@ -1,110 +1,228 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import Page from "../src/features/realSpeech/Page.tsx";
-let fail = false,
-  calls: string[] = [];
-const task = {
-  taskId: "RS-UI",
+const plan = JSON.parse(
+  readFileSync("docs/real-speech-v2-design-r2/examples/plan.json", "utf8"),
+);
+let task: any = {
+  taskId: "ui-task",
+  name: "V2界面任务",
+  voiceRef: "VOICE",
   taskRevision: 1,
-  name: "UI口播",
-  voiceRef: "V1",
-  originalText: "第一句。",
-  units: [{ id: "U001", text: "第一句。" }],
-  description: "",
-  history: [],
-  qc: [],
-  windows: [
-    {
-      windowId: "GW001",
-      unitIds: ["U001"],
-      instruction: "自然聊天",
-      synthesisText: "",
-      rhythmData: [],
-      pronunciation: [],
-      transitionPauseMs: 0,
-      rate: 1,
-      pitch: 1,
-      volume: 50,
-      seed: 0,
-      status: "pending",
-      results: [],
-    },
-  ],
+  plan,
+  planHash: "hash",
+  windows: plan.windows.map((w: any) => ({
+    windowId: w.windowId,
+    configRevision: 1,
+    locked: false,
+    versions: [],
+    attempts: [],
+    selectedVersionId: null,
+  })),
+  anchorReviews: [],
+  finals: [],
+  goldens: [],
+  feedback: [],
 };
+task.windows[0].versions = [
+  { versionId: "ui-v1", versionNumber: 1, at: "2026-10-01T00:00:00Z" },
+  { versionId: "ui-v2", versionNumber: 2, at: "2026-10-01T00:01:00Z" },
+];
+task.windows[0].selectedVersionId = "ui-v1";
+let calls: any[] = [];
+let fail = false;
 Object.assign(window, {
   aiVideo: {
     invoke: async (action: string, p: any) => {
-      calls.push(action);
-      if (fail) throw Error("真人口播DB损坏");
-      if (action === "realSpeech:list")
-        return {
-          tasks: [task],
-          voices: [{ id: "V1", name: "参考音色", status: "ready" }],
-        };
-      if (action === "realSpeech:preview") throw Error("旧方案不匹配");
-      if (action === "realSpeech:document") return "阶段一导演协议 / 使用手册";
-      if (action === "realSpeech:export") return task;
-      if (action === "realSpeech:copy") return true;
-      throw Error("unexpected " + action);
+      calls.push({ action, p });
+      if (fail) throw Error("V2数据库测试错误");
+      switch (action.replace("realSpeech:v2:", "")) {
+        case "list":
+          return {
+            tasks: [task],
+            voices: [{ id: "VOICE", name: "测试复刻音色" }],
+            legacy: [
+              {
+                taskId: "OLD",
+                name: "旧任务只读",
+                originalText: "保留原稿",
+                windows: [],
+              },
+            ],
+          };
+        case "get":
+          return structuredClone(task);
+        case "document":
+          return true;
+        case "preview":
+          return {
+            plan,
+            planHash: "hash",
+            pending: plan.windows.map((w: any) => ({
+              windowId: w.windowId,
+              capabilities: ["instruction"],
+            })),
+          };
+        case "import":
+          assert.equal(p.confirmed, true);
+          return structuredClone(task);
+        case "mutate": {
+          const w = task.windows.find((w: any) => w.windowId === p.windowId);
+          if (p.type === "select" || p.type === "rollback")
+            w.selectedVersionId = p.versionId;
+          task.taskRevision++;
+          return structuredClone(task);
+        }
+        case "generate":
+          return {
+            task,
+            job: {
+              status: "blocked_pending_spike",
+              error: "等待Capability Spike验证",
+            },
+          };
+        case "patchPreview":
+          return {
+            patch: { targetWindowIds: ["GW002"] },
+            diff: [{ field: "instruction", before: "旧", after: "新" }],
+            generateIds: ["GW002"],
+            previewHash: "preview",
+          };
+        case "patchApply":
+          assert.equal(p.confirmed, true);
+          return {
+            task,
+            job: {
+              status: "blocked_pending_spike",
+              error: "等待Capability Spike验证",
+            },
+          };
+        case "export":
+          return { path: "offline.zip" };
+        default:
+          throw Error("unexpected " + action);
+      }
     },
+    onChange: () => () => {},
   },
 });
 const root = createRoot(document.getElementById("root")!);
-await act(async () => {
-  root.render(<Page />);
-});
-assert.ok(document.body.textContent?.includes("真人口播表演生产系统"));
-const click = async (text: string) => {
-  const button = [...document.querySelectorAll("button")].find((b) =>
-    b.textContent?.includes(text),
-  );
-  assert.ok(button, text);
-  await act(async () => button.click());
+const click = async (text: string, scope: ParentNode = document) => {
+  const b = [...scope.querySelectorAll("button")].find(
+    (b) => b.textContent === text,
+  ) as HTMLButtonElement;
+  assert.ok(b, text);
+  assert.equal(b.disabled, false, text);
+  await act(async () => b.click());
 };
-await click("UI口播");
-assert.equal(document.querySelectorAll(".rs-question").length, 10);
-const generateButton = [...document.querySelectorAll("button")].find((b) =>
-  b.textContent?.includes("生成本段"),
+const change = async (
+  el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement,
+  value: string,
+) => {
+  const proto =
+    el.tagName === "SELECT"
+      ? window.HTMLSelectElement.prototype
+      : el.tagName === "TEXTAREA"
+        ? window.HTMLTextAreaElement.prototype
+        : window.HTMLInputElement.prototype;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(el, value);
+    el.dispatchEvent(
+      new window.Event(el.tagName === "SELECT" ? "change" : "input", {
+        bubbles: true,
+      }),
+    );
+  });
+};
+await act(async () => root.render(<Page />));
+assert.ok(!document.body.textContent?.includes("阶段一"));
+assert.ok(!document.querySelector("[role=dialog]"));
+await click("使用手册");
+assert.equal(
+  calls.find((c) => c.action === "realSpeech:v2:document")?.action,
+  "realSpeech:v2:document",
 );
-assert.ok(generateButton, "应显示单段生成按钮");
-assert.equal(generateButton.disabled, false, "首次生成不应被试演Gate锁死");
+assert.ok(!document.querySelector("[role=dialog]"));
+await change(
+  document.querySelector(".rs-v2-import textarea")!,
+  JSON.stringify(plan),
+);
+await click("导入并校验方案");
+assert.ok(document.body.textContent?.includes("无需另上传"));
+const save = [...document.querySelectorAll("button")].find(
+  (b) => b.textContent === "保存执行方案",
+)!;
+assert.equal(save.disabled, true);
+await change(document.querySelector(".rs-v2-import select")!, "VOICE");
+const confirm = document.querySelector(
+  ".rs-v2-import input[type=checkbox]",
+) as HTMLInputElement;
+await act(async () => confirm.click());
+await click("保存执行方案");
+assert.equal(document.querySelectorAll(".rs-v2-window").length, 3);
+assert.ok(document.body.textContent?.includes("导演意图（只读）"));
+await click("生成新音频版本", document.querySelector(".rs-v2-window")!);
+assert.ok(document.body.textContent?.includes("等待Capability Spike验证"));
+assert.deepEqual(
+  calls.find((c) => c.action.endsWith(":generate")).p.windowIds,
+  ["GW001"],
+);
+const card = document.querySelectorAll(".rs-v2-window")[1];
+await change(
+  card.querySelector("textarea")!,
+  '{"schema":"REAL_SPEECH_EXECUTION_PATCH_V2"}',
+);
+await click("导入修复并查看Diff", card);
+assert.ok(card.textContent?.includes("instruction"));
+const apply = [...card.querySelectorAll("button")].find(
+  (b) => b.textContent === "应用并生成新版本",
+)!;
+assert.equal(apply.disabled, true);
+await act(async () =>
+  (
+    card.querySelectorAll("input[type=checkbox]")[1] as HTMLInputElement
+  ).click(),
+);
+await click("应用并生成新版本", card);
+assert.equal(
+  calls.find((c) => c.action.endsWith(":patchApply")).p.windowId,
+  "GW002",
+);
 assert.ok(
-  [...document.querySelectorAll("button")].some((b) =>
-    b.textContent?.includes("保存并复制优化请求给 ChatGPT"),
-  ),
-  "诊断区应有就地复制给ChatGPT入口",
+  document.querySelector(".rs-v2-version")?.textContent?.startsWith("V2"),
 );
-
-assert.ok(
-  [...document.querySelectorAll("button")].some((b) =>
-    b.textContent?.includes("问 ChatGPT 优化本段"),
-  ),
-  "每个生成窗口应有就地问ChatGPT入口",
+await click("选择当前版本", document.querySelector(".rs-v2-version")!);
+assert.equal(task.windows[0].selectedVersionId, "ui-v2");
+await click(
+  "回滚配置与音频至V1",
+  document.querySelectorAll(".rs-v2-version")[1],
 );
-await click("① 复制阶段一任务给 ChatGPT");
-assert.ok(calls.includes("realSpeech:copy"), "阶段一应能一键复制原稿+导演协议");
-const batchButton = [...document.querySelectorAll("button")].find((b) =>
-  b.textContent?.includes("生成所有未生成（1）"),
+assert.equal(task.windows[0].selectedVersionId, "ui-v1");
+await click("导出单Window诊断", document.querySelector(".rs-v2-window")!);
+assert.deepEqual(calls.find((c) => c.action.endsWith(":export")).p.windowIds, [
+  "GW001",
+]);
+await click("选择全篇");
+await click("生成所选Window（3）");
+assert.deepEqual(
+  calls.filter((c) => c.action.endsWith(":generate")).at(-1).p.windowIds,
+  ["GW001", "GW002", "GW003"],
 );
-assert.ok(batchButton, "应提供批量生成未生成片段");
-assert.equal(batchButton.disabled, false, "有音色且无未保存修改时批量生成应可用");
-const concatButton = [...document.querySelectorAll("button")].find((b) =>
-  b.textContent?.includes("拼接 / 更新完整WAV"),
-);
-assert.ok(concatButton?.disabled, "未生成完不应允许拼接");
-assert.ok(document.body.textContent?.includes("暂不能拼接：还有 1 段尚未生成到当前参数"));
-await click("📄 使用手册");
-assert.ok(document.querySelector("[role=dialog]"));
-await click("关闭文档");
+await click("旧v1.2.9任务（只读）");
+await click("旧任务只读");
+assert.ok(document.body.textContent?.includes("旧数据库和原始音频保留"));
 await act(async () => root.unmount());
 fail = true;
 const second = createRoot(document.getElementById("root")!);
 await act(async () => second.render(<Page />));
 assert.ok(
-  document.querySelector("[role=alert]")?.textContent?.includes("DB损坏"),
+  document
+    .querySelector("[role=alert]")
+    ?.textContent?.includes("V2数据库测试错误"),
 );
 await act(async () => second.unmount());
 console.log(
-  "PASS 真人口播UI：创建页、任务选择、阶段一复制、批量生成入口、单段生成无试演死锁、拼接禁用原因、诊断就地ChatGPT入口、文档、DB错误隔离",
+  "PASS V2 UI：首页导入确认、只读意图、多Window、单段/多段框架、Patch Diff确认、诊断、独立文档调用、旧任务只读、错误隔离",
 );

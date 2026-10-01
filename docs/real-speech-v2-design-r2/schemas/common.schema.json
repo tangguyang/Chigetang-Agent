@@ -1,0 +1,848 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chigetang.local/schemas/real-speech/v2/common.schema.json",
+  "title": "V2 strict common definitions; model ranges resolved via Capability Manifest",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nullableHash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullableId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "confirmation": {
+      "type": "object",
+      "properties": {
+        "referenceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "userStatement": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "referenceId",
+        "userStatement"
+      ],
+      "additionalProperties": false
+    },
+    "textApproval": {
+      "type": "object",
+      "properties": {
+        "changed": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "confirmation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "referenceId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                },
+                "userStatement": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "referenceId",
+                "userStatement"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "changed",
+        "reason",
+        "confirmation"
+      ],
+      "additionalProperties": false
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "instruction": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "number"
+        },
+        "pitch": {
+          "type": "number"
+        },
+        "volume": {
+          "type": "integer"
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "format": {
+          "type": "string"
+        },
+        "sampleRate": {
+          "type": "integer"
+        },
+        "languageHints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "instruction",
+        "rate",
+        "pitch",
+        "volume",
+        "seed",
+        "format",
+        "sampleRate",
+        "languageHints"
+      ],
+      "additionalProperties": false
+    },
+    "ssml": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "break"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "timeMs": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "offset",
+                  "timeMs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "phoneme"
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "alphabet": {
+                    "type": "string",
+                    "enum": [
+                      "py",
+                      "cmu"
+                    ]
+                  },
+                  "ph": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "kind",
+                  "start",
+                  "end",
+                  "text",
+                  "alphabet",
+                  "ph"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "sayAs"
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "interpretAs": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "start",
+                  "end",
+                  "text",
+                  "interpretAs"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "sub"
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "alias": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "confirmation": {
+                    "$ref": "#/$defs/confirmation"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "start",
+                  "end",
+                  "text",
+                  "alias",
+                  "confirmation"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 0
+        },
+        "speakSegments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/speakSegment"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "enabled",
+        "nodes",
+        "speakSegments"
+      ],
+      "additionalProperties": false
+    },
+    "pronunciation": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "phoneme",
+            "hotFix"
+          ]
+        },
+        "word": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ph": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alphabet": {
+          "type": "string",
+          "enum": [
+            "py",
+            "cmu"
+          ]
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "word",
+        "ph",
+        "alphabet",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    },
+    "hotFix": {
+      "type": "object",
+      "properties": {
+        "pronunciation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "word": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pinyin": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "word",
+              "pinyin"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "replace": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "minLength": 1
+              },
+              "target": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confirmation": {
+                "type": "object",
+                "properties": {
+                  "referenceId": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                  },
+                  "userStatement": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "referenceId",
+                  "userStatement"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "source",
+              "target",
+              "confirmation"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "pronunciation",
+        "replace"
+      ],
+      "additionalProperties": false
+    },
+    "transition": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "silence"
+        },
+        "pauseMs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "pauseMs"
+      ],
+      "additionalProperties": false
+    },
+    "confidence": {
+      "type": "object",
+      "properties": {
+        "intentId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "intent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "level": {
+          "type": "string",
+          "enum": [
+            "E0",
+            "E1",
+            "E2",
+            "E3"
+          ]
+        },
+        "implementation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "targetPaths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "approximation": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "tradeoff": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "confirmation": {
+                  "type": "object",
+                  "properties": {
+                    "referenceId": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+                    },
+                    "userStatement": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "referenceId",
+                    "userStatement"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "description",
+                "tradeoff",
+                "confirmation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "intentId",
+        "intent",
+        "capability",
+        "level",
+        "implementation",
+        "targetPaths",
+        "approximation"
+      ],
+      "additionalProperties": false
+    },
+    "directorReference": {
+      "type": "object",
+      "properties": {
+        "sourceType": {
+          "const": "confirmed_director_plan"
+        },
+        "documentId": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "documentVersion": {
+          "$ref": "#/$defs/nullableId"
+        },
+        "documentHash": {
+          "$ref": "#/$defs/nullableHash"
+        },
+        "confirmation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/confirmation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/id"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "sourceType"
+      ],
+      "additionalProperties": false
+    },
+    "window": {
+      "type": "object",
+      "properties": {
+        "windowId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "original": {
+          "type": "string",
+          "minLength": 1
+        },
+        "synthesisText": {
+          "type": "string",
+          "minLength": 1
+        },
+        "textApproval": {
+          "$ref": "#/$defs/textApproval"
+        },
+        "execution": {
+          "$ref": "#/$defs/execution"
+        },
+        "ssml": {
+          "$ref": "#/$defs/ssml"
+        },
+        "pronunciation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/pronunciation"
+          },
+          "minItems": 0
+        },
+        "hotFix": {
+          "$ref": "#/$defs/hotFix"
+        },
+        "transition": {
+          "$ref": "#/$defs/transition"
+        },
+        "directorBlockIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "executionConfidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/confidence"
+          },
+          "minItems": 1
+        },
+        "lockedFields": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "windowId",
+        "start",
+        "end",
+        "original",
+        "synthesisText",
+        "textApproval",
+        "execution",
+        "ssml",
+        "pronunciation",
+        "hotFix",
+        "transition",
+        "executionConfidence",
+        "lockedFields"
+      ],
+      "additionalProperties": false
+    },
+    "speakSegment": {
+      "type": "object",
+      "properties": {
+        "segmentId": {
+          "$ref": "#/$defs/id"
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rate": {
+          "type": "number"
+        },
+        "pitch": {
+          "type": "number"
+        },
+        "volume": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segmentId",
+        "start",
+        "end",
+        "rate",
+        "pitch",
+        "volume"
+      ],
+      "additionalProperties": false
+    },
+    "intentRange": {
+      "type": "object",
+      "properties": {
+        "intentId": {
+          "$ref": "#/$defs/id"
+        },
+        "usage": {
+          "const": "DISPLAY_AND_DIAGNOSIS_ONLY"
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "windowId": {
+              "$ref": "#/$defs/id"
+            },
+            "start": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "targetText": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "windowId",
+            "start",
+            "end",
+            "targetText"
+          ],
+          "additionalProperties": false
+        },
+        "emphasisTerms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "end": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "start",
+              "end",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "humanIntent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pacingIntent": {
+          "type": "string"
+        },
+        "pauseIntent": {
+          "type": "string"
+        },
+        "emotionIntent": {
+          "type": "string"
+        },
+        "relationshipIntent": {
+          "type": "string"
+        },
+        "requestedConfidence": {
+          "type": "string",
+          "enum": [
+            "E0",
+            "E1",
+            "E2",
+            "E3"
+          ]
+        },
+        "adoptedExecution": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "capability": {
+                "type": "string",
+                "minLength": 1
+              },
+              "confidence": {
+                "type": "string",
+                "enum": [
+                  "E0",
+                  "E1",
+                  "E2",
+                  "E3"
+                ]
+              },
+              "fieldRefs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "capability",
+              "confidence",
+              "fieldRefs"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0
+        },
+        "limitation": {
+          "type": "string"
+        },
+        "unresolvedItemId": {
+          "$ref": "#/$defs/nullableId"
+        }
+      },
+      "required": [
+        "intentId",
+        "usage",
+        "target",
+        "emphasisTerms",
+        "humanIntent",
+        "pacingIntent",
+        "pauseIntent",
+        "emotionIntent",
+        "relationshipIntent",
+        "requestedConfidence",
+        "adoptedExecution",
+        "limitation",
+        "unresolvedItemId"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$comment": "Design revision R2; not frozen. Director attachment optional. SSML candidates await Capability Spike. Model ranges remain Manifest-owned."
+}

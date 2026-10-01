@@ -107,33 +107,6 @@ const change = async (
     el.dispatchEvent(new window.Event("input", { bubbles: true }));
   });
 };
-await act(async () => root.render(<Page />));
-const original = document.querySelector("textarea")!;
-await change(original, "第一句。");
-await click("创建任务");
-assert.ok(document.body.textContent?.includes("任务信息 · 可修改并保存"));
-const info = document.querySelector("fieldset")!;
-const goal = [...info.querySelectorAll("input")][1];
-await change(goal, "坚定且快慢交替");
-assert.ok(document.body.textContent?.includes("有未保存修改"));
-const trial = [...document.querySelectorAll("button")].find(
-  (b) => b.textContent?.startsWith("生成试演"),
-)!;
-assert.equal(trial.disabled, true);
-await click("保存任务信息");
-assert.equal(task.goal, "坚定且快慢交替");
-await click("旧版 Director 导出");
-assert.ok(document.body.textContent?.includes("已复制"));
-assert.equal(
-  calls.find((x) => x.action === "realSpeech:export")?.p.attachments,
-  false,
-);
-await act(async () => {
-  await new Promise((r) => setTimeout(r, 2100));
-});
-assert.ok(!document.body.textContent?.includes("已复制"));
-await click("＋ 新建任务");
-assert.equal(document.querySelector("textarea")!.value, "");
 useApp.setState({ assetKind: "video" });
 await act(async () => root.render(<LibraryPage />));
 await act(async () => {
@@ -153,5 +126,5 @@ assert.ok(document.querySelector("dialog[open]"));
 assert.ok(document.body.textContent?.includes("操作步骤"));
 await act(async () => root.unmount());
 console.log(
-  "PASS 修复版UI：编辑保存、未保存阻止生成、创建清空、默认复制/2秒提醒、统一资产入口、标题手册",
+  "PASS 非口播修复版UI回归：统一资产入口、复刻标题手册（旧口播交互由V2测试替代）",
 );

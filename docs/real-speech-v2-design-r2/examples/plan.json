@@ -1,0 +1,350 @@
+{
+  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
+  "protocolVersion": "2.0",
+  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+  "capabilityVersion": "1.0.0-draft.2",
+  "planId": "PLAN-DEMO-001",
+  "parentPlanId": null,
+  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
+  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
+  "engine": {
+    "name": "aliyun-cosyvoice",
+    "model": "cosyvoice-v3.5-plus",
+    "region": "cn-beijing",
+    "transport": "http"
+  },
+  "voiceRequirements": {
+    "kind": "cloned",
+    "targetModel": "cosyvoice-v3.5-plus",
+    "continuity": "same_voice_all_windows",
+    "requestedVoiceRef": null
+  },
+  "directorReference": {
+    "sourceType": "confirmed_director_plan"
+  },
+  "windows": [
+    {
+      "windowId": "GW001",
+      "start": 0,
+      "end": 29,
+      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
+      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
+      "textApproval": {
+        "changed": false,
+        "reason": "原样合成",
+        "confirmation": null
+      },
+      "execution": {
+        "instruction": "像熟人面对手机，开头真诚反问，接着自然解释，不播音。",
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 0,
+        "format": "wav",
+        "sampleRate": 48000,
+        "languageHints": [
+          "zh"
+        ]
+      },
+      "ssml": {
+        "enabled": false,
+        "nodes": [],
+        "speakSegments": []
+      },
+      "pronunciation": [],
+      "hotFix": {
+        "pronunciation": [],
+        "replace": []
+      },
+      "transition": {
+        "kind": "silence",
+        "pauseMs": 0
+      },
+      "executionConfidence": [
+        {
+          "intentId": "I1",
+          "intent": "熟人反问并连续解释",
+          "capability": "instruction",
+          "level": "E2",
+          "implementation": "Instruction语义引导",
+          "targetPaths": [
+            "/windows/0/execution/instruction"
+          ],
+          "approximation": null
+        }
+      ],
+      "lockedFields": [
+        "/original",
+        "/start",
+        "/end"
+      ]
+    },
+    {
+      "windowId": "GW002",
+      "start": 29,
+      "end": 37,
+      "original": "今天这套99元。",
+      "synthesisText": "今天这套99元。",
+      "textApproval": {
+        "changed": false,
+        "reason": "原样合成",
+        "confirmation": null
+      },
+      "execution": {
+        "instruction": "价格说清楚，略提精神强调数字，说完收住，不喊卖。",
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 0,
+        "format": "wav",
+        "sampleRate": 48000,
+        "languageHints": [
+          "zh"
+        ]
+      },
+      "ssml": {
+        "enabled": true,
+        "nodes": [
+          {
+            "kind": "sayAs",
+            "start": 4,
+            "end": 6,
+            "text": "99",
+            "interpretAs": "cardinal"
+          }
+        ],
+        "speakSegments": []
+      },
+      "pronunciation": [],
+      "hotFix": {
+        "pronunciation": [],
+        "replace": []
+      },
+      "transition": {
+        "kind": "silence",
+        "pauseMs": 0
+      },
+      "executionConfidence": [
+        {
+          "intentId": "I2",
+          "intent": "价格重点自然出现",
+          "capability": "instruction",
+          "level": "E2",
+          "implementation": "Instruction语义引导",
+          "targetPaths": [
+            "/windows/1/execution/instruction"
+          ],
+          "approximation": null
+        },
+        {
+          "intentId": "I4",
+          "intent": "99读九十九",
+          "capability": "sayAs",
+          "level": "E0",
+          "implementation": "say-as cardinal结构读法",
+          "targetPaths": [
+            "/windows/1/ssml/nodes/0"
+          ],
+          "approximation": null
+        }
+      ],
+      "lockedFields": [
+        "/original",
+        "/start",
+        "/end"
+      ]
+    },
+    {
+      "windowId": "GW003",
+      "start": 37,
+      "end": 55,
+      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
+      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
+      "textApproval": {
+        "changed": false,
+        "reason": "原样合成",
+        "confirmation": null
+      },
+      "execution": {
+        "instruction": "延续熟人聊天，顺手提醒看详情，句尾收稳，不催单。",
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 0,
+        "format": "wav",
+        "sampleRate": 48000,
+        "languageHints": [
+          "zh"
+        ]
+      },
+      "ssml": {
+        "enabled": false,
+        "nodes": [],
+        "speakSegments": []
+      },
+      "pronunciation": [],
+      "hotFix": {
+        "pronunciation": [],
+        "replace": []
+      },
+      "transition": {
+        "kind": "silence",
+        "pauseMs": 0
+      },
+      "executionConfidence": [
+        {
+          "intentId": "I3",
+          "intent": "自然提醒CTA",
+          "capability": "instruction",
+          "level": "E2",
+          "implementation": "Instruction语义引导",
+          "targetPaths": [
+            "/windows/2/execution/instruction"
+          ],
+          "approximation": null
+        }
+      ],
+      "lockedFields": [
+        "/original",
+        "/start",
+        "/end"
+      ]
+    }
+  ],
+  "rehearsalAnchors": [
+    {
+      "anchorId": "A-OPEN",
+      "windowId": "GW001",
+      "purpose": "验证熟人反问与解释连续",
+      "validationFocus": [
+        "不像主持人",
+        "反问以后自然解释"
+      ]
+    },
+    {
+      "anchorId": "A-PRICE",
+      "windowId": "GW002",
+      "purpose": "验证价格读法与力度",
+      "validationFocus": [
+        "99读九十九",
+        "稍提精神但不喊"
+      ]
+    },
+    {
+      "anchorId": "A-CTA",
+      "windowId": "GW003",
+      "purpose": "验证顺势提醒",
+      "validationFocus": [
+        "不催单",
+        "人物关系延续"
+      ]
+    }
+  ],
+  "unresolvedItems": [],
+  "lockedFields": [
+    "/originalText",
+    "/originalTextHash",
+    "/engine",
+    "/voiceRequirements",
+    "/rehearsalAnchors"
+  ],
+  "intentRanges": [
+    {
+      "intentId": "I1",
+      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
+      "target": {
+        "windowId": "GW001",
+        "start": 0,
+        "end": 29,
+        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
+      },
+      "emphasisTerms": [],
+      "humanIntent": "真发问后连续解释",
+      "pacingIntent": "先问再自然连说",
+      "pauseIntent": "优先自然语义停顿，不额外机械插入",
+      "emotionIntent": "关注、直接",
+      "relationshipIntent": "店主面对一个熟悉客户",
+      "requestedConfidence": "E2",
+      "adoptedExecution": [
+        {
+          "capability": "instruction",
+          "confidence": "E2",
+          "fieldRefs": [
+            "/windows/0/execution/instruction"
+          ]
+        }
+      ],
+      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
+      "unresolvedItemId": null
+    },
+    {
+      "intentId": "I2",
+      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
+      "target": {
+        "windowId": "GW002",
+        "start": 0,
+        "end": 8,
+        "targetText": "今天这套99元。"
+      },
+      "emphasisTerms": [
+        {
+          "start": 4,
+          "end": 7,
+          "text": "99元"
+        }
+      ],
+      "humanIntent": "价格清楚，略提精神但不喊",
+      "pacingIntent": "价格清楚，不故意拉长",
+      "pauseIntent": "优先自然语义停顿，不额外机械插入",
+      "emotionIntent": "克制、笃定",
+      "relationshipIntent": "店主面对一个熟悉客户",
+      "requestedConfidence": "E2",
+      "adoptedExecution": [
+        {
+          "capability": "instruction",
+          "confidence": "E2",
+          "fieldRefs": [
+            "/windows/1/execution/instruction"
+          ]
+        },
+        {
+          "capability": "sayAs",
+          "confidence": "E0",
+          "fieldRefs": [
+            "/windows/1/ssml/nodes/0"
+          ]
+        }
+      ],
+      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
+      "unresolvedItemId": null
+    },
+    {
+      "intentId": "I3",
+      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
+      "target": {
+        "windowId": "GW003",
+        "start": 0,
+        "end": 18,
+        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
+      },
+      "emphasisTerms": [],
+      "humanIntent": "顺势提醒，不催单",
+      "pacingIntent": "自然收尾",
+      "pauseIntent": "优先自然语义停顿，不额外机械插入",
+      "emotionIntent": "放松、收稳",
+      "relationshipIntent": "店主面对一个熟悉客户",
+      "requestedConfidence": "E2",
+      "adoptedExecution": [
+        {
+          "capability": "instruction",
+          "confidence": "E2",
+          "fieldRefs": [
+            "/windows/2/execution/instruction"
+          ]
+        }
+      ],
+      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
+      "unresolvedItemId": null
+    }
+  ]
+}

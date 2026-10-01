@@ -1,0 +1,8 @@
+{
+  "planId": "PLAN-DEMO-001",
+  "planHash": "5aa8449b8ff9dfe71b7e6b554d081cfac3abb1c47d49bf0a80ddb9e5260816f6",
+  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
+  "directorDocumentHash": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef",
+  "taskId": "TASK-DEMO-001",
+  "note": "Fictional runtime task id; no real task or audio exists. Hashes computed from included fixtures."
+}

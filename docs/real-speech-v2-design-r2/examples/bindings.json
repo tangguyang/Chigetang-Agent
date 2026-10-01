@@ -1,0 +1,14 @@
+{
+  "planId": "PLAN-DEMO-001",
+  "planHash": "bdb84662a74e7dc1141f2e7863097b5bc1f47574faec7181ae2102af6e06da66",
+  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
+  "directorDocumentHash": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef",
+  "taskId": "TASK-DEMO-001",
+  "note": "Fictional runtime. Primary Plan requires no director attachment. Optional attachment hash only proves bytes; not identity or execution authorization.",
+  "examplePlanHashes": {
+    "plan-with-optional-audit.json": "c656bbfee5de0a0f528d78ad34ef5c40402d71740cb99ee841ae83bdb229a5f6",
+    "plan-with-speak-candidates.json": "818f09b65ece938ece5c6a7420fdccbac976263a6e893ff9d0fdd17cf2d0784b",
+    "plan-with-sub-candidate.json": "9dfdbdc9d8c6b5661fa0ec516c0b0950733a814b2e7507be0066a50be2358df5",
+    "plan.json": "bdb84662a74e7dc1141f2e7863097b5bc1f47574faec7181ae2102af6e06da66"
+  }
+}

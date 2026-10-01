@@ -1,0 +1,29 @@
+{
+  "schemasMetaValidated": 3,
+  "schemaExamplesValidated": 2,
+  "designChecksPassed": 19,
+  "checks": [
+    "Plan根未知字段",
+    "Patch根未知字段",
+    "Plan嵌套未知控制字段",
+    "SSML未知字段",
+    "Patch不开放原稿修改字段",
+    "Patch空set拒绝",
+    "Patch重复目标拒绝",
+    "Volume整型约束",
+    "配置版本正整数约束",
+    "旧协议版本拒绝",
+    "样例原文hash/导演稿hash/完整Window覆盖/模型范围/SSML切片",
+    "语义反例：rate超官方边界",
+    "语义反例：Window错序覆盖",
+    "语义反例：SSML切片错误",
+    "语义反例：原文Hash错误",
+    "Patch仅GW002并与expectedVersions一致",
+    "三文档与Manifest版本一致",
+    "本地Markdown链接存在",
+    "新增查看器九项要求设计覆盖"
+  ],
+  "runtimeV2Implemented": false,
+  "liveTtsVerified": false,
+  "windowsViewerVerified": false
+}

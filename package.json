@@ -14,7 +14,7 @@
     "test:repair2:windows": "node scripts/run-repair2-electron.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs",
-    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts",
+    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts",
     "start": "electron .",
     "pack:win": "npm run build && node scripts/package-win.mjs",
     "typecheck": "tsc --noEmit",
@@ -29,15 +29,19 @@
     "test:pdf": "node --experimental-strip-types scripts/test-local-pdf.ts",
     "test:browser": "node --experimental-strip-types scripts/test-browser.ts",
     "test:real-speech": "node --experimental-strip-types tests/v129.test.ts && node --experimental-strip-types tests/v129-media.test.ts && node scripts/run-real-speech-ui.mjs",
-    "test:repair": "node --experimental-strip-types tests/v129-repair.test.ts && node scripts/run-repair-ui.mjs"
+    "test:repair": "node --experimental-strip-types tests/v129-repair.test.ts && node scripts/run-repair-ui.mjs",
+    "test:real-speech:v2": "node --experimental-strip-types --test tests/v2-real-speech.test.ts && node scripts/run-real-speech-ui.mjs && node scripts/run-v2-documents-native.mjs",
+    "spike:dry-run": "node scripts/run-cosyvoice-spike.mjs --dry-run",
+    "spike:preflight": "node scripts/run-cosyvoice-spike.mjs --preflight"
   },
   "dependencies": {
+    "ajv": "8.20.0",
     "lucide-react": "0.468.0",
     "mediainfo.js": "0.3.7",
+    "pdfjs-dist": "5.6.205",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "zustand": "5.0.3",
-    "pdfjs-dist": "5.6.205"
+    "zustand": "5.0.3"
   },
   "devDependencies": {
     "@electron/packager": "18.3.6",

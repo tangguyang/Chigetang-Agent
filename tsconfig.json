@@ -12,5 +12,13 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src", "tests/v109.test.ts", "vite.config.ts"]
+  "include": [
+    "src",
+    "tests/v109.test.ts",
+    "vite.config.ts",
+    "tests/v2-real-speech.test.ts",
+    "scripts/test-real-speech-ui.tsx",
+    "scripts/test-v2-workflow-ui.tsx",
+    "scripts/test-v2-documents-native.ts"
+  ]
 }

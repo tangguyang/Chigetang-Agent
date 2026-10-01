@@ -1,0 +1,73 @@
+{
+  "schema": "REAL_SPEECH_EXECUTION_PATCH_V2",
+  "protocolVersion": "2.0",
+  "patchId": "PATCH-DEMO-001",
+  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+  "capabilityVersion": "1.0.0-draft.1",
+  "basePlanId": "PLAN-DEMO-001",
+  "basePlanHash": "5aa8449b8ff9dfe71b7e6b554d081cfac3abb1c47d49bf0a80ddb9e5260816f6",
+  "taskId": "TASK-DEMO-001",
+  "targetWindowIds": [
+    "GW002"
+  ],
+  "expectedVersions": [
+    {
+      "windowId": "GW002",
+      "configRevision": 1,
+      "selectedVersionId": null,
+      "selectedVersionHash": null
+    }
+  ],
+  "changes": [
+    {
+      "windowId": "GW002",
+      "set": {
+        "instruction": "价格像给熟人报数，清楚平实，数字稍突出，句尾收住。"
+      },
+      "executionConfidence": [
+        {
+          "intentId": "I2",
+          "intent": "价格更克制、数字清楚",
+          "capability": "instruction",
+          "level": "E2",
+          "implementation": "Instruction语义近似",
+          "targetPaths": [
+            "/windows/1/execution/instruction"
+          ],
+          "approximation": null
+        },
+        {
+          "intentId": "I4",
+          "intent": "99读九十九",
+          "capability": "sayAs",
+          "level": "E0",
+          "implementation": "沿用既有cardinal",
+          "targetPaths": [
+            "/windows/1/ssml/nodes/0"
+          ],
+          "approximation": null
+        }
+      ]
+    }
+  ],
+  "lockedWindows": [],
+  "diagnosis": {
+    "evidenceBasis": "text_only",
+    "listenedVersionIds": [],
+    "summary": "结构示例：尚无实际WAV，不能声称听过；展示限定价格Window的参数修订。",
+    "issues": [
+      {
+        "windowId": "GW002",
+        "dimension": "salesDrive",
+        "observation": "仅提出更克制的候选Instruction，实际效果待生成试听。",
+        "certainty": "unverified"
+      }
+    ]
+  },
+  "validationFocus": [
+    {
+      "windowId": "GW002",
+      "focus": "数字是否清楚、价格重点是否自然；不得改变其他Window"
+    }
+  ]
+}

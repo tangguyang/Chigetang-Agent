@@ -1,0 +1,451 @@
+{
+  "status": "PASS",
+  "scope": "设计静态验证，不是生产validator或云端验收",
+  "passed": 109,
+  "checks": [
+    {
+      "name": "schema元验证 https://chigetang.local/schemas/real-speech/v2/common.schema.json",
+      "passed": true
+    },
+    {
+      "name": "schema元验证 https://chigetang.local/schemas/real-speech/v2/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
+      "passed": true
+    },
+    {
+      "name": "schema元验证 https://chigetang.local/schemas/real-speech/v2/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
+      "passed": true
+    },
+    {
+      "name": "样例结构 patch.json",
+      "passed": true
+    },
+    {
+      "name": "样例结构 plan-with-optional-audit.json",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-optional-audit.jsonGW001",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-optional-audit.jsonGW002",
+      "passed": true
+    },
+    {
+      "name": "节点切片",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-optional-audit.jsonGW003",
+      "passed": true
+    },
+    {
+      "name": "全文覆盖",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "重点词切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "样例结构 plan-with-speak-candidates.json",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-speak-candidates.jsonGW001",
+      "passed": true
+    },
+    {
+      "name": "连续speak覆盖",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-speak-candidates.jsonGW002",
+      "passed": true
+    },
+    {
+      "name": "节点切片",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-speak-candidates.jsonGW003",
+      "passed": true
+    },
+    {
+      "name": "全文覆盖",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "重点词切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "样例结构 plan-with-sub-candidate.json",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-sub-candidate.jsonGW001",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-sub-candidate.jsonGW002",
+      "passed": true
+    },
+    {
+      "name": "节点切片",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan-with-sub-candidate.jsonGW003",
+      "passed": true
+    },
+    {
+      "name": "全文覆盖",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "重点词切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "样例结构 plan.json",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan.jsonGW001",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan.jsonGW002",
+      "passed": true
+    },
+    {
+      "name": "节点切片",
+      "passed": true
+    },
+    {
+      "name": "原稿区间 plan.jsonGW003",
+      "passed": true
+    },
+    {
+      "name": "全文覆盖",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "重点词切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "导演意图切片",
+      "passed": true
+    },
+    {
+      "name": "真实执行路径",
+      "passed": true
+    },
+    {
+      "name": "无导演附件结构有效",
+      "passed": true
+    },
+    {
+      "name": "无导演附件结构有效",
+      "passed": true
+    },
+    {
+      "name": "非法展示字段拒绝 usage",
+      "passed": true
+    },
+    {
+      "name": "非法展示字段拒绝 autoRate",
+      "passed": true
+    },
+    {
+      "name": "展示层必需",
+      "passed": true
+    },
+    {
+      "name": "说明不改执行字段",
+      "passed": true
+    },
+    {
+      "name": "Patch目标",
+      "passed": true
+    },
+    {
+      "name": "Patch说明范围",
+      "passed": true
+    },
+    {
+      "name": "禁止冻结",
+      "passed": true
+    },
+    {
+      "name": "sub模型支持",
+      "passed": true
+    },
+    {
+      "name": "sub产品待验证",
+      "passed": true
+    },
+    {
+      "name": "parallelSpeak模型支持",
+      "passed": true
+    },
+    {
+      "name": "parallelSpeak产品待验证",
+      "passed": true
+    },
+    {
+      "name": "speakRangeRate模型支持",
+      "passed": true
+    },
+    {
+      "name": "speakRangeRate产品待验证",
+      "passed": true
+    },
+    {
+      "name": "speakRangePitch模型支持",
+      "passed": true
+    },
+    {
+      "name": "speakRangePitch产品待验证",
+      "passed": true
+    },
+    {
+      "name": "候选调用数",
+      "passed": true
+    },
+    {
+      "name": "未批准未运行",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 S00",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 B00",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 B50",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 B400",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 B1000",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 IS01",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P00",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-rate-mild",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-rate-reverse",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-rate-stress",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-rate-order-flat",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-rate-order-changed",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-rate-priority",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-pitch-mild",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-pitch-reverse",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-pitch-stress",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-pitch-order-flat",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-pitch-order-changed",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 P-pitch-priority",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 PSI01",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 SA01",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 PH01",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 SUB01",
+      "passed": true
+    },
+    {
+      "name": "官方hot_fix数组 HF01",
+      "passed": true
+    },
+    {
+      "name": "官方hot_fix数组 HF02",
+      "passed": true
+    },
+    {
+      "name": "XML可解析 R01",
+      "passed": true
+    },
+    {
+      "name": "32条完整词典",
+      "passed": true
+    },
+    {
+      "name": "最终词典JSON A至G均完整",
+      "passed": true
+    }
+  ],
+  "paidApiCalls": 0,
+  "runtimeSourceChanges": 0,
+  "notValidated": [
+    "云端能力及听感",
+    "Windows10/11文档窗口",
+    "完整生产语义validator",
+    "全RFC8785互操作"
+  ]
+}

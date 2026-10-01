@@ -1,0 +1,861 @@
+{
+  "status": "NOT_RUN",
+  "paidApprovalGranted": false,
+  "requestTransport": "HTTP Beijing",
+  "dispatchCodeIncluded": false,
+  "credentialPolicy": "No API keys in fixtures or reports",
+  "endpoint": "https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
+  "cases": [
+    {
+      "caseId": "I00",
+      "group": "cloned_instruction",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "复刻音色基线",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "I01",
+      "group": "cloned_instruction",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "像熟人面对手机解释，语气自然，别播音。"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "同一复刻voice是否接受并产生方向性变化",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-A99",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "ASCII加权边界API行为，不用于听感判断",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-A100",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "ASCII加权边界API行为，不用于听感判断",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-A101",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "ASCII加权边界API行为，不用于听感判断",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-H98",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "汉字加权边界API行为",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-H100",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "汉字加权边界API行为",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-H102",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "汉字加权边界API行为",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-M100",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢AB"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "混合字符加权100",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IB-EM100",
+      "group": "instruction_boundary",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢🙂A"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "码点与UTF16差异记录，不宣称官方emoji算法确定",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "S00",
+      "group": "ssml",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这个收纳盒拿起来很顺手。今天这套99元。想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "单speak基线",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "B00",
+      "group": "break",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这个收纳盒拿起来很顺手。今天这套99元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "自然停顿基线",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "B50",
+      "group": "break",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"50ms\"/>今天这套99元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "指定静默与自然停顿区分",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "B400",
+      "group": "break",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"400ms\"/>今天这套99元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "指定静默与自然停顿区分",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "B1000",
+      "group": "break",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"1000ms\"/>今天这套99元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "指定静默与自然停顿区分",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "IS01",
+      "group": "instruction_ssml",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"400ms\"/>今天这套99元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true,
+          "instruction": "像熟人解释，中间自然留一下，别播音。"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "instruction与break同时使用",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P00",
+      "group": "parallel_speak",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"1\" pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1\" pitch=\"1\">今天这套99元。</speak><speak rate=\"1\" pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "同参数并列根自身是否引入接缝或停顿",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-rate-mild",
+      "group": "local_rate",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"0.9\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-rate-reverse",
+      "group": "local_rate",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1.1\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-rate-stress",
+      "group": "local_rate",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"0.5\">这个收纳盒拿起来很顺手。</speak><speak rate=\"2\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-rate-order-flat",
+      "group": "local_rate",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"1\">今天这套99元。</speak><speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "交换短语次序的配对控制，排除位置本身影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-rate-order-changed",
+      "group": "local_rate",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"0.9\">今天这套99元。</speak><speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "交换短语次序的配对控制，排除位置本身影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-rate-priority",
+      "group": "parameter_priority",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"0.9\">这个收纳盒拿起来很顺手。今天这套99元。想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1.1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "HTTP全局参数与speak同名参数实际优先级",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-pitch-mild",
+      "group": "local_pitch",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"0.9\">今天这套99元。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-pitch-reverse",
+      "group": "local_pitch",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"1.1\">今天这套99元。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-pitch-stress",
+      "group": "local_pitch",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak pitch=\"0.5\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"2\">今天这套99元。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-pitch-order-flat",
+      "group": "local_pitch",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak pitch=\"1\">今天这套99元。</speak><speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "交换短语次序的配对控制，排除位置本身影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-pitch-order-changed",
+      "group": "local_pitch",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak pitch=\"0.9\">今天这套99元。</speak><speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "交换短语次序的配对控制，排除位置本身影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "P-pitch-priority",
+      "group": "parameter_priority",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak pitch=\"0.9\">这个收纳盒拿起来很顺手。今天这套99元。想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1.1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "HTTP全局参数与speak同名参数实际优先级",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "PSI01",
+      "group": "instruction_local_ssml",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"0.9\" pitch=\"1.1\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true,
+          "instruction": "像熟人分享，价格清楚但不喊，结尾自然收住。"
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "真实口播组合及接缝听感",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "SA01",
+      "group": "say_as",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>今天这套<say-as interpret-as=\"cardinal\">99</say-as>元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "数字读法",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "PH01",
+      "group": "phoneme",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>这家银<phoneme alphabet=\"py\" ph=\"hang2\">行</phoneme>就在附近。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "多音字位置纠音",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "SUB01",
+      "group": "sub",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak>今天讲<sub alias=\"人工智能\">AI</sub>工具。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "alias是否替代朗读且不读标签",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "HF00",
+      "group": "hot_fix",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这家银行就在附近。今天讲AI工具。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "纠音替代自然基线",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "HF01",
+      "group": "hot_fix",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这家银行就在附近。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "hot_fix": {
+            "pronunciation": [
+              {
+                "行": "hang2"
+              }
+            ]
+          }
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "官方hot_fix键格式及全窗口影响",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "HF02",
+      "group": "hot_fix",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "今天讲AI工具。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "hot_fix": {
+            "replace": [
+              {
+                "AI": "人工智能"
+              }
+            ]
+          }
+        }
+      },
+      "plannedCalls": 1,
+      "status": "NOT_RUN",
+      "question": "replace替代朗读",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "R00",
+      "group": "repeat_seed",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "instruction": "像熟人解释，清楚自然，别播音。"
+        }
+      },
+      "plannedCalls": 3,
+      "status": "NOT_RUN",
+      "question": "完全相同输入与seed重复的PCM/hash及听感差异",
+      "requiresPaidApproval": true
+    },
+    {
+      "caseId": "R01",
+      "group": "repeat_seed_ssml",
+      "requestBody": {
+        "model": "cosyvoice-v3.5-plus",
+        "input": {
+          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"0.9\">今天这套99元。</speak>",
+          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
+          "format": "wav",
+          "sample_rate": 48000,
+          "rate": 1,
+          "pitch": 1,
+          "volume": 50,
+          "seed": 1234,
+          "enable_ssml": true,
+          "instruction": "自然解释，不喊。"
+        }
+      },
+      "plannedCalls": 3,
+      "status": "NOT_RUN",
+      "question": "相同完整SSML/指令输入重复表现",
+      "requiresPaidApproval": true
+    }
+  ],
+  "plannedCalls": 42,
+  "preflight": "核对账号、voice目标模型、官方HTTP当前字段和hot_fix格式后才可形成付费批准清单；不合格fixture不得发送"
+}

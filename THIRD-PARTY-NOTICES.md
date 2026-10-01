@@ -33,3 +33,7 @@ pdfjs-dist 5.6.205 (Mozilla PDF.js), Apache-2.0. License: licenses/PDFjs-Apache-
 新增独立Windows ffprobe.exe，来自FFmpeg官网列出的BtbN构建，未修改，以子进程读取本地WAV元数据。未更换原ffmpeg.exe。
 来源与文件SHA256：resources/docs/ffprobe-来源.json；GPL许可：licenses/ffprobe-LICENSE.txt。
 构建项目及源码获取：https://github.com/BtbN/FFmpeg-Builds ，https://github.com/FFmpeg/FFmpeg 。
+
+## 真人口播 V2严格协议校验
+
+Ajv 8.20.0（MIT）及其运行依赖fast-deep-equal（MIT）、fast-uri（BSD-3-Clause）、json-schema-traverse（MIT）、require-from-string（MIT）打包于主进程，仅编译内置受信JSON Schema，不编译导入协议提供的Schema。对应原始许可证见licenses/*-LICENSE.txt。

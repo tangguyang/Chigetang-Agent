@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chigetang.local/schemas/real-speech/v2/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
+  "title": "REAL_SPEECH_EXECUTION_PLAN_V2",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "REAL_SPEECH_EXECUTION_PLAN_V2"
+    },
+    "protocolVersion": {
+      "const": "2.0"
+    },
+    "capabilityProfileId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "capabilityVersion": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "planId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "parentPlanId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "originalText": {
+      "type": "string",
+      "minLength": 1
+    },
+    "originalTextHash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "engine": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "model": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "region": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "transport": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        }
+      },
+      "required": [
+        "name",
+        "model",
+        "region",
+        "transport"
+      ],
+      "additionalProperties": false
+    },
+    "voiceRequirements": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "cloned"
+        },
+        "targetModel": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "continuity": {
+          "const": "same_voice_all_windows"
+        },
+        "requestedVoiceRef": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "targetModel",
+        "continuity",
+        "requestedVoiceRef"
+      ],
+      "additionalProperties": false
+    },
+    "directorReference": {
+      "anyOf": [
+        {
+          "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/directorReference"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/window"
+      },
+      "minItems": 1
+    },
+    "rehearsalAnchors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "anchorId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "windowId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validationFocus": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        },
+        "required": [
+          "anchorId",
+          "windowId",
+          "purpose",
+          "validationFocus"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "unresolvedItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+          },
+          "intent": {
+            "type": "string",
+            "minLength": 1
+          },
+          "windowIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "confidence": {
+            "const": "E3"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "blocking": {
+            "const": true
+          }
+        },
+        "required": [
+          "itemId",
+          "intent",
+          "windowIds",
+          "confidence",
+          "reason",
+          "blocking"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
+    "lockedFields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "intentRanges": {
+      "type": "array",
+      "items": {
+        "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/intentRange"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "schema",
+    "protocolVersion",
+    "capabilityProfileId",
+    "capabilityVersion",
+    "planId",
+    "parentPlanId",
+    "originalText",
+    "originalTextHash",
+    "engine",
+    "voiceRequirements",
+    "directorReference",
+    "windows",
+    "rehearsalAnchors",
+    "unresolvedItems",
+    "lockedFields",
+    "intentRanges"
+  ],
+  "additionalProperties": false,
+  "$comment": "R2 candidate: interpretation-only intentRanges never becomes API input; freeze after spike."
+}

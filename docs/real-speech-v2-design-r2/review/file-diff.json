@@ -1,0 +1,176 @@
+{
+  "excludedGeneratedFiles": [
+    "review/R1-to-R2.diff",
+    "review/file-diff.json"
+  ],
+  "counts": {
+    "ADDED": 9,
+    "MODIFIED": 17,
+    "UNCHANGED": 1,
+    "DELETED": 0
+  },
+  "files": [
+    {
+      "path": "01-源码审计与重构边界.md",
+      "status": "MODIFIED",
+      "r1Sha256": "12d5ca82c6832687c75251eeb66d42599195912daa51573da66a0f883a989104",
+      "r2Sha256": "23fcd4adc6d32ce04e317badbc036b3054555bf4ba3b6af40704718734889568"
+    },
+    {
+      "path": "02-官方能力核验.md",
+      "status": "MODIFIED",
+      "r1Sha256": "206b5ad04f1aa0d950d4e23e708f7b605660a5fa6b5c01c1e689a2d5ab8b6431",
+      "r2Sha256": "d90bd9886ed0f25c69c08347effc697f5ba05ce5461d5e1e08c82b873cccad69"
+    },
+    {
+      "path": "03-ChatGPT真人口播导演意图沟通手册.md",
+      "status": "MODIFIED",
+      "r1Sha256": "35adc8f0b3f1d2a377661099916378cdc91849c601c0349ddfe0d060e970abb7",
+      "r2Sha256": "0f0bc42383a60b9559a98a13f60712f5c4756e25819b08a489f1bd9448f552c8"
+    },
+    {
+      "path": "04-真人带货口播台词需求模板与示例.md",
+      "status": "MODIFIED",
+      "r1Sha256": "959e887f52c68fab484c0847156e1cc68c314f14345214236af5907529b0c07b",
+      "r2Sha256": "5e1f2e3631f583873019bb6afbc581249b3e860ee7a714087c2071c6c27a59c6"
+    },
+    {
+      "path": "05-ChatGPT到CosyVoice执行协议编译规范.md",
+      "status": "MODIFIED",
+      "r1Sha256": "4ec236b946d926275017441cf3f3087a0fc91768ace0d32a4bb1eca3dbb079ac",
+      "r2Sha256": "3dfbfc54809c4288c06d3b93464cf7aaf029057358cab0a82ab4895b8d919955"
+    },
+    {
+      "path": "06-架构UI数据迁移与测试.md",
+      "status": "MODIFIED",
+      "r1Sha256": "754e64c747612e03001a640430ced15c293402fb834b920e58969f23a0343857",
+      "r2Sha256": "b993f09f30d2acb75055f271038601042e9d87430ca59b8157f923ae52d281b5"
+    },
+    {
+      "path": "07-设计交付验证.md",
+      "status": "MODIFIED",
+      "r1Sha256": "716b54701c577d19cbe1d48c4efee2a599a253d14f1c73adf74dce0dd6463c19",
+      "r2Sha256": "025264c19316939ba4308686c5daec7d2bcb20da6cc36b574b7c15285ae01ef5"
+    },
+    {
+      "path": "08-独立文档查看器设计.md",
+      "status": "MODIFIED",
+      "r1Sha256": "a75d37ef13ee2bca8af2ef3fb29e70f90adddf7bf2859d01e191ee1104d92a94",
+      "r2Sha256": "86804384b8ddbf27dbcbfe2122c4b76f82ee9f24078fe074a36e6e0b915722d0"
+    },
+    {
+      "path": "09-CosyVoice-3.5-Plus-Capability-Spike方案.md",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "2ec40ec384b0c8dc5941b0289212d35a9383b7034ac4b16ce47c9c824e1e8f76"
+    },
+    {
+      "path": "10-R1到R2修改清单.md",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "4214ecad16d0c312ee34fb0a5bd443feeddf195dfb604e756300e3d872b7dee5"
+    },
+    {
+      "path": "COSYVOICE_CAPABILITY_PROFILE.v1.json",
+      "status": "MODIFIED",
+      "r1Sha256": "08a33bda2f80f8325647a753b423cf51bc6c7d3d6d83bd13eb7d385004079ad5",
+      "r2Sha256": "3492d3063607637be3bac47f82e37a80caaeec8677476649df17252cae603dc0"
+    },
+    {
+      "path": "README.md",
+      "status": "MODIFIED",
+      "r1Sha256": "ad1c085ee8952e8c9ef4854f3ddb0a63421bef13824bf7cc93e3ca557c6cb831",
+      "r2Sha256": "f6dcb3e68e1c807bdbd3e1fc2009938be58bc9d3abfee7eccc5d157df014b611"
+    },
+    {
+      "path": "design-validation-results.json",
+      "status": "MODIFIED",
+      "r1Sha256": "f534d783f2dafaaaa1d549547379e394858f5be4415701d30840d666d2e4f62c",
+      "r2Sha256": "3396df6b02cbe8d4cfe04d74d89761e851063257801799ca8b9de9b7e1232bd5"
+    },
+    {
+      "path": "director-dictionary.json",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "dcd91bb63bf609f3de35eca00c2db9095064f85f4d31033c456bbb32d85bfba2"
+    },
+    {
+      "path": "examples/bindings.json",
+      "status": "MODIFIED",
+      "r1Sha256": "f8d435252fb39a0fadd6072c95a977e2d263c83e0e3373252ba2c2641f754071",
+      "r2Sha256": "4abaa139ed0a55733a4a08e82566d05992b68cd6760a85bd05a90dce811b3854"
+    },
+    {
+      "path": "examples/director-confirmed.txt",
+      "status": "UNCHANGED",
+      "r1Sha256": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef",
+      "r2Sha256": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef"
+    },
+    {
+      "path": "examples/patch.json",
+      "status": "MODIFIED",
+      "r1Sha256": "f65ff3e147cf78be0c1548e539c0155838135eda08edcf2127b2071f6dce95d7",
+      "r2Sha256": "aaf6cb2e31ff4700b2b8b40adbc3e520c24e2566ae6295f0fae2e9e6578362b4"
+    },
+    {
+      "path": "examples/plan-with-optional-audit.json",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "e0ead3240bc3fb3e51cb1a55b4bd781fed8916a3c9a835d0eeccd25954357d1e"
+    },
+    {
+      "path": "examples/plan-with-speak-candidates.json",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "d2108d0401df90edbb199ff6ee445ada2b2ade140c3ba6c1ebdc2df02ace3556"
+    },
+    {
+      "path": "examples/plan-with-sub-candidate.json",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "0323185a5162a95009992e354101ca317c7293b5bd546726fec7101a596d812c"
+    },
+    {
+      "path": "examples/plan.json",
+      "status": "MODIFIED",
+      "r1Sha256": "8432782da1c4005615eb435d7c489397a1cf832da6b2db47a0425997c11ea347",
+      "r2Sha256": "f182fec207f4141157a0d60b25dc0de1b611d3b711cec3881479b926df203783"
+    },
+    {
+      "path": "schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
+      "status": "MODIFIED",
+      "r1Sha256": "f7b2ab2722c2fa9fbf8a5f4b80f060e4406e7d960ddd84d6a82dd124d9e12ba4",
+      "r2Sha256": "6f7ade27c315948dd38aed4d68a1ac818400990b211149158f9c87e6451ed2f5"
+    },
+    {
+      "path": "schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
+      "status": "MODIFIED",
+      "r1Sha256": "d00627a9d0178888894a0c4a4414f947e0c4427231aff44b7d63383aac7d86d6",
+      "r2Sha256": "cf042ee3ca4506a2d2bbe0954137da112f38806130a50a3fe35b8975d704d2fe"
+    },
+    {
+      "path": "schemas/common.schema.json",
+      "status": "MODIFIED",
+      "r1Sha256": "8bd5c1c071d2b1bc9d4d463ac959b5fd9a45ea6b6329b545922fa8fb5bb3cfc8",
+      "r2Sha256": "5bffbf19652886c353294ace039d4bde2f09aa95b92ecd97dcd87d671a5dc629"
+    },
+    {
+      "path": "spike/result-report-template.json",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "5c55b852ee7328c4f577ac53ce375ee4111fb52d88d41c7a6da813dd9c3c26be"
+    },
+    {
+      "path": "spike/test-matrix.json",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "b1969a8ef490fe1e865d83961c538bcabb7a7611f8c51bbf39f291caf681ee26"
+    },
+    {
+      "path": "spike/付费调用批准单模板.md",
+      "status": "ADDED",
+      "r1Sha256": null,
+      "r2Sha256": "560e8b40a5d0133721a3f95df6df3a12b330f9ef1a933ce2a406839982f861d0"
+    }
+  ]
+}

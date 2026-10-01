@@ -1,0 +1,5629 @@
+--- R1/02-官方能力核验.md
++++ R2/02-官方能力核验.md
+@@ -1,6 +1,6 @@
+ # CosyVoice 3.5 Plus官方能力核验
+ 
+-核验日期：2026-10-01。证据等级：官方文档核验；无本轮真实云端调用。profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http@1.0.0-draft.1`。
++核验日期：2026-10-01。证据等级：官方文档核验；无本轮真实云端调用。profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http@1.0.0-draft.2`。
+ 
+ ## 官方来源索引
+ 
+@@ -53,7 +53,7 @@
+ | 要求 | 事实/推断分类 | 处理 |
+ |---|---|---|
+ | 逐字连续rate/pitch曲线、某字精确F0+8% | 当前已核验API未提供此类接口，按E3处理 | 禁止wordPitch等假字段；如用户接受，可用独立范围或Window整体pitch/Instruction近似 |
+-| 局部范围快慢/音高 | S3支持并列speak各自rate/pitch，非嵌套 | E1范围参数支持；“逐字精准声学变化”仍不成立。首版产品先不开放，Manifest不能写模型不支持 |
++| 局部范围快慢/音高 | S3支持并列speak各自rate/pitch，非嵌套 | E1范围参数支持；“逐字精准声学变化”仍不成立。首版候选保留，等待Spike决定，Manifest不能写模型不支持 |
+ | 逐字emotion/emphasis数值 | 未发现独立官方接口，按E3精确要求处理 | Instruction中的重点/调侃等为E2；标明近似获用户确认 |
+ | 真人状态连续、价格高潮、CTA自然、销售能量曲线 | E2导演意图，非API真实数值 | Instruction与用户确认的Window设计近似；试听判断，禁止软件给自动听感分数 |
+ | 保证每个字时长、整段精确10秒、逐词时间戳用于控制 | 无相应控制承诺 | E3；时间戳仅观察；不假称可锁时长 |
+@@ -66,4 +66,11 @@
+ 
+ PRODUCT_RECOMMENDED_RANGE：初次rate 0.9–1.1、pitch优先1、volume优先50、seed先0；instruction建议加权≤80，保留修改余量，不做硬拦截；只给关键语义停顿添加break。以上为本产品初始调试建议，没有实测最优依据；超出建议但在官方范围内应提示并允许。
+ 
+-PRODUCT_HARD_LIMIT：首版wav/48000Hz；单languageHints；不接原始XML；只开放break/phoneme/say-as；不允许同窗口并列speak参数；每个边界仅SSML或transition一种额外停顿。全部需在profile.productPolicy明确声明，与modelCapabilities分开。
++PRODUCT_HARD_LIMIT：首版wav/48000Hz；单languageHints；不接原始XML；候选Schema包含break/phoneme/say-as/sub与并列speak参数；正式启用集合待Spike决定；每个边界仅SSML或transition一种额外停顿。全部需在profile.productPolicy明确声明，与modelCapabilities分开。
++
++
++## R2补核与能力真值
++
++官方SSML明确支持sub(alias替代朗读)、连续非嵌套speak及speak级rate/pitch/volume。不能用产品暂不开启覆盖模型能力真值。[官方SSML说明](https://help.aliyun.com/zh/model-studio/ssml-latex-user-guide)。Manifest分别存modelSupport=MODEL_SUPPORTED与productPolicy.capabilityAvailability；后者为PRODUCT_ENABLED、PRODUCT_DISABLED_PENDING_VALIDATION、PRODUCT_DISABLED_OUT_OF_SCOPE或PRODUCT_UNSUPPORTED。PRODUCT_ENABLED在本设计稿只表示产品候选规则允许，不表示软件已实现或云端已实测。所有Spike结果目前NOT_RUN。
++
++官方文档中的历史示例、HTTP/其他接口参数命名和数值口径不可混用；实际优先级、字符边界、指令与SSML组合必须按09实测，失败不能直接抹掉官方支持项。
+--- R1/03-ChatGPT真人口播导演意图沟通手册.md
++++ R2/03-ChatGPT真人口播导演意图沟通手册.md
+@@ -1,76 +1,529 @@
+-# ChatGPT真人口播导演意图沟通手册｜V2设计稿
+-
+-适用：听得出声音不对、但不懂声音工程的人。引用 `COSYVOICE_CAPABILITY_PROFILE.v1.json`，`capabilityProfileId=aliyun.cosyvoice-v3.5-plus.cn-beijing.http`，`capabilityVersion=1.0.0-draft.1`。必须与Manifest一起提供给ChatGPT。
+-
+-## 目录
+-
+-1. 活人感的八个方面；2. 听感问题怎么说；3. 导演词典；4. 精确与近似；5. 导演确认方法；6. 音频诊断边界。
+-
+-## 活人感指什么
+-
+-活人感是“一个人理解这句话、带着目的对你说”，不是增加喘气、塞满停顿或刻意口误。讲话必须先把意思说清楚，再形成自然的力度变化。
+-
+-| 维度 | 小白可直接说的话 | 执行边界 |
+-|---|---|---|
+-| 语义停顿 | “这两件事要分开说；价格出来前留一下。” | ✅指定位置break是E0；△自然思考感是E2 |
+-| 速度变化 | “解释部分别赶，最后一句干脆一点。” | ✅整Window rate是E1；△句内变化E2；⚠需要稳定局部变化时可建议Window |
+-| 重音层级 | “我想让人记住‘不用另外买’，不是每个词都重。” | △Instruction E2；❌逐字力度百分比无精确接口 |
+-| 情绪变化 | “先有点好奇，讲清楚以后更笃定。” | △E2；⚠差异太大可建议Window，但要用户确认 |
+-| 聊天/临场感 | “像手机前回答一个朋友的问题，别像录广告。” | △E2，不保证音频每次都达到 |
+-| 人物连续性 | “前后是同一个人同一次录制，别突然换成主持人。” | ✅锁音色保证选同voice；△状态连续仍为E2；多Window可能增加接缝风险 |
+-| 销售能量曲线 | “开头抓住人，中间解释清楚，报价格提一下再收住。” | △E2，曲线只作导演参考；⚠Window增强局部控制 |
+-| CTA自然度 | “像顺势提醒看链接，别突然喊下单。” | △E2，不能保证成交率 |
+-
+-标记说明：✅只说明存在真实参数/结构控制，分E0/E1，**不代表听感绝对精准**；△通过Instruction近似；⚠经用户确认后可拆Window增强，但可能牺牲连贯性和增加试听成本；❌要求精确控制时当前没有接口。一个需求可以包含多种标记，必须分解后说明。
+-
+-## 常见听感问题 → 怎么告诉ChatGPT
+-
+-| 听起来不对 | 可以直接复制的反馈 | 实现判断 |
+-|---|---|---|
+-| 太像念稿 | “句句一样整齐。我希望像边想边解释，不要每句都同样收尾。” | △人物状态和句尾自然度E2；不要软件自动添口误 |
+-| 太平 | “开头有疑问，中间给理由，价格才是重点，现在三段没变化。” | △E2；⚠确认后分别Window |
+-| 太像广告 | “每句话都在用力卖，改成我自己用过、给熟人讲的感觉。” | △E2；不能擅自增加‘亲自用过’事实到台词 |
+-| 太激动 | “兴奋过头，像喊活动。把情绪压下来，价格重点保留。” | △E2；✅整体volume只调音量E1，不等于降低情绪 |
+-| 太端 | “像主持人，不像普通人在手机镜头前聊天，句尾不要端着。” | △E2 |
+-| 不够抓人 | “第一句要像真的在问我，后面的解释再松下来。” | △反问E2；⚠开场Window |
+-| 不够亲近 | “距离太远，像台上介绍，改成跟身边一个朋友说。” | △E2，不擅自改变音色 |
+-| 没有价格高潮 | “报价格之前留一点期待，数字说清楚、略提精神，下一句收住。” | ✅停顿E0；△数字状态E2；⚠价格Window |
+-| 重点没出来 | “重点是‘一套’，不是‘今天’，别把全句读成重音。” | △E2；❌逐字emphasis数值 |
+-| 转折不明显 | “前面是常见想法，‘但’以后是我要说的新理由，转过去要听得出来。” | ✅break E0；△转折状态E2 |
+-| CTA太硬 | “最后一句像推销员催单，改成说完顺手提醒，别突然升音量。” | △E2；✅整Window volume E1仅基础校准 |
+-| 前后不像同一个人 | “第二段突然嗓门/状态变了，延续第一段的人物关系和力度。” | ✅核对相同voice E0；△连续状态E2，先对照参数，不自动合段 |
+-| 数字念错 | “99读九十九，不是九九；这一处发音要清楚。” | ✅say-as/cardinal E0或确认后的合成文本；不靠提高情绪修发音 |
+-| 某词读错 | “这里的‘行’要读hang2，请修这个词，别改别处。” | ✅phoneme或hot_fix E0，仍需听实际结果 |
+-
+-## 导演词典
+-
+-| 导演词 | 具体意思与可用描述 | 能力标记 |
+-|---|---|---|
+-| 反问 | 真对对方提出疑问，不是播报问号：“你是不是也这样？” | △E2 |
+-| 轻微调侃 | 带一点会心笑意，不嘲讽、不大笑 | △E2；❌精确笑声时点/强度 |
+-| 熟人感 | 对一个熟悉的人直接解释，无舞台距离 | △E2 |
+-| 压低 | 可以是情绪克制，也可以是整体音高降低，先确认指哪种 | △前者E2；✅后者整Window pitch E1 |
+-| 提气 | 精神集中、准备抛出重点，未必更大声 | △E2，不等于volume加值 |
+-| 收住 | 重点说完，尾句落稳，不继续兴奋 | △E2 |
+-| 松弛 | 讲话不赶、不端，但信息仍清楚 | △E2；✅整Window稍慢可rate E1 |
+-| 戳痛 | 指出用户真实烦恼，像理解对方，不夸大焦虑 | △E2，台词事实需另外确认 |
+-| 专业解释 | 讲清理由、数字清晰，避免播音腔 | △E2；✅必要读法标注E0 |
+-| 数字爆点 | 数字是句子的重点，短暂提精神，不变喊麦 | △E2；⚠价格Window；❌逐字重音强度 |
+-| 降能量 | 情绪和销售压力减弱，转入轻解释 | △E2；不能用volume自动替代 |
+-| 克制成交 | 提醒下一步，态度确定，给人选择空间 | △E2 |
+-| 悬一下 | 关键答案前暂留间隔，别拖长制造假神秘 | ✅break E0；△期待感E2 |
+-| 干脆 | 收尾清楚利落，不拖尾 | △E2；✅整Window快一点可rate E1 |
+-
+-## 怎么确认导演稿
+-
+-先阅读按原稿顺序的《真人口播导演确认稿》。检查“重点有没有理解错”“情绪是不是你要的人”“有没有改台词”“哪里只是近似”。只确认导演意图，不必为所有句子填写数值。
+-
+-若要求“那个字音高精确+8%”，ChatGPT应明确说：当前没有逐字声学曲线接口；可改为“这句略扬、那个词自然强调”，但这只是近似，可能强调不到或损失连贯性。用户接受后写入确认稿；不接受就标unresolved。未经确认不偷偷替换要求。
+-
+-最后用户明确回复“导演稿确认”，ChatGPT才进入编译。软件不会替用户完成这一步。
+-
+-## 诊断如何避免假装听过
+-
+-必须有实际可访问的WAV并确认当前ChatGPT会话具备音频分析能力，才能下听感诊断。仅拿到文字/波形截图/请求参数时，只能做执行检查和假设分析，明确未听音频。不能声称“我听过很自然”。若此会话不能读取WAV，依靠用户反馈给候选Patch，标为用户反馈推断，或换能分析音频的会话。
+-
+-用户反馈十维固定字段：面对镜头感、念稿感、语义停顿、快慢变化、重音层级、情绪变化、连续表达感、广告/播音腔、销售推动力、CTA自然度。每项可选“好/有问题/不确定/未评估”，加一句补充即可。诊断包不要求十题全填；Golden最终确认要明确整篇试听、发音、接缝和用户愿意采用。
++# ChatGPT真人口播导演意图沟通手册｜R2可检索词典
++
++适用于听得出“不对”、却不知道怎么形容的人。Ctrl+F搜索词条或听感描述；将B整句复制给ChatGPT，再补具体原句、位置及真实音频。引用COSYVOICE_CAPABILITY_PROFILE.v1.json@1.0.0-draft.2；能力尚待Spike冻结。
++
++E0=明确结构/读法控制，不等于听感保证；E1=真实参数控制，不等于精确声学结果；E2=instruction语义近似；E3=没有精确接口。一个诉求可混合多个等级。多speak局部rate/pitch是官方支持的E1候选，待Spike验证实用性，不能提前排除。不要让软件按这些描述自行导演。
++
++查词顺序：速度与结构（语速、节奏、停顿、连说、留白、气口）；重点与语势（重音、句尾、反问、转折、数字爆点、价格高潮、CTA）；人物与状态（音高感觉、能量、松弛、提气、收住、压低、调侃、熟人感、专业解释、戳痛、笃定）；问题诊断（广告腔、播音腔、念稿感、AI平读感、前后人物状态不一致、咬字、尾字吞掉、强调对比）。
++
++## 可直接复制的沟通模板
++
++“原句是【…】，问题在【…】。听起来【…】。我想要【…】，不要【…】。请先解释你理解的导演意图，区分E0/E1/E2/E3及限制，等我确认再编译Plan/Patch。不要改事实、原稿或偷偷拆Window。”
++
++下列B是导演沟通表达，不是已冻结instruction；ChatGPT确认后需压缩为符合官方字符限制的指令。各条F说明独有边界。默认不自动加喘气、口误，不对无音频作“已听到”的判断。
++
++## D01 语速
++
++A. 小白听起来：一口气太赶，或拖得像慢放。
++
++B. 直接告诉ChatGPT：“这句意思没听清，请整体稍慢，重点词保持清楚。”
++
++C. 专业理解：单位时间音节密度；区分整体速度和局部强调。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：单位时间音节密度；区分整体速度和局部强调由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：整体rate；短语明确speakSegments.rate待Spike；instruction补自然度。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：参数倍率不等于听感或精确时长倍率。
++
++G. 常见误用：为了重音把整段都降速。
++
++## D02 节奏
++
++A. 小白听起来：每句长短、轻重都一样，没有推进。
++
++B. 直接告诉ChatGPT：“解释部分连起来，结论前留一下，别每逗号都停。”
++
++C. 专业理解：语义组块与能量分布。
++
++D. E级：E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：语义组块与能量分布由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：已确认break和范围rate候选；instruction表达连说。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证完全复刻参考音频节拍。
++
++G. 常见误用：把所有标点变成固定停顿。
++
++## D03 停顿
++
++A. 小白听起来：两层意思挤在一起，或断得支离破碎。
++
++B. 直接告诉ChatGPT：“在“99元”前留一个短空隙，让价格单独被听见。”
++
++C. 专业理解：语义边界与悬念留白。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义边界与悬念留白由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：明确位置break；窗口间transition显式静默。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：break数值不等于含自然静默的总间隙。
++
++G. 常见误用：连续叠加break和transition。
++
++## D04 重音
++
++A. 小白听起来：听不出这句最重要的词。
++
++B. 直接告诉ChatGPT：“重点是“不用另外买”，其他词轻一点，不要全句用力。”
++
++C. 专业理解：焦点对比与信息层级。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：焦点对比与信息层级由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction E2；范围rate/pitch E1候选辅助。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：没有精准逐字力度百分比接口。
++
++G. 常见误用：每个卖点都标重音。
++
++## D05 句尾
++
++A. 小白听起来：每句都往上飘，或突然砸下去。
++
++B. 直接告诉ChatGPT：“这句最后自然收稳，不像主持人宣布，也别吞掉尾字。”
++
++C. 专业理解：终止调型与尾音能量。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：终止调型与尾音能量由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction指定句尾动作。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证精确尾音F0曲线。
++
++G. 常见误用：所有句尾统一压低。
++
++## D06 音高感觉
++
++A. 小白听起来：声音太尖、太闷，人物年龄感变了。
++
++B. 直接告诉ChatGPT：“保留这个人的声音，整体少一点尖亮，别变成低沉男播音。”
++
++C. 专业理解：感知音区与声线身份区分。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：感知音区与声线身份区分由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：整体pitch E1；局部pitch候选；instruction E2。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：调pitch可能影响音色感，不能保证只改音高。
++
++G. 常见误用：把温柔直接等同低pitch。
++
++## D07 能量
++
++A. 小白听起来：有气无力，或全程像吆喝。
++
++B. 直接告诉ChatGPT：“开头有精神，中间解释放松，价格处提一下，再自然收住。”
++
++C. 专业理解：激活水平与动态对比。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：激活水平与动态对比由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；明确volume仅控制整体幅度。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：提高volume不等于兴奋或有说服力。
++
++G. 常见误用：靠加音量修复平读。
++
++## D08 松弛
++
++A. 小白听起来：字字绷紧，像努力背台词。
++
++B. 直接告诉ChatGPT：“像给熟人解释，允许轻重变化，吐字清楚但别字字端着。”
++
++C. 专业理解：低紧张度、自然语义连接。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：低紧张度、自然语义连接由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction关系与状态。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证真实临场感或自动口误。
++
++G. 常见误用：把松弛写成含糊、拖音。
++
++## D09 提气
++
++A. 小白听起来：重要句出来时没有精神。
++
++B. 直接告诉ChatGPT：“到这句精神提起来，语气更笃定，别喊，不要加喘气声。”
++
++C. 专业理解：语势启动与能量提升。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：语势启动与能量提升由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；明确范围参数可辅助。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：无可验证的真实呼吸控制接口。
++
++G. 常见误用：自动塞吸气音或一律升pitch。
++
++## D10 收住
++
++A. 小白听起来：价格说完还一路喊，听着很硬。
++
++B. 直接告诉ChatGPT：““99元”说清楚后把劲收回来，接下一句像正常提醒。”
++
++C. 专业理解：高潮后能量回落。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：高潮后能量回落由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；已指定下一范围rate/pitch候选。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证精确能量包络。
++
++G. 常见误用：把收住理解成突然静音。
++
++## D11 压低
++
++A. 小白听起来：想说悄悄话，却变成闷声播音。
++
++B. 直接告诉ChatGPT：“这句像靠近朋友提醒，少一点外放，字要清楚。”
++
++C. 专业理解：关系距离、音区和力度联合变化。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：关系距离、音区和力度联合变化由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction为主；pitch/volume仅明确辅助。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证耳语或某个频率下降值。
++
++G. 常见误用：只拉低pitch就当亲密感。
++
++## D12 反问
++
++A. 小白听起来：疑问句像陈述，或像责骂人。
++
++B. 直接告诉ChatGPT：““你是不是也这样？”是带理解的轻反问，不是质问。”
++
++C. 专业理解：疑问语势与关系立场。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：疑问语势与关系立场由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction指定轻反问及非责备。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证固定上扬幅度。
++
++G. 常见误用：见问号就全部挑高喊出来。
++
++## D13 转折
++
++A. 小白听起来：但是前后听不出方向变化。
++
++B. 直接告诉ChatGPT：““但是”前略留一下，后面是关键解释，语气转得自然。”
++
++C. 专业理解：语义立场切换。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义立场切换由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：break E0加instruction E2。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证推理关系自动被模型理解。
++
++G. 常见误用：所有转折词都强重音。
++
++## D14 调侃
++
++A. 小白听起来：本想轻松，却听成嘲讽。
++
++B. 直接告诉ChatGPT：“这句带一点会心笑意，像吐槽自己的小习惯，不笑话观众。”
++
++C. 专业理解：温和幽默与目标指向。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：温和幽默与目标指向由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction描述关系、幅度和禁止项。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不保证笑意精确或无冒犯感。
++
++G. 常见误用：只写“搞笑一点”不说笑谁。
++
++## D15 熟人感
++
++A. 小白听起来：像客服统一话术，离人很远。
++
++B. 直接告诉ChatGPT：“像认识很久的朋友随口分享，真诚、有分寸，别推销口吻。”
++
++C. 专业理解：关系距离和交流目的。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：关系距离和交流目的由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction稳定同一人物关系。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：克隆同voice不保证熟人交流感。
++
++G. 常见误用：用过度亲昵称呼假装熟悉。
++
++## D16 专业解释
++
++A. 小白听起来：像术语堆砌，听着懂但记不住。
++
++B. 直接告诉ChatGPT：“先把原因讲清，再给结果，语气笃定但不端着，不要念报告。”
++
++C. 专业理解：信息层次与可信状态。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：信息层次与可信状态由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；导演确认文本本身是否清楚。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：声音无法修复事实错误或复杂原稿。
++
++G. 常见误用：用播音腔冒充专业。
++
++## D17 戳痛
++
++A. 小白听起来：像吓唬人、指责人，观众会防御。
++
++B. 直接告诉ChatGPT：“指出这个真实麻烦，像理解对方，不夸大后果、不制造焦虑。”
++
++C. 专业理解：问题识别与共情立场。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：问题识别与共情立场由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction及已确认真实文本。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证共鸣或合规，不能虚构痛点。
++
++G. 常见误用：把戳痛等同羞辱和恐吓。
++
++## D18 数字爆点
++
++A. 小白听起来：数字糊过去，或被喊成夸张广告。
++
++B. 直接告诉ChatGPT：““99”清楚突出一次，前后留对比，别把整句都喊高。”
++
++C. 专业理解：数字信息焦点与对比。
++
++D. E级：E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：数字信息焦点与对比由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：say-as正确读法E0；instruction E2；范围rate候选。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：读对数字不等于突出或促进成交。
++
++G. 常见误用：整数误用currency，或每个数字都爆。
++
++## D19 价格高潮
++
++A. 小白听起来：报价没有亮点，或者像清仓叫卖。
++
++B. 直接告诉ChatGPT：“到价格精神提一下，明确报完就收住，别加虚假的惊讶。”
++
++C. 专业理解：报价段局部能量峰值。
++
++D. E级：E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：报价段局部能量峰值由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；明确break与范围rate/pitch候选。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证价格吸引力或转化。
++
++G. 常见误用：用高音量掩盖价格无竞争力。
++
++## D20 CTA
++
++A. 小白听起来：结尾突然换成主播喊下单。
++
++B. 直接告诉ChatGPT：“顺着刚才的话提醒看尺寸和颜色，像帮对方下一步，不催促。”
++
++C. 专业理解：行为引导与人物状态延续。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：行为引导与人物状态延续由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；明确整Window rate可辅助。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：声音不能保证点击购买。
++
++G. 常见误用：每条CTA都强迫限时催单。
++
++## D21 广告腔
++
++A. 小白听起来：每句话都在卖，像宣传片。
++
++B. 直接告诉ChatGPT：“删掉表演感，像真实使用后解释给朋友，卖点有层次，不夸张。”
++
++C. 专业理解：过度商业表演与均匀强调。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：过度商业表演与均匀强调由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；必要时请用户确认文本改写。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：指令不能自动消除广告式原稿。
++
++G. 常见误用：只说“自然”却保留夸张叫卖文字。
++
++## D22 播音腔
++
++A. 小白听起来：吐字太整齐，像新闻播报。
++
++B. 直接告诉ChatGPT：“不用主持人声线，语义连起来，清楚但不字字圆满。”
++
++C. 专业理解：朗读规范化与角色距离。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：朗读规范化与角色距离由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；保持同一复刻音色。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不保证彻底消除样本自带播音习惯。
++
++G. 常见误用：把清楚吐字当成必须去掉。
++
++## D23 念稿感
++
++A. 小白听起来：像沿文字往下读，没有想说给谁。
++
++B. 直接告诉ChatGPT：“这句是回答一个具体问题，先理解对方，再把重点说出来。”
++
++C. 专业理解：交流目的缺失、句式等距。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：交流目的缺失、句式等距由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction指定对象与动作；导演核对文本。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证生成实时思考或随机临场。
++
++G. 常见误用：自动添加嗯啊和口误。
++
++## D24 AI平读感
++
++A. 小白听起来：强弱和句尾都相似，情绪起伏无意义。
++
++B. 直接告诉ChatGPT：“只突出一个核心短语，其他部分自然连说，别均匀强调。”
++
++C. 专业理解：焦点不足或动态缺乏语义对应。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：焦点不足或动态缺乏语义对应由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；显式局部speak候选作对照。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证靠参数完全修复模型平读。
++
++G. 常见误用：叠加大量相互矛盾的情绪指令。
++
++## D25 前后人物状态不一致
++
++A. 小白听起来：开头像朋友，后面突然像主播。
++
++B. 直接告诉ChatGPT：“全篇都是同一个人同一次解释，价格和结尾也保持同样关系。”
++
++C. 专业理解：跨Window关系状态与音色连续。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：跨Window关系状态与音色连续由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：锁voice E0配置；统一instruction框架E2；试听拼接。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：相同voice/seed不能保证状态完全连续。
++
++G. 常见误用：每段换一套人物设定。
++
++## D26 连说
++
++A. 小白听起来：词与词总断开，意思散了。
++
++B. 直接告诉ChatGPT：“这几个词是一整个意思，中间不要额外停，讲完再换气。”
++
++C. 专业理解：语义组完整性。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义组完整性由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：撤销经确认不必要break；instruction。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证消除模型自然停顿。
++
++G. 常见误用：软件自行去标点或裁静音。
++
++## D27 留白
++
++A. 小白听起来：关键结论没空间被听见。
++
++B. 直接告诉ChatGPT：“这句结论说完留一点，让人消化，再说下一句。”
++
++C. 专业理解：信息处理时间与节奏空间。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：信息处理时间与节奏空间由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：明确break或transition二选一。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：听觉总空隙可能包含自然静默。
++
++G. 常见误用：留白越长越认为高级。
++
++## D28 笃定
++
++A. 小白听起来：像试探推销，或硬装权威。
++
++B. 直接告诉ChatGPT：“只对已确认事实说得肯定，语气稳，不加不真实保证。”
++
++C. 专业理解：认知立场与语气稳定。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：认知立场与语气稳定由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction；事实边界由人确认。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不保证声音可信即事实正确。
++
++G. 常见误用：用肯定语气扩大产品承诺。
++
++## D29 气口
++
++A. 小白听起来：一句话像永远不呼吸，或喘得太多。
++
++B. 直接告诉ChatGPT：“按完整意思分气口，不要每几个字断，也不要刻意加呼吸声。”
++
++C. 专业理解：语义呼吸组与连续表达。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义呼吸组与连续表达由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：明确break与已确认Window；instruction。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：没有真实肺部呼吸控制，不能保证喘息位置。
++
++G. 常见误用：把每个逗号都设为吸气。
++
++## D30 咬字
++
++A. 小白听起来：重点词糊，或字字像教学示范。
++
++B. 直接告诉ChatGPT：“只有这个词要清楚，其他词正常说，别整段变成逐字朗读。”
++
++C. 专业理解：构音清晰度与局部焦点。
++
++D. E级：E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：构音清晰度与局部焦点由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：phoneme纠错E0；instruction清晰度E2。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：读法纠正不保证力度、音质或重音。
++
++G. 常见误用：用拼音标注解决所有音质问题。
++
++## D31 尾字吞掉
++
++A. 小白听起来：最后一个字几乎听不到。
++
++B. 直接告诉ChatGPT：“最后的“选”完整说出来，然后自然结束，不突然截断。”
++
++C. 专业理解：终止音节完整性和下载/截断排查。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：终止音节完整性和下载/截断排查由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：先核音频完整；instruction E2；不自动补字。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：不能保证仅指令修复音频传输截断。
++
++G. 常见误用：没检查文件就强拉音量。
++
++## D32 强调对比
++
++A. 小白听起来：两个选择像同一件事，没有区别。
++
++B. 直接告诉ChatGPT：“重点是“省空间”而不是“更大”，对比清楚但别贬低别人。”
++
++C. 专业理解：焦点对立与语义关系。
++
++D. E级：E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：焦点对立与语义关系由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。
++
++E. CosyVoice路径：instruction E2；显式范围参数候选。范围参数目前待Spike；执行以明确execution字段为准。
++
++F. 不能保证：没有任意逐字重音标记接口。
++
++G. 常见误用：把对比双方都同样喊重。
++
++## 确认与诊断
++
++先讨论一个主要问题，再确认导演意图及近似限制。导演确认稿可由ChatGPT输出便于人阅读，但软件导入不要求另上传文件。粘贴Plan并明确确认其来自已确认导演方案，即可建立软件确认记录。诊断必须区分实际听过音频、仅用户反馈、仅文本；同一seed不保证逐采样相同。人物状态不足时先查样本适配与指令冲突，不继续堆叠参数。
+--- R1/04-真人带货口播台词需求模板与示例.md
++++ R2/04-真人带货口播台词需求模板与示例.md
+@@ -1,6 +1,6 @@
+ # 真人带货口播台词需求模板与示例
+ 
+-profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http`；version：`1.0.0-draft.1`。一起提供Manifest和导演沟通手册。以下示例是场景化演示，不是已发布案例、成交数据或产品功效证据。
++profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http`；version：`1.0.0-draft.2`。一起提供Manifest和导演沟通手册。以下示例是场景化演示，不是已发布案例、成交数据或产品功效证据。
+ 
+ ## 可直接复制的需求模板
+ 
+@@ -63,3 +63,12 @@
+ ## 与机器编译的交接
+ 
+ 人类导演稿保存原文、逐块意图、Window和anchor建议以及E3处理。ChatGPT编译时引用确认稿ID/hash/确认记录。没有确认的E3不能偷偷写成已解决；影响目标Window的unresolved阻止其生成。后续修改台词或Window结构需要新的导演确认和Plan Revision，不能让局部Patch越权。
++
++
++## R2评审修订（替代旧稿中冲突的准入与开发顺序）
++
++软件最短工作流：任务名称 → 复刻音色 → 粘贴Plan → 导入并校验。用户声明Plan来自已确认导演方案后，软件创建自己的确认记录；导演稿附件及documentHash均可选，不能强制上传。导演沟通阶段仍需确认方向，但这不是软件额外文件门槛。
++
++开发顺序改为：R2设计评审 → 用户第二次确认 → 逐项明确批准付费Spike范围/请求上限/预算上限 → 隔离的Capability Spike → 效果报告及产品启用决策 → 一起冻结Capability Profile、Plan V2、Patch V2 → 获得正式开发授权后开始V2运行源码开发。设计批准不等于API扣费批准，也不等于正式开发批准。本轮没有进入Spike执行。
++
++intentRanges用于展示和诊断；软件不自行导演。候选SSML包含sub及连续speak局部rate/pitch；正式是否启用由Spike判断，不能预先排除。仅说明变更不重新生成；实际execution变更才创建生成任务。文档查看器继续采用08的独立non-modal BrowserWindow设计，新增词典和Spike帮助资料统一进入documentId注册表，全文复制原始Markdown。
+--- R1/05-ChatGPT到CosyVoice执行协议编译规范.md
++++ R2/05-ChatGPT到CosyVoice执行协议编译规范.md
+@@ -1,6 +1,6 @@
+ # ChatGPT → CosyVoice执行协议编译规范｜V2设计稿
+ 
+-schema版本：2.0。profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http@1.0.0-draft.1`。输入必须为用户确认的导演稿＋Manifest＋原稿。输出严格遵守本目录schemas；本规范同时负责Schema无法表达的语义规则。
++schema版本：2.0。profile：`aliyun.cosyvoice-v3.5-plus.cn-beijing.http@1.0.0-draft.2`。输入必须为用户确认的导演稿＋Manifest＋原稿。输出严格遵守本目录schemas；本规范同时负责Schema无法表达的语义规则。
+ 
+ ## 编译顺序与能力分类
+ 
+@@ -16,7 +16,7 @@
+ | “这里停400ms” | ssml break节点，offset指纯文本码点位置 | E0指定插入；最终可听间隙可能含自然停顿 |
+ | “整句话稍快” | 已确认该句为完整Window则rate；否则Instruction近似或重新确认结构 | E1整体参数；不暗中拆句 |
+ | “带一点调侃” | instruction：“像熟人聊天，带一点会心笑意，别夸张。” | E2，无emotion数值 |
+-| “某一个字pitch +8%” | 无逐字精准声学接口，E3。用户接受可用Instruction强调或另建范围/Window整体参数 | 范围控制是近似，需确认；首版不开放多speak范围 |
++| “某一个字pitch +8%” | 无逐字精准声学接口，E3。用户接受可用Instruction强调或另建范围/Window整体参数 | 范围控制是近似，需确认；多speak范围保留为首版候选，发布决策等待Spike |
+ | “这个数字正确朗读” | cardinal/digits等say-as；格式不匹配时用确认的synthesisText转换 | E0读法结构；不要给整数自动套currency |
+ | “这个词发音错误” | 一个位置用phoneme py/cmu；全窗口一致读法用hotFix.pronunciation | E0；pronunciation不能直接当官方input字段 |
+ 
+@@ -32,9 +32,11 @@
+ 
+ Window.original是原稿连续片段；synthesisText是送入发音标记前的纯文本。二者不同必须textApproval列出原因和用户确认引用。**Original Text锁定不等于合成文本可以偷偷改**，Diff必须展示词/标点/数字读法的变化。
+ 
+-ssml不是原始XML字符串，而是`enabled + nodes`。节点只允许break(offset,timeMs)、phoneme(start,end,text,alphabet,ph)、sayAs(start,end,text,interpretAs)。位置以synthesisText的Unicode码点计，左闭右开。每个节点text必须等于切片；范围不得重叠，break不得落在phoneme/sayAs内部。节点按位置顺序，不允许DTD、实体声明、未知标签、外部声音/BGM或更换voice属性。
++ssml不是原始XML字符串，而是`enabled + nodes + speakSegments`。节点只允许break(offset,timeMs)、phoneme(start,end,text,alphabet,ph)、sayAs(start,end,text,interpretAs)、sub(start,end,text,alias,confirmation)。位置以synthesisText的Unicode码点计，左闭右开。每个节点text必须等于切片；范围不得重叠，break不得落在phoneme/sayAs内部。节点按位置顺序，不允许DTD、实体声明、未知标签、外部声音/BGM或更换voice属性。
+ 
+-软件只能**确定性序列化已经指定的节点**为官方SSML；这不是导演编译。text必须XML转义，统一外包一个speak。enabled=false则nodes为空；有nodes则enabled=true。break遵守Manifest模型范围；相邻break总和不得超上限，不让服务端静默截断。首版不允许任意XML、prosody、emphasis或多speak范围；这是PRODUCT_HARD_LIMIT，不是MODEL_HARD_LIMIT。
++软件只能确定性序列化明确节点，不根据导演文字添加参数。speakSegments为空时使用单一根speak；非空时按已指定区间输出连续多个根speak。各区间必须连续完整覆盖synthesisText，start/end按码点计，每段显式提供rate/pitch/volume，禁止嵌套。节点不得跨越段边界；边界break归前段，offset=0归首段。文本及alias都必须XML转义。enabled=false时nodes和speakSegments必须都为空。break遵守Manifest范围及连续总和约束。
++
++sub只接受纯文本子内容与明确alias，必须展示实际朗读替代并确认，不能暗改原稿。其与hotFix重叠时拒绝模糊执行。连续speak和局部rate/pitch已经进入候选Schema，状态为PRODUCT_DISABLED_PENDING_VALIDATION；这不是首版排除决定。Spike听感报告及用户启用决定之前不得由正式产品执行。任意XML、DTD、未知标签仍禁止。
+ 
+ pronunciation条目只给method=phoneme的区间说明，必须与对应节点完全一致；method=hotFix仅镜像hotFix.pronunciation。它是供人核对的非执行声明，绝不第二次应用。hotFix在已指定节点文本上可能产生覆盖冲突时拒绝；replace源须真实出现在synthesisText，重复出现会影响全窗口，必须明确确认。所有replace的预期实际朗读文本展示在预览；不允许链式/循环替换和替换XML标签。台词原稿不会被hotFix覆盖。
+ 
+@@ -44,11 +46,13 @@
+ 
+ originalTextHash=SHA-256(UTF-8原样originalText)；保留换行、空格、标点、Unicode，不做NFC/CRLF转换。文件hash=SHA-256原始字节。planHash=SHA-256(RFC8785规范化整个Plan JSON)；导演稿hash=SHA-256确认文件UTF-8原样正文，建议正文不含自身hash。
+ 
+-JSON Schema只校验hex格式，不能证明内容正确。禁止要求语言模型心算hash。首次编译可将originalTextHash和directorReference.documentHash置null（未绑定草案）；软件导入校验时计算并展示绑定结果，用户“保存执行方案”后生成填有真实hash的冻结Plan及planHash。**null草案不得生成**。提供了hash则必须匹配，不自动纠正不一致。最终导出Plan给ChatGPT用真实hash，Patch必须原样复制诊断包里的绑定值。
++JSON Schema只校验hash格式。首次Plan的originalTextHash可为null，导入时软件计算并展示，保存执行方案后绑定真实原稿hash；提交了错误原稿hash则拒绝。directorReference可为null，或仅声明sourceType；documentHash始终可选，不是执行门槛。附件hash只增强追溯：无附件时为declared_unverified，不伪造已核验；自愿提供附件但hash不匹配时拒绝关联该附件，Plan自身校验通过仍可执行。
++
++正常工作流严格保持：任务名称 → 复刻音色 → 粘贴REAL_SPEECH_EXECUTION_PLAN_V2 → 导入并校验。用户在导入确认区明确勾选“该Plan来自我已确认的导演方案”，软件建立不可变本地确认记录，包含recordId、planId/planHash、profile版本、用户声明、时间及来源类型。记录属于软件审计，不发给TTS；无附件也能完成。没有该明确声明则暂不保存执行方案，但不要求另上传导演稿。
+ 
+ 采用[RFC8785 JCS](https://www.rfc-editor.org/rfc/rfc8785)的确定性属性排序与ECMAScript数值序列化；拒绝重复键、无效Unicode与非有限数值。旧domain canonical使用localeCompare，不直接沿用作跨环境新协议哈希。Schema参考[JSON Schema 2020-12验证规范](https://json-schema.org/draft/2020-12/json-schema-validation)；跨字段集合、真实hash、官方范围及文本覆盖仍须语义验证。
+ 
+-首次Plan无需软件taskId，软件创建时分配；directorReference.confirmation记录导演稿ID/version/明确确认语句，由用户导入时再次确认对应内容。此记录是用户声明的确认轨迹，不是密码学身份认证。导演稿附件缺失且documentHash=null时，必须附确认稿完成绑定，不伪造审核完成。
++首次Plan无需软件taskId。directorReference.confirmation仅保存可选的外部声明；执行授权以本次导入软件确认记录为准，不把文件hash当身份认证。
+ 
+ Schema底层只约束类型，不在JSON Schema中复制官方参数范围；范围全部由Manifest validator校验。发布时生成范围视图并标注profile hash，防止第二套真值。
+ 
+@@ -58,7 +62,7 @@
+ - protocolVersion=2.0，未知字段在每层拒绝，JSON重复键拒绝，NaN/Infinity拒绝，单协议、体积符合产品保护。
+ - windows非空；id唯一；offset连续覆盖originalText码点0到末尾，original逐字等于切片，不能错序、重叠、漏字；不重拆。
+ - 所有anchor引用真实Window。首版同一个anchor只引用一个完整Window；多个anchor可引用同Window、focus不同，测试结果以参数binding复用；空anchor列表允许，须导演确认不做试演。
+-- directorReference块引用有效且已确认；textApproval涉及的替代已获确认。
++- 可选directorReference和附件只作追溯；软件确认记录存在；textApproval涉及的替代已获确认。
+ - confidence.capability存在；E级不能把instruction标E0；每个要求的路径存在且属于本Window。nearby constraints不自动变成API字段。
+ - unresolved须真实列出Window和处理；未确认E3阻止所影响Window生成，空windowIds视为全局阻止。其他无关Window可单独生成；全篇拼接与Golden需所有阻断清除。
+ - lockedFields采用规范JSON路径并解析实际字段；originalText、hash、engine、voiceRequirements和窗口边界为结构锁，普通编辑不能解锁。窗口用户锁/Golden引用由运行时加严。
+@@ -71,7 +75,7 @@
+ 
+ basePlanHash绑定当前冻结Plan。Patch应用产生新的Plan Revision（新planId、parentPlanId旧planId、新hash），属于局部修订，不要求ChatGPT重交全文。结构改变才由ChatGPT提交新完整Plan。前一个Patch完成后旧baseHash失效；首版严格拒绝并行陈旧Patch，不自动rebase。
+ 
+-过程：只读校验 → 展示字段级Diff、受影响Window、预计重新生成范围及不变范围 → 用户点击“应用并生成新版本” → 事务内再次检查base/versions/locks → 保存新PlanRevision＋Patch记录＋唯一generation job → 提交后顺序调用目标Window TTS。云端请求不能在SQLite事务里等待。
++过程：只读校验 → 展示字段级Diff、受影响Window、预计重新生成范围及不变范围 → 用户点击对应按钮（说明修订仅“应用说明修订”，执行修改为“应用并生成新版本”） → 事务内再次检查base/versions/locks → 保存新PlanRevision＋Patch记录；仅实际执行修改创建唯一generation job → 提交后顺序调用目标Window TTS。云端请求不能在SQLite事务里等待。
+ 
+ DB应用成功但TTS失败：新配置和失败job保留，旧选中音频仍在，界面显示新配置尚未有成功版本；不回滚历史，不假称生成完成，不自动重发unknown请求。重启后durable job和请求快照恢复。patchId重复点击返回原job状态，不创建新付费任务。
+ 
+@@ -84,3 +88,12 @@
+ diagnosis.evidenceBasis为audio_listened/user_feedback_only/text_only；audio_listened必须实际读到对应WAV，记录listenedVersionIds。无声音不得假称听感确定。validationFocus描述重听具体位置和目标，例如“99元是否自然清楚，CTA是否延续人物状态”，不编造自动合格分。
+ 
+ 示例JSON是结构演示，真实hash由本次设计验证生成；示例Patch只改GW002，不改变GW001/GW003。软件尚未实现这些schema，不能把本设计样例直接当作修复版2协议导入。
++
++
++## 导演意图展示层与执行隔离
++
++Plan.intentRanges必须包含至少一个展示条目；每项含target(windowId/start/end/targetText)、emphasisTerms、humanIntent、pacingIntent、pauseIntent、emotionIntent、relationshipIntent、requestedConfidence、adoptedExecution及limitation/unresolvedItemId。target坐标基于该Window的synthesisText码点，文本必须匹配；重点词必须在target内。路径只引用该Window真实execution字段，能力与E级须与Manifest一致。E3原要求可保留，但不能伪装为已执行能力；近似路径另标E2及限制。
++
++usage固定DISPLAY_AND_DIAGNOSIS_ONLY。UI展示与诊断导出可以读取这些文字；请求构建器不得读取它们，也不得根据“提气”“慢一点”再次生成instruction、rate、SSML或分段。意图与参数矛盾时仅提示用户交给ChatGPT修订，不自动纠正。
++
++Patch.set.intentRanges仅替换对应targetWindow的展示条目，禁止改非targetWindow。修改synthesisText/SSML时，已有范围及fieldRefs重新校验，失效则拒绝Patch并要求同时修订展示条目。只改展示文字产生审计Revision和新planHash，但executionFingerprint不变，不创建generation job；按钮为“应用说明修订”。含实际执行变更才允许“应用并生成新版本”。executionFingerprint只含模型、音色实际绑定、完整实际输入及输出配置，排除intentRanges、directorReference、名称与审计时间。全Plan哈希仍包括展示层，故旧Patch的basePlanHash会失效。
+--- R1/06-架构UI数据迁移与测试.md
++++ R2/06-架构UI数据迁移与测试.md
+@@ -45,7 +45,7 @@
+ 
+ 全部真人口播帮助文档点击后用独立非模态Electron窗口打开，支持同时对照操作；固定顶部复制全文与关闭按钮；同文档复用窗口。查看器不写task state、不调用导演导出。专项架构及Windows10/11验收见[08-独立文档查看器设计.md](08-独立文档查看器设计.md)。
+ 
+-校验页：先列能力版本/原稿/Window/anchor/锁定项/unresolved；错误定位字段并给真实原因。提供【查看方案】【保存执行方案】。没有hash的草案计算绑定，导演稿原件缺失提示补齐确认材料。选中音色与Plan要求不匹配不能保存为可执行。
++校验页：先列能力版本/原稿/Window/anchor/锁定项/unresolved；错误定位字段并给真实原因。提供【查看方案】【保存执行方案】。没有hash的草案计算绑定，导演稿附件可选；显示来源声明确认区，不阻挡无附件导入。选中音色与Plan要求不匹配不能保存为可执行。
+ 
+ 工作台：顶部任务/音色/PlanRevision/profile；左侧Window原文列表，右侧窗口详细卡。原稿默认只读，不提供自动重新解析按钮；结构变更入口是【导入新Plan Revision】。
+ 
+@@ -121,6 +121,15 @@
+ 
+ ## 批准后的实现优先级
+ 
+-P0：profile与strict validator、Plan导入、revision/job/unknown保护、旧数据只读；P1：Window生成/多版本/任意A-B/多anchor/Patch Diff；P2：多选诊断/拼接/Golden/迁移继续生产；最后统一文档镜像、完整回归和打包验收。每层先本地验证后进入下一层，云端验收作为付费任务单独记录。当前停止在设计阶段。
++前置关卡：获批Capability Spike及启用决策完成，再冻结Profile/Plan/Patch；正式开发另行授权。P0：profile与strict validator、Plan导入、revision/job/unknown保护、旧数据只读；P1：Window生成/多版本/任意A-B/多anchor/Patch Diff；P2：多选诊断/拼接/Golden/迁移继续生产；最后统一文档镜像、完整回归和打包验收。每层先本地验证后进入下一层，云端验收作为付费任务单独记录。当前停止在设计阶段。
+ 
+ 文档查看器作为P1并列工作项，但必须先在P0约定DocumentRegistry、独立preload/renderer打包边界和生命周期接口。不能在V2交付中沿用rs-modal覆盖层。
++
++
++## R2评审修订（替代旧稿中冲突的准入与开发顺序）
++
++软件最短工作流：任务名称 → 复刻音色 → 粘贴Plan → 导入并校验。用户声明Plan来自已确认导演方案后，软件创建自己的确认记录；导演稿附件及documentHash均可选，不能强制上传。导演沟通阶段仍需确认方向，但这不是软件额外文件门槛。
++
++开发顺序改为：R2设计评审 → 用户第二次确认 → 逐项明确批准付费Spike范围/请求上限/预算上限 → 隔离的Capability Spike → 效果报告及产品启用决策 → 一起冻结Capability Profile、Plan V2、Patch V2 → 获得正式开发授权后开始V2运行源码开发。设计批准不等于API扣费批准，也不等于正式开发批准。本轮没有进入Spike执行。
++
++intentRanges用于展示和诊断；软件不自行导演。候选SSML包含sub及连续speak局部rate/pitch；正式是否启用由Spike判断，不能预先排除。仅说明变更不重新生成；实际execution变更才创建生成任务。文档查看器继续采用08的独立non-modal BrowserWindow设计，新增词典和Spike帮助资料统一进入documentId注册表，全文复制原始Markdown。
+--- R1/07-设计交付验证.md
++++ R2/07-设计交付验证.md
+@@ -1,25 +1,7 @@
+-# 本次设计交付验证
++# R2设计交付验证
+ 
+-日期：2026-10-01。只验证设计资料及现有源码逻辑，未实现V2。
++本轮109项设计静态检查通过。包含3份Schema元验证、5份Plan/Patch样例、无附件结构、展示层关键负例、文本覆盖与切片、真实字段路径、Patch目标、能力真值状态、38个用例的计数及XML结构。明细见design-validation-results.json。
+ 
+-## 已执行
++静态检查不证明云端接受或声音效果，也不是完整生产语义validator。区间重叠、跨段节点、错误E级、无效fieldRefs和非目标说明等须在正式实现中测试拒绝。本轮仅执行结构负例及样例语义检查。
+ 
+-- 本地dev与git ls-remote远程dev均为034b497709d7a58359aa22c847ecb70d4e2a6eeb。
+-- 已读取本次完整任务，审计真人口播domain/UI/service/IPC、共享audio能力与文档检查、相关测试。
+-- 官方北京CosyVoice3.5Plus资料已重新查询，具体链接与差异在02及Manifest中。
+-- 现有三套口播核心测试50/50通过，0skip，未调用真实付费API。
+-- 三份JSON Schema经Draft202012Validator元Schema校验；Plan/Patch示例按外部common引用验证。
+-- 设计反例检查未知字段、嵌套伪控制、空Patch变更、重复目标、错误类型/协议版本；独立检查示例文本覆盖、SSML切片、参数范围、原文与导演文件hash。
+-- Node实际计算示例Plan canonical hash并与Patch basePlanHash一致；Instruction加权分别48/44/44。
+-- 三份文档profile ID/version一致；本地交叉链接存在。详细结果见design-validation-results.json。
+-- 最终设计资料检查19项通过，包含新增查看器九项要求的文本覆盖检查；这不是查看器功能测试。08已核对当前弹层、主窗口安全/退出及本地Electron44.3.0剪贴板签名，尚未改任何实现。
+-
+-## 限制与后续验证
+-
+-当前Node v24.17.0低于package声明>=24.19.0；本轮局部测试通过不代表正式构建环境合格。Schema检查使用临时目录安装的Python jsonschema，不改项目依赖。
+-
+-Schema只验证结构；示例语义检查是本次一次性资料QA，尚非软件V2运行时validator。真实API接受、SSML读法、听感、窗口接缝、生产Electron IPC和迁移都必须在批准开发后按06验收，不能把本次设计检查说成V2功能测试通过。
+-
+-样例taskId及导演确认记录为明确标记的演示，没有创建生产任务、没有真实WAV。正文和原文hash由附带样例实际计算，不是虚构。未提交Git、未推送、未打包、未改运行源码和旧正式文档。
+-
+-已完成第一阶段设计，等待用户确认后才进入代码修改。
++R1曾完成50项既有源码回归，是历史证据；本轮源码未改，未重复运行、未构建V2。付费调用0，所有Spike结果NOT_RUN。Windows10/11文档窗口及崩溃、多屏、剪贴板运行验收仍待开发。hash计算验证本包ASCII键及普通数值样例，不声称全RFC8785互操作验证。旧修复版2不能直接导入V2样例。
+--- R1/09-CosyVoice-3.5-Plus-Capability-Spike方案.md
++++ R2/09-CosyVoice-3.5-Plus-Capability-Spike方案.md
+@@ -0,0 +1,30 @@
++# CosyVoice 3.5 Plus Capability Spike｜设计方案 R2
++
++状态NOT_RUN；没有云端调用和实测结论。必须在冻结Profile/Plan/Patch之前完成获批验证，不能修改正式业务源码。离线矩阵包含38个case、计划42次请求；这是完整候选清单，不是已获准预算，允许用户选择分批验证。所有fixture中的voice是占位符，不可直接发送。
++
++## 要解决的问题
++
++官方已明确支持连续多个speak及speak级rate/pitch，sub alias也是受支持元素。[官方SSML](https://help.aliyun.com/zh/model-studio/ssml-latex-user-guide)。待验证的是HTTP实际接受、组合后的声音变化、短语范围是否局部生效，以及接缝和人物连续性成本。官方支持不能直接推出口播适用；一次失败也不能直接写成MODEL_UNSUPPORTED。
++
++## 分阶段矩阵
++
++1. 先做只读预检：账号地域、模型名、同一现有复刻voice及targetModel、音频输出配置、当前HTTP字段尤其hot_fix格式，离线加权计数和XML解析。若字段需修订，先更新批准清单；本包fixture不构成请求正确性的云端证据。[HTTP API](https://help.aliyun.com/zh/model-studio/cosyvoice-tts-http-api)。
++2. 用户选定并批准最小连通/语法组：I00/I01、字符边界、S00、B、IS01、P00、SA01、PH01、SUB01、HF组。instruction边界覆盖ASCII99/100/101、汉字98/100/102、混合100、emoji组合；越界预期可能返回拒绝，仍可能收费，必须提前列入批准。
++3. 再批准局部控制与听感组：P-rate/P-pitch mild、reverse、stress、order及priority、PSI01。轻度对照判断实用性，极值只作接口与变化证据，不作为产品建议。S00对P00区分并列根固有边界影响；P00对mild/reverse区分参数影响；order-flat对order-changed排除价格在第几段造成的误判。全局与SSML优先级不猜测，保留实际完整输入。
++4. 再批准重复组R00/R01，各3次；输入含voice、model、text/XML字节、instruction、seed、hot_fix、language及输出配置必须完全相同。请求id等服务追踪项单独存储，不能误当模型输入。若样本数不足，结论只适用这些样本，不宣称模型全局确定性。
++
++每组使用同一账号、现有voice和明确版本快照。费用预估以当前账号实际价格和所选请求为准；输入字符长度仅预估，不假定XML标签计费方式。真实usage、失败请求计费和账单是事后依据。价格与额度批准后变化或达到上限即停止；无自动重试，超时/unknown先核账。不得用免费额度存在作为免确认理由。
++
++## 听感与声学记录
++
++记录API是否接受、实际生效方向、范围泄漏、自然停顿、连说、重音清晰、音色一致、人物关系、接缝突变、句尾连续及整体可用性。盲听配对随机顺序，由老唐按具体句子描述改善/变坏/无差别，保存原始判断，不编造合格分或成功率。文本、voice、instruction一致的配对才可归因。
++
++保留原始WAV、文件SHA256与解码PCM SHA256；文件hash不同可能只是容器头不同，PCM相同才是逐样本相同的强证据。记录总时长、短语位置、对齐方法；局部rate用同短语时长/音节密度作辅助，局部pitch用有声音帧F0分布辅助，剔除静默与无声帧，不能把语义变音或倍频错误当参数结果。不承诺精确倍率、恒定F0、固定时长或固定边界。
++
++break组比较同标点自然停顿基线，报告额外变化与总间隙，不把自然静默算成请求插入量。sub听查是否读alias及是否保留周边内容；phoneme/hot_fix不仅验单词读对，也看无关位置是否受影响。instruction边界是格式测试，无语义的重复字符不用于声音优劣判断。
++
++## 证据到启用决策
++
++每项依次记录DOCUMENTED → API_ACCEPTED → EFFECT_OBSERVED → PERCEPTUALLY_USEFUL → 用户批准PRODUCT_ENABLED。步骤不可互相替代。多个speak局部rate/pitch若有效且自然度可接受，可进入首版明确范围控制；若只适合部分句式，记录经过测试的适用条件；若接缝代价过大，暂留PRODUCT_DISABLED_PENDING_VALIDATION并列出改善验证，不删除MODEL_SUPPORTED。不得以未运行作为首版不支持证据。
++
++所有结果模板字段现在为空/NOT_RUN。测试输出未来放隔离目录，API Key只从受控环境读取，不写入JSON、日志、ZIP或请求导出。脱敏账号信息，下载链接按有效期管理；不污染现有任务库或生产业务代码。任何真实付费API调用前，用spike/付费调用批准单模板.md取得明确确认。Spike结束先交实际报告和逐能力决定，未批准冻结或正式开发则继续停止。
+--- R1/10-R1到R2修改清单.md
++++ R2/10-R1到R2修改清单.md
+@@ -0,0 +1,36 @@
++# R1 → R2 全量修改清单
++
++R1保留在../real-speech-v2-design；本包是独立R2，Profile版本升为1.0.0-draft.2，仍未冻结。完整逐行文本差异见review/R1-to-R2.diff；所有内容文件新增/修改/不变状态及两版SHA256见review/file-diff.json。
++
++## 五项评审修改
++
++1. 增加09与spike目录：冻结前Capability Spike，38个离线case/42次候选请求，逐阶段付费批准、完整输入快照、盲听及PCM重复比较；无调度脚本、无真实调用。多个speak的轻度rate/pitch、反向与换序对照保留首版候选资格。
++2. common.directorReference只要求sourceType，Plan允许null；documentId/version/hash/confirmation与Window.directorBlockIds均可选。软件导入以用户声明建立本地确认记录，文件缺失不是执行门槛。新增无附件主样例及可选附件对照，重新绑定Plan/Patch hash。
++3. 03替换为32条A—G词典，新增director-dictionary.json可检索索引，含每词独立实现路径、限制及误用。B可以直接复制给ChatGPT，不等于直接送API的instruction。
++4. common.intentRange与Plan.intentRanges新增展示结构；Patch.set.intentRanges支持目标范围说明更新。字段覆盖文字区间、重点词、导演意图、速度/停顿/情绪/关系感、E级、执行路径及限制。明确只展示/诊断，说明变更不建付费任务。SSML新增speakSegments与sub节点，加入两份候选样例。
++5. Manifest拆分modelSupport与productPolicy.capabilityAvailability。补sub、parallelSpeak、speakRangeRate/Pitch/Volume及六元素/属性清单，保留模型官方真值；产品启用待Spike，不能用“未开启”冒充“不支持”。02重核官方依据。
++
++## 逐文件作用
++
++README：R2入口、确认关卡和新工作流。
++01：只同步profile版本（如文件引用该版本），源码证据沿用R1。
++02：官方SSML能力与产品状态区分。
++03：扩充32词A—G词典。
++04：增加无附件软件导入及Spike前置顺序。
++05：修改确认/hash、SSML编译、展示层及metadata-only Patch规则。
++06：校验页取消补附件门槛，开发P0之前插入Spike，保留独立文档窗口要求。
++07：改为本轮实际静态验证及未测范围，不把旧回归当本轮结果。
++08：保留独立文档查看器架构，版本引用同步；未编写Electron代码。
++09：新增Spike完整方案。
++10：本清单。
++Manifest/common/Plan/Patch schemas：以上机器字段变更，仍为候选。
++examples：主样例去硬附件，新增optional-audit/speak/sub，Patch补展示说明，bindings重算。
++director-dictionary.json：词典检索数据，不参与执行。
++spike：矩阵/NOT_RUN结果/未批准的付费单模板。
++design-validation-results.json：R2实际验证。
++
++生成的review/R1-to-R2.diff与review/file-diff.json不对自身递归做Diff；除此以外全部内容文件均纳入状态清单及文本比较，包含本修改清单。文本Diff将行尾统一为LF以便阅读；原始字节差异以双版SHA256为准。ZIP为外部交付容器，不纳入自身Diff。
++
++## 本轮明确停止点
++
++尚未冻结协议、未进行付费Spike、未开发V2运行源码、未提交或推送。等待老唐第二次设计确认；后续每批付费调用仍须单独明确批准。
+--- R1/COSYVOICE_CAPABILITY_PROFILE.v1.json
++++ R2/COSYVOICE_CAPABILITY_PROFILE.v1.json
+@@ -2,8 +2,8 @@
+   "schema": "COSYVOICE_CAPABILITY_PROFILE",
+   "schemaVersion": "1.0",
+   "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+-  "capabilityVersion": "1.0.0-draft.1",
+-  "status": "draft_pending_user_approval",
++  "capabilityVersion": "1.0.0-draft.2",
++  "status": "draft_pending_spike_and_second_user_confirmation",
+   "engine": "aliyun-cosyvoice",
+   "model": "cosyvoice-v3.5-plus",
+   "verifiedAt": "2026-10-01",
+@@ -109,7 +109,6 @@
+   },
+   "modelCapabilities": {
+     "instruction": {
+-      "support": "supported",
+       "confidence": "E2",
+       "scope": "request",
+       "sourceIds": [
+@@ -138,10 +137,10 @@
+       "requiresVoiceType": [
+         "cloned",
+         "designed"
+-      ]
++      ],
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "rate": {
+-      "support": "supported",
+       "confidence": "E1",
+       "scope": "request",
+       "sourceIds": [
+@@ -152,10 +151,10 @@
+         "min": 0.5,
+         "max": 2,
+         "default": 1
+-      }
++      },
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "pitch": {
+-      "support": "supported",
+       "confidence": "E1",
+       "scope": "request",
+       "sourceIds": [
+@@ -166,10 +165,10 @@
+         "min": 0.5,
+         "max": 2,
+         "default": 1
+-      }
++      },
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "volume": {
+-      "support": "supported",
+       "confidence": "E1",
+       "scope": "request",
+       "sourceIds": [
+@@ -181,10 +180,10 @@
+         "max": 100,
+         "default": 50,
+         "integer": true
+-      }
++      },
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "seed": {
+-      "support": "supported",
+       "confidence": "E1",
+       "scope": "request",
+       "sourceIds": [
+@@ -197,10 +196,10 @@
+         "default": 0,
+         "integer": true
+       },
+-      "reproducibility": "official: same model version and all inputs; do not guarantee cross-version or cross-time byte identity"
++      "reproducibility": "official: same model version and all inputs; do not guarantee cross-version or cross-time byte identity",
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "ssml": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "text-structure",
+       "sourceIds": [
+@@ -212,9 +211,10 @@
+       "tags": [
+         "speak",
+         "break",
++        "sub",
+         "phoneme",
+-        "say-as",
+-        "soundEvent"
++        "soundEvent",
++        "say-as"
+       ],
+       "speakAttributes": {
+         "rate": [
+@@ -232,10 +232,60 @@
+       },
+       "parallelSpeakSupported": true,
+       "nestedSpeakSupported": false,
+-      "tagListScope": "Verified relevant tags only; no claim to enumerate all official tags"
++      "tagListScope": "All six elements in the current official SSML tag-reference section; attribute support is separately inventoried",
++      "modelSupport": "MODEL_SUPPORTED",
++      "speakAttributeInventory": {
++        "voice": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "rate": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "pitch": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "volume": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "effect": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "effectValue": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "bgm": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        },
++        "backgroundMusicVolume": {
++          "modelSupport": "MODEL_SUPPORTED",
++          "sourceIds": [
++            "S3"
++          ]
++        }
++      }
+     },
+     "break": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "text-offset",
+       "sourceIds": [
+@@ -251,10 +301,10 @@
+         "defaultMs": 1000,
+         "consecutiveMaxMs": 10000
+       },
+-      "outputCaveat": "Inserted silence request is explicit; perceived total gap can include natural silence"
++      "outputCaveat": "Inserted silence request is explicit; perceived total gap can include natural silence",
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "phoneme": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "text-range",
+       "sourceIds": [
+@@ -271,10 +321,10 @@
+         3,
+         4,
+         5
+-      ]
++      ],
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "sayAs": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "text-range",
+       "sourceIds": [
+@@ -293,10 +343,10 @@
+         "time",
+         "currency",
+         "measure"
+-      ]
++      ],
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "hotFix": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "pre-synthesis-text",
+       "sourceIds": [
+@@ -308,10 +358,10 @@
+         "replace"
+       ],
+       "pronunciationWireShape": "array of single-key objects: word -> pinyin",
+-      "replaceWireShape": "array of single-key objects: source -> target"
++      "replaceWireShape": "array of single-key objects: source -> target",
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "pronunciation": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "product-abstraction",
+       "sourceIds": [
+@@ -323,10 +373,10 @@
+         "phoneme",
+         "hot_fix.pronunciation"
+       ],
+-      "noDoubleApplication": true
++      "noDoubleApplication": true,
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "languageHints": {
+-      "support": "supported",
+       "confidence": "E1",
+       "scope": "request",
+       "sourceIds": [
+@@ -365,10 +415,10 @@
+         "id",
+         "vi"
+       ],
+-      "note": "API enum is not a claim of equal model quality in every listed language"
++      "note": "API enum is not a claim of equal model quality in every listed language",
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "voiceClone": {
+-      "support": "supported",
+       "confidence": "E1",
+       "scope": "voice-enrollment",
+       "sourceIds": [
+@@ -404,10 +454,10 @@
+         20
+       ],
+       "enablePreprocessDefault": false,
+-      "enableVolumeNormalizationType": "string enum true/false"
++      "enableVolumeNormalizationType": "string enum true/false",
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "sampleRate": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "audio-format",
+       "sourceIds": [
+@@ -433,32 +483,30 @@
+           44100,
+           48000
+         ]
+-      }
++      },
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "wordLevelRate": {
+-      "support": "approximate",
+       "confidence": "E1",
+       "scope": "isolated-speak-range-not-acoustic-word-curve",
+       "sourceIds": [
+         "S3"
+       ],
+       "exactAcousticControl": false,
+-      "route": "parallel speak range rate; requires confirmed approximation",
+-      "productEnabled": false
++      "route": "A word-sized speak segment is a supported range-control approximation; no exact acoustic duration curve",
++      "modelSupport": "MODEL_APPROXIMATE"
+     },
+     "wordLevelPitch": {
+-      "support": "approximate",
+       "confidence": "E1",
+       "scope": "isolated-speak-range-not-F0-curve",
+       "sourceIds": [
+         "S3"
+       ],
+       "exactAcousticControl": false,
+-      "route": "parallel speak range pitch; not exact word F0 +8%",
+-      "productEnabled": false
++      "route": "A word-sized speak segment is a supported range-control approximation; no exact F0 +8% guarantee",
++      "modelSupport": "MODEL_APPROXIMATE"
+     },
+     "wordLevelEmotion": {
+-      "support": "unsupported",
+       "confidence": "E3",
+       "scope": "exact-word-control",
+       "sourceIds": [
+@@ -468,10 +516,10 @@
+       "approximation": {
+         "confidence": "E2",
+         "route": "instruction with user approval"
+-      }
++      },
++      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+     },
+     "wordLevelEmphasis": {
+-      "support": "unsupported",
+       "confidence": "E3",
+       "scope": "exact-word-control",
+       "sourceIds": [
+@@ -481,35 +529,124 @@
+       "approximation": {
+         "confidence": "E2",
+         "route": "instruction with user approval"
+-      }
++      },
++      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+     },
+     "prosodyCurve": {
+-      "support": "unsupported",
+       "confidence": "E3",
+       "scope": "continuous-acoustic-curve",
+       "sourceIds": [
+         "S1",
+         "S3"
+-      ]
++      ],
++      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+     },
+     "wordTimestamps": {
+-      "support": "supported",
+       "confidence": "E0",
+       "scope": "output-observation-only",
+       "sourceIds": [
+         "S1"
+       ],
+       "requiresStreaming": true,
+-      "productEnabled": false
++      "modelSupport": "MODEL_SUPPORTED"
+     },
+     "exactDuration": {
+-      "support": "unsupported",
+       "confidence": "E3",
+       "scope": "target-audio-duration",
+       "sourceIds": [
+         "S1",
+         "S3"
+-      ]
++      ],
++      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
++    },
++    "sub": {
++      "modelSupport": "MODEL_SUPPORTED",
++      "confidence": "E0",
++      "scope": "text-range",
++      "sourceIds": [
++        "S3"
++      ],
++      "requiredAttribute": "alias",
++      "plainTextOnly": true,
++      "executionMeaning": "Replace the pronunciation text of one specified span without modifying originalText",
++      "liveValidation": "NOT_RUN"
++    },
++    "speakRangeRate": {
++      "modelSupport": "MODEL_SUPPORTED",
++      "confidence": "E1",
++      "scope": "parallel-speak-segment",
++      "sourceIds": [
++        "S3"
++      ],
++      "attribute": "rate",
++      "limits": {
++        "classification": "MODEL_HARD_LIMIT",
++        "min": 0.5,
++        "max": 2,
++        "default": 1
++      },
++      "liveValidation": "NOT_RUN",
++      "acousticGuarantee": false,
++      "protocolCandidateIncluded": true
++    },
++    "speakRangePitch": {
++      "modelSupport": "MODEL_SUPPORTED",
++      "confidence": "E1",
++      "scope": "parallel-speak-segment",
++      "sourceIds": [
++        "S3"
++      ],
++      "attribute": "pitch",
++      "limits": {
++        "classification": "MODEL_HARD_LIMIT",
++        "min": 0.5,
++        "max": 2,
++        "default": 1
++      },
++      "liveValidation": "NOT_RUN",
++      "acousticGuarantee": false,
++      "protocolCandidateIncluded": true
++    },
++    "speakRangeVolume": {
++      "modelSupport": "MODEL_SUPPORTED",
++      "confidence": "E1",
++      "scope": "parallel-speak-segment",
++      "sourceIds": [
++        "S3"
++      ],
++      "attribute": "volume",
++      "limits": {
++        "classification": "MODEL_HARD_LIMIT",
++        "min": 0,
++        "max": 100,
++        "default": 50,
++        "integer": true
++      },
++      "liveValidation": "NOT_RUN",
++      "acousticGuarantee": false,
++      "protocolCandidateIncluded": true
++    },
++    "parallelSpeak": {
++      "modelSupport": "MODEL_SUPPORTED",
++      "confidence": "E0",
++      "scope": "SSML root-sequence",
++      "sourceIds": [
++        "S3"
++      ],
++      "nestedSpeakAllowed": false,
++      "liveValidation": "NOT_RUN",
++      "protocolCandidateIncluded": true
++    },
++    "soundEvent": {
++      "modelSupport": "MODEL_SUPPORTED",
++      "confidence": "E0",
++      "scope": "external-audio-insertion",
++      "sourceIds": [
++        "S3"
++      ],
++      "apiTag": "soundEvent",
++      "liveValidation": "NOT_RUN",
++      "productDecision": "Outside first-release speech-only scope; retained in model inventory"
+     }
+   },
+   "productPolicy": {
+@@ -532,12 +669,6 @@
+       "sampleRate": 48000,
+       "maxLanguageHints": 1,
+       "rawXmlAllowed": false,
+-      "enabledSsmlTags": [
+-        "break",
+-        "phoneme",
+-        "say-as"
+-      ],
+-      "parallelSpeakParametersEnabled": false,
+       "synthesisTextCodePointMax": 20000,
+       "serializedTextCodePointMax": 20000,
+       "importBytesMax": 1048576,
+@@ -545,7 +676,15 @@
+       "maxAnchors": 500,
+       "instructionHanMax": null,
+       "doubleBoundaryPauseAllowed": false,
+-      "physicalVersionDeletionAllowed": false
++      "physicalVersionDeletionAllowed": false,
++      "ssmlSchemaCandidateTags": [
++        "break",
++        "phoneme",
++        "say-as",
++        "sub"
++      ],
++      "parallelSpeakReleaseDecision": "PENDING_SPIKE",
++      "releaseTagAllowlist": null
+     },
+     "semanticRules": [
+       "no automatic directing",
+@@ -554,7 +693,173 @@
+       "E3 must be confirmed approximation or unresolved",
+       "schema and capability validation before every paid request"
+     ],
+-    "scope": "realSpeech V2 only; shared modelCapabilities may be used by ordinary audio with its own explicit product policy"
++    "scope": "realSpeech V2 only; shared modelCapabilities may be used by ordinary audio with its own explicit product policy",
++    "availabilityStateDefinitions": {
++      "PRODUCT_ENABLED": "Candidate design allows this path; not a claim of implemented V2 or completed cloud validation",
++      "PRODUCT_DISABLED_PENDING_VALIDATION": "Documented model support retained in candidate schemas; release decision awaits spike, not pre-excluded",
++      "PRODUCT_DISABLED_OUT_OF_SCOPE": "Deliberately outside this product scope, still recorded as model-supported",
++      "PRODUCT_UNSUPPORTED": "No verified exact execution interface"
++    },
++    "capabilityAvailability": {
++      "instruction": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "rate": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "pitch": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "volume": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "seed": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "ssml": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "break": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "phoneme": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "sayAs": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "hotFix": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "pronunciation": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "languageHints": {
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "voiceClone": {
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "sampleRate": {
++        "state": "PRODUCT_ENABLED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "wordLevelRate": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "wordLevelPitch": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "wordLevelEmotion": {
++        "state": "PRODUCT_UNSUPPORTED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "wordLevelEmphasis": {
++        "state": "PRODUCT_UNSUPPORTED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "prosodyCurve": {
++        "state": "PRODUCT_UNSUPPORTED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "wordTimestamps": {
++        "state": "PRODUCT_DISABLED_OUT_OF_SCOPE",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "exactDuration": {
++        "state": "PRODUCT_UNSUPPORTED",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      },
++      "sub": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "speakRangeRate": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "speakRangePitch": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "speakRangeVolume": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "parallelSpeak": {
++        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
++        "evidenceStatus": "NOT_RUN",
++        "spikeRequired": true
++      },
++      "soundEvent": {
++        "state": "PRODUCT_DISABLED_OUT_OF_SCOPE",
++        "evidenceStatus": "DOCUMENTATION_ONLY",
++        "spikeRequired": false
++      }
++    },
++    "ssmlAttributeAvailability": {
++      "voice": "PRODUCT_DISABLED_OUT_OF_SCOPE",
++      "rate": "PRODUCT_DISABLED_PENDING_VALIDATION",
++      "pitch": "PRODUCT_DISABLED_PENDING_VALIDATION",
++      "volume": "PRODUCT_DISABLED_PENDING_VALIDATION",
++      "effect": "PRODUCT_DISABLED_OUT_OF_SCOPE",
++      "effectValue": "PRODUCT_DISABLED_OUT_OF_SCOPE",
++      "bgm": "PRODUCT_DISABLED_OUT_OF_SCOPE",
++      "backgroundMusicVolume": "PRODUCT_DISABLED_OUT_OF_SCOPE"
++    }
+   },
+-  "unsupportedEvidencePolicy": "No verified documented exact interface => unavailable for execution; not a permanent assertion about future model versions"
++  "unsupportedEvidencePolicy": "No verified documented exact interface => unavailable for execution; not a permanent assertion about future model versions",
++  "freezeAllowed": false,
++  "capabilitySpike": {
++    "status": "NOT_RUN",
++    "approvalRequiredBeforeAnyPaidCall": true,
++    "matrixFile": "spike/test-matrix.json",
++    "reportFile": "spike/result-report-template.json",
++    "freezePreconditions": [
++      "approved and completed scoped live spike",
++      "record per-feature API and perceptual evidence",
++      "user approves enablement decisions",
++      "freeze manifest and Plan/Patch schemas together"
++    ]
++  }
+ }
+--- R1/README.md
++++ R2/README.md
+@@ -1,4 +1,4 @@
+-# 真人口播执行系统 V2｜第一阶段设计评审包
++# 真人口播执行系统 V2｜R2设计评审包
+ 
+ 状态：设计草案，等待老唐确认；核验日期：2026-10-01（北京时间）。本次只新增设计资料，没有修改软件源码、现有正式文档、数据库或打包资源，也没有调用付费 TTS。
+ 
+@@ -14,7 +14,7 @@
+ 4. 首版 anchor 引用完整 Window，数量不限于三个；不做软件截取某几句话。牺牲少量试演费用，换取试演与正式生成相同上下文和可复用音频。
+ 5. 保留每次生成的旧音频；“删除版本”首版实现为隐藏/软删除。选中版本、Golden及诊断引用的版本不能删除，暂不提供物理清理。
+ 6. 不把 E0 或“模型接收参数”解释为真人听感保证。精确400ms请求成立，但最终可听停顿可能包含模型自然停顿；需要输出级精确静默时，由明确的本地 transition 插入完成。
+-7. 首版 SSML 开放 break、phoneme、say-as 的结构化编译；并列 speak 范围 rate/pitch 属官方支持，但先保留为“模型支持、产品未开放”，待单独云端验证再开放，绝不写成模型不支持。
++7. 候选 SSML 包含 break、phoneme、say-as、sub 的结构化编译；并列 speak 范围 rate/pitch 属官方支持，但纳入首版协议候选，先执行用户批准的Capability Spike再决定启用，绝不写成模型不支持。
+ 
+ 决定效果的关键变量是：样本声音是否适合出镜讲话、Instruction能否抓住人物状态、Window是否保留完整意思、用户是否基于真实WAV作选择。增加协议字段本身不能产生“活人感”。第一轮优先用已确认开场/价格/CTA做少量对照，听感没有改善则重新审视声音样本和导演表达，不继续堆参数。
+ 
+@@ -42,10 +42,19 @@
+ 
+ ## 版本与文档体系
+ 
+-全包统一引用 `capabilityProfileId=aliyun.cosyvoice-v3.5-plus.cn-beijing.http`、`capabilityVersion=1.0.0-draft.1`。三份文档不另写一套常量；能力数值只以 Manifest 为真值，02是其审查依据。
++全包统一引用 `capabilityProfileId=aliyun.cosyvoice-v3.5-plus.cn-beijing.http`、`capabilityVersion=1.0.0-draft.2`。三份文档不另写一套常量；能力数值只以 Manifest 为真值，02是其审查依据。
+ 
+ 这是一份尚未接入软件的V1能力草案。正式批准后移至专用 capability registry，三份文档在构建时注入同一profile header；锁文件记录文档、schema、manifest SHA-256。运行时加载内置受信profile，导入JSON不能自行扩大能力。旧profile永久保留用于历史快照，不对旧请求套用新规则。
+ 
+ ChatGPT必须获得Manifest与对应文档后才能编译。若附件读取失败或缺失，先索取缺失文件，不凭模型记忆编造能力。旧正式文档仍维持修复版2的现有构建，待批准的实现阶段再整体替换镜像和检查脚本，避免本轮设计污染可构建基线。
+ 
+ 下一阶段只能在明确确认后开始。本包没有开始V2实现，也没有承诺模型能保证销量或声音效果。
++
++
++## R2评审入口与当前关卡
++
++本包尚未冻结。先阅读[10-R1到R2修改清单.md](10-R1到R2修改清单.md)及[09-CosyVoice-3.5-Plus-Capability-Spike方案.md](09-CosyVoice-3.5-Plus-Capability-Spike方案.md)。完整逐行Diff在review/R1-to-R2.diff，原R1包保留。
++
++顺序：第二次设计确认 → 单独付费Spike批准 → 隔离验证与报告 → 启用决策 → Profile/Plan/Patch共同冻结 → 另行授权正式开发。当前没有付费API调用，没有运行源码修改。
++
++正常导入不要求导演稿附件；本地明确确认Plan来源即可。intentRanges只展示，不参与参数推导。03已扩展为可用Ctrl+F查词的完整词典。spike目录保存离线请求样例、测试矩阵和NOT_RUN结果模板，不包含自动调度调用脚本。
+--- R1/design-validation-results.json
++++ R2/design-validation-results.json
+@@ -1,29 +1,451 @@
+ {
+-  "schemasMetaValidated": 3,
+-  "schemaExamplesValidated": 2,
+-  "designChecksPassed": 19,
++  "status": "PASS",
++  "scope": "设计静态验证，不是生产validator或云端验收",
++  "passed": 109,
+   "checks": [
+-    "Plan根未知字段",
+-    "Patch根未知字段",
+-    "Plan嵌套未知控制字段",
+-    "SSML未知字段",
+-    "Patch不开放原稿修改字段",
+-    "Patch空set拒绝",
+-    "Patch重复目标拒绝",
+-    "Volume整型约束",
+-    "配置版本正整数约束",
+-    "旧协议版本拒绝",
+-    "样例原文hash/导演稿hash/完整Window覆盖/模型范围/SSML切片",
+-    "语义反例：rate超官方边界",
+-    "语义反例：Window错序覆盖",
+-    "语义反例：SSML切片错误",
+-    "语义反例：原文Hash错误",
+-    "Patch仅GW002并与expectedVersions一致",
+-    "三文档与Manifest版本一致",
+-    "本地Markdown链接存在",
+-    "新增查看器九项要求设计覆盖"
++    {
++      "name": "schema元验证 https://chigetang.local/schemas/real-speech/v2/common.schema.json",
++      "passed": true
++    },
++    {
++      "name": "schema元验证 https://chigetang.local/schemas/real-speech/v2/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json",
++      "passed": true
++    },
++    {
++      "name": "schema元验证 https://chigetang.local/schemas/real-speech/v2/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json",
++      "passed": true
++    },
++    {
++      "name": "样例结构 patch.json",
++      "passed": true
++    },
++    {
++      "name": "样例结构 plan-with-optional-audit.json",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-optional-audit.jsonGW001",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-optional-audit.jsonGW002",
++      "passed": true
++    },
++    {
++      "name": "节点切片",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-optional-audit.jsonGW003",
++      "passed": true
++    },
++    {
++      "name": "全文覆盖",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "重点词切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "样例结构 plan-with-speak-candidates.json",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-speak-candidates.jsonGW001",
++      "passed": true
++    },
++    {
++      "name": "连续speak覆盖",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-speak-candidates.jsonGW002",
++      "passed": true
++    },
++    {
++      "name": "节点切片",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-speak-candidates.jsonGW003",
++      "passed": true
++    },
++    {
++      "name": "全文覆盖",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "重点词切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "样例结构 plan-with-sub-candidate.json",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-sub-candidate.jsonGW001",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-sub-candidate.jsonGW002",
++      "passed": true
++    },
++    {
++      "name": "节点切片",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan-with-sub-candidate.jsonGW003",
++      "passed": true
++    },
++    {
++      "name": "全文覆盖",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "重点词切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "样例结构 plan.json",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan.jsonGW001",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan.jsonGW002",
++      "passed": true
++    },
++    {
++      "name": "节点切片",
++      "passed": true
++    },
++    {
++      "name": "原稿区间 plan.jsonGW003",
++      "passed": true
++    },
++    {
++      "name": "全文覆盖",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "重点词切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "导演意图切片",
++      "passed": true
++    },
++    {
++      "name": "真实执行路径",
++      "passed": true
++    },
++    {
++      "name": "无导演附件结构有效",
++      "passed": true
++    },
++    {
++      "name": "无导演附件结构有效",
++      "passed": true
++    },
++    {
++      "name": "非法展示字段拒绝 usage",
++      "passed": true
++    },
++    {
++      "name": "非法展示字段拒绝 autoRate",
++      "passed": true
++    },
++    {
++      "name": "展示层必需",
++      "passed": true
++    },
++    {
++      "name": "说明不改执行字段",
++      "passed": true
++    },
++    {
++      "name": "Patch目标",
++      "passed": true
++    },
++    {
++      "name": "Patch说明范围",
++      "passed": true
++    },
++    {
++      "name": "禁止冻结",
++      "passed": true
++    },
++    {
++      "name": "sub模型支持",
++      "passed": true
++    },
++    {
++      "name": "sub产品待验证",
++      "passed": true
++    },
++    {
++      "name": "parallelSpeak模型支持",
++      "passed": true
++    },
++    {
++      "name": "parallelSpeak产品待验证",
++      "passed": true
++    },
++    {
++      "name": "speakRangeRate模型支持",
++      "passed": true
++    },
++    {
++      "name": "speakRangeRate产品待验证",
++      "passed": true
++    },
++    {
++      "name": "speakRangePitch模型支持",
++      "passed": true
++    },
++    {
++      "name": "speakRangePitch产品待验证",
++      "passed": true
++    },
++    {
++      "name": "候选调用数",
++      "passed": true
++    },
++    {
++      "name": "未批准未运行",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 S00",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 B00",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 B50",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 B400",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 B1000",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 IS01",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P00",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-rate-mild",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-rate-reverse",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-rate-stress",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-rate-order-flat",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-rate-order-changed",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-rate-priority",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-pitch-mild",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-pitch-reverse",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-pitch-stress",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-pitch-order-flat",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-pitch-order-changed",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 P-pitch-priority",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 PSI01",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 SA01",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 PH01",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 SUB01",
++      "passed": true
++    },
++    {
++      "name": "官方hot_fix数组 HF01",
++      "passed": true
++    },
++    {
++      "name": "官方hot_fix数组 HF02",
++      "passed": true
++    },
++    {
++      "name": "XML可解析 R01",
++      "passed": true
++    },
++    {
++      "name": "32条完整词典",
++      "passed": true
++    },
++    {
++      "name": "最终词典JSON A至G均完整",
++      "passed": true
++    }
+   ],
+-  "runtimeV2Implemented": false,
+-  "liveTtsVerified": false,
+-  "windowsViewerVerified": false
++  "paidApiCalls": 0,
++  "runtimeSourceChanges": 0,
++  "notValidated": [
++    "云端能力及听感",
++    "Windows10/11文档窗口",
++    "完整生产语义validator",
++    "全RFC8785互操作"
++  ]
+ }
+--- R1/director-dictionary.json
++++ R2/director-dictionary.json
+@@ -0,0 +1,357 @@
++{
++  "status": "DESIGN_ONLY",
++  "entries": [
++    {
++      "id": "D01",
++      "term": "语速",
++      "A": "一口气太赶，或拖得像慢放",
++      "B": "这句意思没听清，请整体稍慢，重点词保持清楚。",
++      "C": "单位时间音节密度；区分整体速度和局部强调",
++      "E": "整体rate；短语明确speakSegments.rate待Spike；instruction补自然度",
++      "F": "参数倍率不等于听感或精确时长倍率",
++      "G": "为了重音把整段都降速",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：单位时间音节密度；区分整体速度和局部强调由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D02",
++      "term": "节奏",
++      "A": "每句长短、轻重都一样，没有推进",
++      "B": "解释部分连起来，结论前留一下，别每逗号都停。",
++      "C": "语义组块与能量分布",
++      "E": "已确认break和范围rate候选；instruction表达连说",
++      "F": "不能保证完全复刻参考音频节拍",
++      "G": "把所有标点变成固定停顿",
++      "D": "E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：语义组块与能量分布由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D03",
++      "term": "停顿",
++      "A": "两层意思挤在一起，或断得支离破碎",
++      "B": "在“99元”前留一个短空隙，让价格单独被听见。",
++      "C": "语义边界与悬念留白",
++      "E": "明确位置break；窗口间transition显式静默",
++      "F": "break数值不等于含自然静默的总间隙",
++      "G": "连续叠加break和transition",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义边界与悬念留白由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D04",
++      "term": "重音",
++      "A": "听不出这句最重要的词",
++      "B": "重点是“不用另外买”，其他词轻一点，不要全句用力。",
++      "C": "焦点对比与信息层级",
++      "E": "instruction E2；范围rate/pitch E1候选辅助",
++      "F": "没有精准逐字力度百分比接口",
++      "G": "每个卖点都标重音",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：焦点对比与信息层级由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D05",
++      "term": "句尾",
++      "A": "每句都往上飘，或突然砸下去",
++      "B": "这句最后自然收稳，不像主持人宣布，也别吞掉尾字。",
++      "C": "终止调型与尾音能量",
++      "E": "instruction指定句尾动作",
++      "F": "不能保证精确尾音F0曲线",
++      "G": "所有句尾统一压低",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：终止调型与尾音能量由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D06",
++      "term": "音高感觉",
++      "A": "声音太尖、太闷，人物年龄感变了",
++      "B": "保留这个人的声音，整体少一点尖亮，别变成低沉男播音。",
++      "C": "感知音区与声线身份区分",
++      "E": "整体pitch E1；局部pitch候选；instruction E2",
++      "F": "调pitch可能影响音色感，不能保证只改音高",
++      "G": "把温柔直接等同低pitch",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：感知音区与声线身份区分由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D07",
++      "term": "能量",
++      "A": "有气无力，或全程像吆喝",
++      "B": "开头有精神，中间解释放松，价格处提一下，再自然收住。",
++      "C": "激活水平与动态对比",
++      "E": "instruction；明确volume仅控制整体幅度",
++      "F": "提高volume不等于兴奋或有说服力",
++      "G": "靠加音量修复平读",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：激活水平与动态对比由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D08",
++      "term": "松弛",
++      "A": "字字绷紧，像努力背台词",
++      "B": "像给熟人解释，允许轻重变化，吐字清楚但别字字端着。",
++      "C": "低紧张度、自然语义连接",
++      "E": "instruction关系与状态",
++      "F": "不能保证真实临场感或自动口误",
++      "G": "把松弛写成含糊、拖音",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：低紧张度、自然语义连接由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D09",
++      "term": "提气",
++      "A": "重要句出来时没有精神",
++      "B": "到这句精神提起来，语气更笃定，别喊，不要加喘气声。",
++      "C": "语势启动与能量提升",
++      "E": "instruction；明确范围参数可辅助",
++      "F": "无可验证的真实呼吸控制接口",
++      "G": "自动塞吸气音或一律升pitch",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：语势启动与能量提升由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D10",
++      "term": "收住",
++      "A": "价格说完还一路喊，听着很硬",
++      "B": "“99元”说清楚后把劲收回来，接下一句像正常提醒。",
++      "C": "高潮后能量回落",
++      "E": "instruction；已指定下一范围rate/pitch候选",
++      "F": "不能保证精确能量包络",
++      "G": "把收住理解成突然静音",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：高潮后能量回落由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D11",
++      "term": "压低",
++      "A": "想说悄悄话，却变成闷声播音",
++      "B": "这句像靠近朋友提醒，少一点外放，字要清楚。",
++      "C": "关系距离、音区和力度联合变化",
++      "E": "instruction为主；pitch/volume仅明确辅助",
++      "F": "不能保证耳语或某个频率下降值",
++      "G": "只拉低pitch就当亲密感",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：关系距离、音区和力度联合变化由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D12",
++      "term": "反问",
++      "A": "疑问句像陈述，或像责骂人",
++      "B": "“你是不是也这样？”是带理解的轻反问，不是质问。",
++      "C": "疑问语势与关系立场",
++      "E": "instruction指定轻反问及非责备",
++      "F": "不能保证固定上扬幅度",
++      "G": "见问号就全部挑高喊出来",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：疑问语势与关系立场由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D13",
++      "term": "转折",
++      "A": "但是前后听不出方向变化",
++      "B": "“但是”前略留一下，后面是关键解释，语气转得自然。",
++      "C": "语义立场切换",
++      "E": "break E0加instruction E2",
++      "F": "不能保证推理关系自动被模型理解",
++      "G": "所有转折词都强重音",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义立场切换由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D14",
++      "term": "调侃",
++      "A": "本想轻松，却听成嘲讽",
++      "B": "这句带一点会心笑意，像吐槽自己的小习惯，不笑话观众。",
++      "C": "温和幽默与目标指向",
++      "E": "instruction描述关系、幅度和禁止项",
++      "F": "不保证笑意精确或无冒犯感",
++      "G": "只写“搞笑一点”不说笑谁",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：温和幽默与目标指向由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D15",
++      "term": "熟人感",
++      "A": "像客服统一话术，离人很远",
++      "B": "像认识很久的朋友随口分享，真诚、有分寸，别推销口吻。",
++      "C": "关系距离和交流目的",
++      "E": "instruction稳定同一人物关系",
++      "F": "克隆同voice不保证熟人交流感",
++      "G": "用过度亲昵称呼假装熟悉",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：关系距离和交流目的由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D16",
++      "term": "专业解释",
++      "A": "像术语堆砌，听着懂但记不住",
++      "B": "先把原因讲清，再给结果，语气笃定但不端着，不要念报告。",
++      "C": "信息层次与可信状态",
++      "E": "instruction；导演确认文本本身是否清楚",
++      "F": "声音无法修复事实错误或复杂原稿",
++      "G": "用播音腔冒充专业",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：信息层次与可信状态由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D17",
++      "term": "戳痛",
++      "A": "像吓唬人、指责人，观众会防御",
++      "B": "指出这个真实麻烦，像理解对方，不夸大后果、不制造焦虑。",
++      "C": "问题识别与共情立场",
++      "E": "instruction及已确认真实文本",
++      "F": "不能保证共鸣或合规，不能虚构痛点",
++      "G": "把戳痛等同羞辱和恐吓",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：问题识别与共情立场由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D18",
++      "term": "数字爆点",
++      "A": "数字糊过去，或被喊成夸张广告",
++      "B": "“99”清楚突出一次，前后留对比，别把整句都喊高。",
++      "C": "数字信息焦点与对比",
++      "E": "say-as正确读法E0；instruction E2；范围rate候选",
++      "F": "读对数字不等于突出或促进成交",
++      "G": "整数误用currency，或每个数字都爆",
++      "D": "E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：数字信息焦点与对比由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D19",
++      "term": "价格高潮",
++      "A": "报价没有亮点，或者像清仓叫卖",
++      "B": "到价格精神提一下，明确报完就收住，别加虚假的惊讶。",
++      "C": "报价段局部能量峰值",
++      "E": "instruction；明确break与范围rate/pitch候选",
++      "F": "不能保证价格吸引力或转化",
++      "G": "用高音量掩盖价格无竞争力",
++      "D": "E0：明确读法/停顿节点结构；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：报价段局部能量峰值由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D20",
++      "term": "CTA",
++      "A": "结尾突然换成主播喊下单",
++      "B": "顺着刚才的话提醒看尺寸和颜色，像帮对方下一步，不催促。",
++      "C": "行为引导与人物状态延续",
++      "E": "instruction；明确整Window rate可辅助",
++      "F": "声音不能保证点击购买",
++      "G": "每条CTA都强迫限时催单",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：明示整体或speak范围rate/pitch/volume；范围待Spike；E2：行为引导与人物状态延续由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D21",
++      "term": "广告腔",
++      "A": "每句话都在卖，像宣传片",
++      "B": "删掉表演感，像真实使用后解释给朋友，卖点有层次，不夸张。",
++      "C": "过度商业表演与均匀强调",
++      "E": "instruction；必要时请用户确认文本改写",
++      "F": "指令不能自动消除广告式原稿",
++      "G": "只说“自然”却保留夸张叫卖文字",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：过度商业表演与均匀强调由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D22",
++      "term": "播音腔",
++      "A": "吐字太整齐，像新闻播报",
++      "B": "不用主持人声线，语义连起来，清楚但不字字圆满。",
++      "C": "朗读规范化与角色距离",
++      "E": "instruction；保持同一复刻音色",
++      "F": "不保证彻底消除样本自带播音习惯",
++      "G": "把清楚吐字当成必须去掉",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：朗读规范化与角色距离由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D23",
++      "term": "念稿感",
++      "A": "像沿文字往下读，没有想说给谁",
++      "B": "这句是回答一个具体问题，先理解对方，再把重点说出来。",
++      "C": "交流目的缺失、句式等距",
++      "E": "instruction指定对象与动作；导演核对文本",
++      "F": "不能保证生成实时思考或随机临场",
++      "G": "自动添加嗯啊和口误",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：交流目的缺失、句式等距由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D24",
++      "term": "AI平读感",
++      "A": "强弱和句尾都相似，情绪起伏无意义",
++      "B": "只突出一个核心短语，其他部分自然连说，别均匀强调。",
++      "C": "焦点不足或动态缺乏语义对应",
++      "E": "instruction；显式局部speak候选作对照",
++      "F": "不能保证靠参数完全修复模型平读",
++      "G": "叠加大量相互矛盾的情绪指令",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：焦点不足或动态缺乏语义对应由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D25",
++      "term": "前后人物状态不一致",
++      "A": "开头像朋友，后面突然像主播",
++      "B": "全篇都是同一个人同一次解释，价格和结尾也保持同样关系。",
++      "C": "跨Window关系状态与音色连续",
++      "E": "锁voice E0配置；统一instruction框架E2；试听拼接",
++      "F": "相同voice/seed不能保证状态完全连续",
++      "G": "每段换一套人物设定",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：跨Window关系状态与音色连续由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D26",
++      "term": "连说",
++      "A": "词与词总断开，意思散了",
++      "B": "这几个词是一整个意思，中间不要额外停，讲完再换气。",
++      "C": "语义组完整性",
++      "E": "撤销经确认不必要break；instruction",
++      "F": "不能保证消除模型自然停顿",
++      "G": "软件自行去标点或裁静音",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义组完整性由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D27",
++      "term": "留白",
++      "A": "关键结论没空间被听见",
++      "B": "这句结论说完留一点，让人消化，再说下一句。",
++      "C": "信息处理时间与节奏空间",
++      "E": "明确break或transition二选一",
++      "F": "听觉总空隙可能包含自然静默",
++      "G": "留白越长越认为高级",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：信息处理时间与节奏空间由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D28",
++      "term": "笃定",
++      "A": "像试探推销，或硬装权威",
++      "B": "只对已确认事实说得肯定，语气稳，不加不真实保证。",
++      "C": "认知立场与语气稳定",
++      "E": "instruction；事实边界由人确认",
++      "F": "不保证声音可信即事实正确",
++      "G": "用肯定语气扩大产品承诺",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：认知立场与语气稳定由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D29",
++      "term": "气口",
++      "A": "一句话像永远不呼吸，或喘得太多",
++      "B": "按完整意思分气口，不要每几个字断，也不要刻意加呼吸声。",
++      "C": "语义呼吸组与连续表达",
++      "E": "明确break与已确认Window；instruction",
++      "F": "没有真实肺部呼吸控制，不能保证喘息位置",
++      "G": "把每个逗号都设为吸气",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：语义呼吸组与连续表达由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D30",
++      "term": "咬字",
++      "A": "重点词糊，或字字像教学示范",
++      "B": "只有这个词要清楚，其他词正常说，别整段变成逐字朗读。",
++      "C": "构音清晰度与局部焦点",
++      "E": "phoneme纠错E0；instruction清晰度E2",
++      "F": "读法纠正不保证力度、音质或重音",
++      "G": "用拼音标注解决所有音质问题",
++      "D": "E0：明确读法/停顿节点结构；E1：不把该感觉擅自换算成rate/pitch数值；E2：构音清晰度与局部焦点由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D31",
++      "term": "尾字吞掉",
++      "A": "最后一个字几乎听不到",
++      "B": "最后的“选”完整说出来，然后自然结束，不突然截断。",
++      "C": "终止音节完整性和下载/截断排查",
++      "E": "先核音频完整；instruction E2；不自动补字",
++      "F": "不能保证仅指令修复音频传输截断",
++      "G": "没检查文件就强拉音量",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：终止音节完整性和下载/截断排查由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    },
++    {
++      "id": "D32",
++      "term": "强调对比",
++      "A": "两个选择像同一件事，没有区别",
++      "B": "重点是“省空间”而不是“更大”，对比清楚但别贬低别人。",
++      "C": "焦点对立与语义关系",
++      "E": "instruction E2；显式范围参数候选",
++      "F": "没有任意逐字重音标记接口",
++      "G": "把对比双方都同样喊重",
++      "D": "E0：本词的听感目标没有直接精确结构保证；E1：不把该感觉擅自换算成rate/pitch数值；E2：焦点对立与语义关系由instruction近似表达；E3：要求此感觉每次必达或逐字声学曲线精确复刻时不可保证。"
++    }
++  ]
++}
+--- R1/examples/bindings.json
++++ R2/examples/bindings.json
+@@ -1,8 +1,14 @@
+ {
+   "planId": "PLAN-DEMO-001",
+-  "planHash": "5aa8449b8ff9dfe71b7e6b554d081cfac3abb1c47d49bf0a80ddb9e5260816f6",
++  "planHash": "bdb84662a74e7dc1141f2e7863097b5bc1f47574faec7181ae2102af6e06da66",
+   "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
+   "directorDocumentHash": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef",
+   "taskId": "TASK-DEMO-001",
+-  "note": "Fictional runtime task id; no real task or audio exists. Hashes computed from included fixtures."
++  "note": "Fictional runtime. Primary Plan requires no director attachment. Optional attachment hash only proves bytes; not identity or execution authorization.",
++  "examplePlanHashes": {
++    "plan-with-optional-audit.json": "c656bbfee5de0a0f528d78ad34ef5c40402d71740cb99ee841ae83bdb229a5f6",
++    "plan-with-speak-candidates.json": "818f09b65ece938ece5c6a7420fdccbac976263a6e893ff9d0fdd17cf2d0784b",
++    "plan-with-sub-candidate.json": "9dfdbdc9d8c6b5661fa0ec516c0b0950733a814b2e7507be0066a50be2358df5",
++    "plan.json": "bdb84662a74e7dc1141f2e7863097b5bc1f47574faec7181ae2102af6e06da66"
++  }
+ }
+--- R1/examples/patch.json
++++ R2/examples/patch.json
+@@ -3,9 +3,9 @@
+   "protocolVersion": "2.0",
+   "patchId": "PATCH-DEMO-001",
+   "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+-  "capabilityVersion": "1.0.0-draft.1",
++  "capabilityVersion": "1.0.0-draft.2",
+   "basePlanId": "PLAN-DEMO-001",
+-  "basePlanHash": "5aa8449b8ff9dfe71b7e6b554d081cfac3abb1c47d49bf0a80ddb9e5260816f6",
++  "basePlanHash": "bdb84662a74e7dc1141f2e7863097b5bc1f47574faec7181ae2102af6e06da66",
+   "taskId": "TASK-DEMO-001",
+   "targetWindowIds": [
+     "GW002"
+@@ -22,7 +22,50 @@
+     {
+       "windowId": "GW002",
+       "set": {
+-        "instruction": "价格像给熟人报数，清楚平实，数字稍突出，句尾收住。"
++        "instruction": "价格像给熟人报数，清楚平实，数字稍突出，句尾收住。",
++        "intentRanges": [
++          {
++            "intentId": "I2",
++            "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++            "target": {
++              "windowId": "GW002",
++              "start": 0,
++              "end": 8,
++              "targetText": "今天这套99元。"
++            },
++            "emphasisTerms": [
++              {
++                "start": 4,
++                "end": 7,
++                "text": "99元"
++              }
++            ],
++            "humanIntent": "价格更克制，数字稍突出",
++            "pacingIntent": "价格清楚，不故意拉长",
++            "pauseIntent": "优先自然语义停顿，不额外机械插入",
++            "emotionIntent": "平实、收住",
++            "relationshipIntent": "店主面对一个熟悉客户",
++            "requestedConfidence": "E2",
++            "adoptedExecution": [
++              {
++                "capability": "instruction",
++                "confidence": "E2",
++                "fieldRefs": [
++                  "/windows/1/execution/instruction"
++                ]
++              },
++              {
++                "capability": "sayAs",
++                "confidence": "E0",
++                "fieldRefs": [
++                  "/windows/1/ssml/nodes/0"
++                ]
++              }
++            ],
++            "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++            "unresolvedItemId": null
++          }
++        ]
+       },
+       "executionConfidence": [
+         {
+--- R1/examples/plan-with-optional-audit.json
++++ R2/examples/plan-with-optional-audit.json
+@@ -0,0 +1,353 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.0",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.2",
++  "planId": "PLAN-DEMO-OPTIONAL-AUDIT",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan",
++    "documentId": "D-DEMO-001",
++    "documentVersion": "1",
++    "documentHash": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "像熟人面对手机，开头真诚反问，接着自然解释，不播音。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "价格说清楚，略提精神强调数字，说完收住，不喊卖。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sayAs",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "interpretAs": "cardinal"
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "延续熟人聊天，顺手提醒看详情，句尾收稳，不催单。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sayAs",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+--- R1/examples/plan-with-speak-candidates.json
++++ R2/examples/plan-with-speak-candidates.json
+@@ -0,0 +1,374 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.0",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.2",
++  "planId": "PLAN-DEMO-SPEAK-CANDIDATE",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "像熟人面对手机，开头真诚反问，接着自然解释，不播音。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [],
++        "speakSegments": [
++          {
++            "segmentId": "S1",
++            "start": 0,
++            "end": 6,
++            "rate": 1,
++            "pitch": 1,
++            "volume": 50
++          },
++          {
++            "segmentId": "S2",
++            "start": 6,
++            "end": 29,
++            "rate": 0.9,
++            "pitch": 1.05,
++            "volume": 50
++          }
++        ]
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "价格说清楚，略提精神强调数字，说完收住，不喊卖。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sayAs",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "interpretAs": "cardinal"
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "延续熟人聊天，顺手提醒看详情，句尾收稳，不催单。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        },
++        {
++          "capability": "speakRangeRate",
++          "confidence": "E1",
++          "fieldRefs": [
++            "/windows/0/ssml/speakSegments/1/rate"
++          ]
++        }
++      ],
++      "limitation": "候选结构样例，等待Spike；目前正式产品禁止执行，不是合格音频。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sayAs",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+--- R1/examples/plan-with-sub-candidate.json
++++ R2/examples/plan-with-sub-candidate.json
+@@ -0,0 +1,354 @@
++{
++  "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
++  "protocolVersion": "2.0",
++  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
++  "capabilityVersion": "1.0.0-draft.2",
++  "planId": "PLAN-DEMO-SUB-CANDIDATE",
++  "parentPlanId": null,
++  "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
++  "originalTextHash": "8d5ea9a922a3ee69f6ebea9978faed8b084aafbdea58c118fb48bc8395cd2d83",
++  "engine": {
++    "name": "aliyun-cosyvoice",
++    "model": "cosyvoice-v3.5-plus",
++    "region": "cn-beijing",
++    "transport": "http"
++  },
++  "voiceRequirements": {
++    "kind": "cloned",
++    "targetModel": "cosyvoice-v3.5-plus",
++    "continuity": "same_voice_all_windows",
++    "requestedVoiceRef": null
++  },
++  "directorReference": {
++    "sourceType": "confirmed_director_plan"
++  },
++  "windows": [
++    {
++      "windowId": "GW001",
++      "start": 0,
++      "end": 29,
++      "original": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "synthesisText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "像熟人面对手机，开头真诚反问，接着自然解释，不播音。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I1",
++          "intent": "熟人反问并连续解释",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/0/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    },
++    {
++      "windowId": "GW002",
++      "start": 29,
++      "end": 37,
++      "original": "今天这套99元。",
++      "synthesisText": "今天这套99元。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "价格说清楚，略提精神强调数字，说完收住，不喊卖。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": true,
++        "nodes": [
++          {
++            "kind": "sub",
++            "start": 4,
++            "end": 6,
++            "text": "99",
++            "alias": "九十九",
++            "confirmation": {
++              "referenceId": "SUB-DEMO-CONFIRM",
++              "userStatement": "确认99读作九十九；仅结构示例"
++            }
++          }
++        ],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I2",
++          "intent": "价格重点自然出现",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/1/execution/instruction"
++          ],
++          "approximation": null
++        },
++        {
++          "intentId": "I4",
++          "intent": "99读九十九",
++          "capability": "sayAs",
++          "level": "E0",
++          "implementation": "say-as cardinal结构读法",
++          "targetPaths": [
++            "/windows/1/ssml/nodes/0"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    },
++    {
++      "windowId": "GW003",
++      "start": 37,
++      "end": 55,
++      "original": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "synthesisText": "想看尺寸和颜色，点开商品链接慢慢选。",
++      "textApproval": {
++        "changed": false,
++        "reason": "原样合成",
++        "confirmation": null
++      },
++      "execution": {
++        "instruction": "延续熟人聊天，顺手提醒看详情，句尾收稳，不催单。",
++        "rate": 1,
++        "pitch": 1,
++        "volume": 50,
++        "seed": 0,
++        "format": "wav",
++        "sampleRate": 48000,
++        "languageHints": [
++          "zh"
++        ]
++      },
++      "ssml": {
++        "enabled": false,
++        "nodes": [],
++        "speakSegments": []
++      },
++      "pronunciation": [],
++      "hotFix": {
++        "pronunciation": [],
++        "replace": []
++      },
++      "transition": {
++        "kind": "silence",
++        "pauseMs": 0
++      },
++      "executionConfidence": [
++        {
++          "intentId": "I3",
++          "intent": "自然提醒CTA",
++          "capability": "instruction",
++          "level": "E2",
++          "implementation": "Instruction语义引导",
++          "targetPaths": [
++            "/windows/2/execution/instruction"
++          ],
++          "approximation": null
++        }
++      ],
++      "lockedFields": [
++        "/original",
++        "/start",
++        "/end"
++      ]
++    }
++  ],
++  "rehearsalAnchors": [
++    {
++      "anchorId": "A-OPEN",
++      "windowId": "GW001",
++      "purpose": "验证熟人反问与解释连续",
++      "validationFocus": [
++        "不像主持人",
++        "反问以后自然解释"
++      ]
++    },
++    {
++      "anchorId": "A-PRICE",
++      "windowId": "GW002",
++      "purpose": "验证价格读法与力度",
++      "validationFocus": [
++        "99读九十九",
++        "稍提精神但不喊"
++      ]
++    },
++    {
++      "anchorId": "A-CTA",
++      "windowId": "GW003",
++      "purpose": "验证顺势提醒",
++      "validationFocus": [
++        "不催单",
++        "人物关系延续"
++      ]
++    }
++  ],
++  "unresolvedItems": [],
++  "lockedFields": [
++    "/originalText",
++    "/originalTextHash",
++    "/engine",
++    "/voiceRequirements",
++    "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sub",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
++  ]
++}
+--- R1/examples/plan.json
++++ R2/examples/plan.json
+@@ -2,7 +2,7 @@
+   "schema": "REAL_SPEECH_EXECUTION_PLAN_V2",
+   "protocolVersion": "2.0",
+   "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+-  "capabilityVersion": "1.0.0-draft.1",
++  "capabilityVersion": "1.0.0-draft.2",
+   "planId": "PLAN-DEMO-001",
+   "parentPlanId": null,
+   "originalText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。今天这套99元。想看尺寸和颜色，点开商品链接慢慢选。",
+@@ -20,18 +20,7 @@
+     "requestedVoiceRef": null
+   },
+   "directorReference": {
+-    "documentId": "D-DEMO-001",
+-    "documentVersion": "1",
+-    "documentHash": "38b32d6f2d683bf16e2b5b7dd4ba5dea6c489065ece6cf966713adc30e2a91ef",
+-    "confirmation": {
+-      "referenceId": "CONF-DEMO-001",
+-      "userStatement": "示例确认：导演稿确认，原稿锁定，接受语义重点近似和三个Window。"
+-    },
+-    "blockIds": [
+-      "B001",
+-      "B002",
+-      "B003"
+-    ]
++    "sourceType": "confirmed_director_plan"
+   },
+   "windows": [
+     {
+@@ -59,7 +48,8 @@
+       },
+       "ssml": {
+         "enabled": false,
+-        "nodes": []
++        "nodes": [],
++        "speakSegments": []
+       },
+       "pronunciation": [],
+       "hotFix": {
+@@ -70,9 +60,6 @@
+         "kind": "silence",
+         "pauseMs": 0
+       },
+-      "directorBlockIds": [
+-        "B001"
+-      ],
+       "executionConfidence": [
+         {
+           "intentId": "I1",
+@@ -125,7 +112,8 @@
+             "text": "99",
+             "interpretAs": "cardinal"
+           }
+-        ]
++        ],
++        "speakSegments": []
+       },
+       "pronunciation": [],
+       "hotFix": {
+@@ -136,9 +124,6 @@
+         "kind": "silence",
+         "pauseMs": 0
+       },
+-      "directorBlockIds": [
+-        "B002"
+-      ],
+       "executionConfidence": [
+         {
+           "intentId": "I2",
+@@ -194,7 +179,8 @@
+       },
+       "ssml": {
+         "enabled": false,
+-        "nodes": []
++        "nodes": [],
++        "speakSegments": []
+       },
+       "pronunciation": [],
+       "hotFix": {
+@@ -205,9 +191,6 @@
+         "kind": "silence",
+         "pauseMs": 0
+       },
+-      "directorBlockIds": [
+-        "B003"
+-      ],
+       "executionConfidence": [
+         {
+           "intentId": "I3",
+@@ -264,5 +247,104 @@
+     "/engine",
+     "/voiceRequirements",
+     "/rehearsalAnchors"
++  ],
++  "intentRanges": [
++    {
++      "intentId": "I1",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW001",
++        "start": 0,
++        "end": 29,
++        "targetText": "台面总是乱？我把常用的小东西放进这个收纳盒，拿起来更顺手。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "真发问后连续解释",
++      "pacingIntent": "先问再自然连说",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "关注、直接",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/0/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I2",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW002",
++        "start": 0,
++        "end": 8,
++        "targetText": "今天这套99元。"
++      },
++      "emphasisTerms": [
++        {
++          "start": 4,
++          "end": 7,
++          "text": "99元"
++        }
++      ],
++      "humanIntent": "价格清楚，略提精神但不喊",
++      "pacingIntent": "价格清楚，不故意拉长",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "克制、笃定",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/1/execution/instruction"
++          ]
++        },
++        {
++          "capability": "sayAs",
++          "confidence": "E0",
++          "fieldRefs": [
++            "/windows/1/ssml/nodes/0"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    },
++    {
++      "intentId": "I3",
++      "usage": "DISPLAY_AND_DIAGNOSIS_ONLY",
++      "target": {
++        "windowId": "GW003",
++        "start": 0,
++        "end": 18,
++        "targetText": "想看尺寸和颜色，点开商品链接慢慢选。"
++      },
++      "emphasisTerms": [],
++      "humanIntent": "顺势提醒，不催单",
++      "pacingIntent": "自然收尾",
++      "pauseIntent": "优先自然语义停顿，不额外机械插入",
++      "emotionIntent": "放松、收稳",
++      "relationshipIntent": "店主面对一个熟悉客户",
++      "requestedConfidence": "E2",
++      "adoptedExecution": [
++        {
++          "capability": "instruction",
++          "confidence": "E2",
++          "fieldRefs": [
++            "/windows/2/execution/instruction"
++          ]
++        }
++      ],
++      "limitation": "表演状态由模型理解，不保证精准重点或连续性。",
++      "unresolvedItemId": null
++    }
+   ]
+ }
+--- R1/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
++++ R2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
+@@ -138,6 +138,13 @@
+               },
+               "transition": {
+                 "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/transition"
++              },
++              "intentRanges": {
++                "type": "array",
++                "items": {
++                  "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/intentRange"
++                },
++                "minItems": 0
+               }
+             },
+             "required": [],
+@@ -289,5 +296,6 @@
+     "diagnosis",
+     "validationFocus"
+   ],
+-  "additionalProperties": false
++  "additionalProperties": false,
++  "$comment": "R2: intentRanges replacement is limited to the same targeted window; display-only changes cannot create paid jobs."
+ }
+--- R1/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
++++ R2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
+@@ -110,7 +110,14 @@
+       "additionalProperties": false
+     },
+     "directorReference": {
+-      "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/directorReference"
++      "anyOf": [
++        {
++          "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/directorReference"
++        },
++        {
++          "type": "null"
++        }
++      ]
+     },
+     "windows": {
+       "type": "array",
+@@ -208,6 +215,13 @@
+       },
+       "minItems": 1,
+       "uniqueItems": true
++    },
++    "intentRanges": {
++      "type": "array",
++      "items": {
++        "$ref": "https://chigetang.local/schemas/real-speech/v2/common.schema.json#/$defs/intentRange"
++      },
++      "minItems": 1
+     }
+   },
+   "required": [
+@@ -225,7 +239,9 @@
+     "windows",
+     "rehearsalAnchors",
+     "unresolvedItems",
+-    "lockedFields"
++    "lockedFields",
++    "intentRanges"
+   ],
+-  "additionalProperties": false
++  "additionalProperties": false,
++  "$comment": "R2 candidate: interpretation-only intentRanges never becomes API input; freeze after spike."
+ }
+--- R1/schemas/common.schema.json
++++ R2/schemas/common.schema.json
+@@ -238,15 +238,59 @@
+                   "interpretAs"
+                 ],
+                 "additionalProperties": false
++              },
++              {
++                "type": "object",
++                "properties": {
++                  "kind": {
++                    "const": "sub"
++                  },
++                  "start": {
++                    "type": "integer",
++                    "minimum": 0
++                  },
++                  "end": {
++                    "type": "integer",
++                    "minimum": 0
++                  },
++                  "text": {
++                    "type": "string",
++                    "minLength": 1
++                  },
++                  "alias": {
++                    "type": "string",
++                    "minLength": 1
++                  },
++                  "confirmation": {
++                    "$ref": "#/$defs/confirmation"
++                  }
++                },
++                "required": [
++                  "kind",
++                  "start",
++                  "end",
++                  "text",
++                  "alias",
++                  "confirmation"
++                ],
++                "additionalProperties": false
+               }
+             ]
+           },
+           "minItems": 0
++        },
++        "speakSegments": {
++          "type": "array",
++          "items": {
++            "$ref": "#/$defs/speakSegment"
++          },
++          "minItems": 0
+         }
+       },
+       "required": [
+         "enabled",
+-        "nodes"
++        "nodes",
++        "speakSegments"
+       ],
+       "additionalProperties": false
+     },
+@@ -494,59 +538,38 @@
+     "directorReference": {
+       "type": "object",
+       "properties": {
++        "sourceType": {
++          "const": "confirmed_director_plan"
++        },
+         "documentId": {
+-          "type": "string",
+-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
++          "$ref": "#/$defs/nullableId"
+         },
+         "documentVersion": {
+-          "type": "string",
+-          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
++          "$ref": "#/$defs/nullableId"
+         },
+         "documentHash": {
++          "$ref": "#/$defs/nullableHash"
++        },
++        "confirmation": {
+           "anyOf": [
+             {
+-              "type": "string",
+-              "pattern": "^[0-9a-f]{64}$"
++              "$ref": "#/$defs/confirmation"
+             },
+             {
+               "type": "null"
+             }
+           ]
+         },
+-        "confirmation": {
+-          "type": "object",
+-          "properties": {
+-            "referenceId": {
+-              "type": "string",
+-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+-            },
+-            "userStatement": {
+-              "type": "string",
+-              "minLength": 1
+-            }
+-          },
+-          "required": [
+-            "referenceId",
+-            "userStatement"
+-          ],
+-          "additionalProperties": false
+-        },
+         "blockIds": {
+           "type": "array",
+           "items": {
+-            "type": "string",
+-            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+-          },
+-          "minItems": 1,
+-          "uniqueItems": true
+-        }
+-      },
+-      "required": [
+-        "documentId",
+-        "documentVersion",
+-        "documentHash",
+-        "confirmation",
+-        "blockIds"
++            "$ref": "#/$defs/id"
++          },
++          "minItems": 0
++        }
++      },
++      "required": [
++        "sourceType"
+       ],
+       "additionalProperties": false
+     },
+@@ -633,11 +656,193 @@
+         "pronunciation",
+         "hotFix",
+         "transition",
+-        "directorBlockIds",
+         "executionConfidence",
+         "lockedFields"
+       ],
+       "additionalProperties": false
++    },
++    "speakSegment": {
++      "type": "object",
++      "properties": {
++        "segmentId": {
++          "$ref": "#/$defs/id"
++        },
++        "start": {
++          "type": "integer",
++          "minimum": 0
++        },
++        "end": {
++          "type": "integer",
++          "minimum": 0
++        },
++        "rate": {
++          "type": "number"
++        },
++        "pitch": {
++          "type": "number"
++        },
++        "volume": {
++          "type": "integer"
++        }
++      },
++      "required": [
++        "segmentId",
++        "start",
++        "end",
++        "rate",
++        "pitch",
++        "volume"
++      ],
++      "additionalProperties": false
++    },
++    "intentRange": {
++      "type": "object",
++      "properties": {
++        "intentId": {
++          "$ref": "#/$defs/id"
++        },
++        "usage": {
++          "const": "DISPLAY_AND_DIAGNOSIS_ONLY"
++        },
++        "target": {
++          "type": "object",
++          "properties": {
++            "windowId": {
++              "$ref": "#/$defs/id"
++            },
++            "start": {
++              "type": "integer",
++              "minimum": 0
++            },
++            "end": {
++              "type": "integer",
++              "minimum": 0
++            },
++            "targetText": {
++              "type": "string",
++              "minLength": 1
++            }
++          },
++          "required": [
++            "windowId",
++            "start",
++            "end",
++            "targetText"
++          ],
++          "additionalProperties": false
++        },
++        "emphasisTerms": {
++          "type": "array",
++          "items": {
++            "type": "object",
++            "properties": {
++              "start": {
++                "type": "integer",
++                "minimum": 0
++              },
++              "end": {
++                "type": "integer",
++                "minimum": 0
++              },
++              "text": {
++                "type": "string",
++                "minLength": 1
++              }
++            },
++            "required": [
++              "start",
++              "end",
++              "text"
++            ],
++            "additionalProperties": false
++          },
++          "minItems": 0
++        },
++        "humanIntent": {
++          "type": "string",
++          "minLength": 1
++        },
++        "pacingIntent": {
++          "type": "string"
++        },
++        "pauseIntent": {
++          "type": "string"
++        },
++        "emotionIntent": {
++          "type": "string"
++        },
++        "relationshipIntent": {
++          "type": "string"
++        },
++        "requestedConfidence": {
++          "type": "string",
++          "enum": [
++            "E0",
++            "E1",
++            "E2",
++            "E3"
++          ]
++        },
++        "adoptedExecution": {
++          "type": "array",
++          "items": {
++            "type": "object",
++            "properties": {
++              "capability": {
++                "type": "string",
++                "minLength": 1
++              },
++              "confidence": {
++                "type": "string",
++                "enum": [
++                  "E0",
++                  "E1",
++                  "E2",
++                  "E3"
++                ]
++              },
++              "fieldRefs": {
++                "type": "array",
++                "items": {
++                  "type": "string",
++                  "minLength": 1
++                },
++                "minItems": 1
++              }
++            },
++            "required": [
++              "capability",
++              "confidence",
++              "fieldRefs"
++            ],
++            "additionalProperties": false
++          },
++          "minItems": 0
++        },
++        "limitation": {
++          "type": "string"
++        },
++        "unresolvedItemId": {
++          "$ref": "#/$defs/nullableId"
++        }
++      },
++      "required": [
++        "intentId",
++        "usage",
++        "target",
++        "emphasisTerms",
++        "humanIntent",
++        "pacingIntent",
++        "pauseIntent",
++        "emotionIntent",
++        "relationshipIntent",
++        "requestedConfidence",
++        "adoptedExecution",
++        "limitation",
++        "unresolvedItemId"
++      ],
++      "additionalProperties": false
+     }
+-  }
++  },
++  "$comment": "Design revision R2; not frozen. Director attachment optional. SSML candidates await Capability Spike. Model ranges remain Manifest-owned."
+ }
+--- R1/spike/result-report-template.json
++++ R2/spike/result-report-template.json
+@@ -0,0 +1,585 @@
++{
++  "status": "NOT_RUN",
++  "approvalRecord": null,
++  "actualCalls": 0,
++  "actualBilledUsage": null,
++  "cases": [
++    {
++      "caseId": "I00",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "I01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-A99",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-A100",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-A101",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-H98",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-H100",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-H102",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-M100",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IB-EM100",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "S00",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "B00",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "B50",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "B400",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "B1000",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "IS01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P00",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-rate-mild",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-rate-reverse",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-rate-stress",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-rate-order-flat",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-rate-order-changed",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-rate-priority",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-pitch-mild",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-pitch-reverse",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-pitch-stress",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-pitch-order-flat",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-pitch-order-changed",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "P-pitch-priority",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "PSI01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "SA01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "PH01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "SUB01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "HF00",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "HF01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "HF02",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "R00",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    },
++    {
++      "caseId": "R01",
++      "status": "NOT_RUN",
++      "apiAccepted": null,
++      "requestFingerprint": null,
++      "responseRequestId": null,
++      "rawRequestSnapshotPath": null,
++      "wavSha256": null,
++      "decodedPcmSha256": null,
++      "durationSeconds": null,
++      "observedEffect": null,
++      "blindListening": null,
++      "errors": null,
++      "usage": null
++    }
++  ],
++  "capabilityDecisions": {
++    "parallelSpeak": "PENDING",
++    "speakRangeRate": "PENDING",
++    "speakRangePitch": "PENDING",
++    "sub": "PENDING"
++  },
++  "freezeAllowed": false
++}
+--- R1/spike/test-matrix.json
++++ R2/spike/test-matrix.json
+@@ -0,0 +1,861 @@
++{
++  "status": "NOT_RUN",
++  "paidApprovalGranted": false,
++  "requestTransport": "HTTP Beijing",
++  "dispatchCodeIncluded": false,
++  "credentialPolicy": "No API keys in fixtures or reports",
++  "endpoint": "https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
++  "cases": [
++    {
++      "caseId": "I00",
++      "group": "cloned_instruction",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "复刻音色基线",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "I01",
++      "group": "cloned_instruction",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "像熟人面对手机解释，语气自然，别播音。"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "同一复刻voice是否接受并产生方向性变化",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-A99",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "ASCII加权边界API行为，不用于听感判断",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-A100",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "ASCII加权边界API行为，不用于听感判断",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-A101",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "ASCII加权边界API行为，不用于听感判断",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-H98",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "汉字加权边界API行为",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-H100",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "汉字加权边界API行为",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-H102",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "汉字加权边界API行为",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-M100",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢AB"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "混合字符加权100",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IB-EM100",
++      "group": "instruction_boundary",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢🙂A"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "码点与UTF16差异记录，不宣称官方emoji算法确定",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "S00",
++      "group": "ssml",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这个收纳盒拿起来很顺手。今天这套99元。想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "单speak基线",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "B00",
++      "group": "break",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这个收纳盒拿起来很顺手。今天这套99元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "自然停顿基线",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "B50",
++      "group": "break",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"50ms\"/>今天这套99元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "指定静默与自然停顿区分",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "B400",
++      "group": "break",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"400ms\"/>今天这套99元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "指定静默与自然停顿区分",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "B1000",
++      "group": "break",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"1000ms\"/>今天这套99元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "指定静默与自然停顿区分",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "IS01",
++      "group": "instruction_ssml",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这个收纳盒拿起来很顺手。<break time=\"400ms\"/>今天这套99元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true,
++          "instruction": "像熟人解释，中间自然留一下，别播音。"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "instruction与break同时使用",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P00",
++      "group": "parallel_speak",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"1\" pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1\" pitch=\"1\">今天这套99元。</speak><speak rate=\"1\" pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "同参数并列根自身是否引入接缝或停顿",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-rate-mild",
++      "group": "local_rate",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"0.9\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-rate-reverse",
++      "group": "local_rate",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1.1\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-rate-stress",
++      "group": "local_rate",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"0.5\">这个收纳盒拿起来很顺手。</speak><speak rate=\"2\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-rate-order-flat",
++      "group": "local_rate",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"1\">今天这套99元。</speak><speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "交换短语次序的配对控制，排除位置本身影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-rate-order-changed",
++      "group": "local_rate",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"0.9\">今天这套99元。</speak><speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "交换短语次序的配对控制，排除位置本身影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-rate-priority",
++      "group": "parameter_priority",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"0.9\">这个收纳盒拿起来很顺手。今天这套99元。想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1.1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "HTTP全局参数与speak同名参数实际优先级",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-pitch-mild",
++      "group": "local_pitch",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"0.9\">今天这套99元。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-pitch-reverse",
++      "group": "local_pitch",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"1.1\">今天这套99元。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-pitch-stress",
++      "group": "local_pitch",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak pitch=\"0.5\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"2\">今天这套99元。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "变化是否主要落在价格短语，前后是否保持人物连续；极值只验接受和影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-pitch-order-flat",
++      "group": "local_pitch",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak pitch=\"1\">今天这套99元。</speak><speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "交换短语次序的配对控制，排除位置本身影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-pitch-order-changed",
++      "group": "local_pitch",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak pitch=\"0.9\">今天这套99元。</speak><speak pitch=\"1\">这个收纳盒拿起来很顺手。</speak><speak pitch=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "交换短语次序的配对控制，排除位置本身影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "P-pitch-priority",
++      "group": "parameter_priority",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak pitch=\"0.9\">这个收纳盒拿起来很顺手。今天这套99元。想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1.1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "HTTP全局参数与speak同名参数实际优先级",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "PSI01",
++      "group": "instruction_local_ssml",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"0.9\" pitch=\"1.1\">今天这套99元。</speak><speak rate=\"1\">想看尺寸和颜色，点开链接慢慢选。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true,
++          "instruction": "像熟人分享，价格清楚但不喊，结尾自然收住。"
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "真实口播组合及接缝听感",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "SA01",
++      "group": "say_as",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>今天这套<say-as interpret-as=\"cardinal\">99</say-as>元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "数字读法",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "PH01",
++      "group": "phoneme",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>这家银<phoneme alphabet=\"py\" ph=\"hang2\">行</phoneme>就在附近。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "多音字位置纠音",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "SUB01",
++      "group": "sub",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak>今天讲<sub alias=\"人工智能\">AI</sub>工具。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "alias是否替代朗读且不读标签",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "HF00",
++      "group": "hot_fix",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这家银行就在附近。今天讲AI工具。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "纠音替代自然基线",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "HF01",
++      "group": "hot_fix",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这家银行就在附近。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "hot_fix": {
++            "pronunciation": [
++              {
++                "行": "hang2"
++              }
++            ]
++          }
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "官方hot_fix键格式及全窗口影响",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "HF02",
++      "group": "hot_fix",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "今天讲AI工具。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "hot_fix": {
++            "replace": [
++              {
++                "AI": "人工智能"
++              }
++            ]
++          }
++        }
++      },
++      "plannedCalls": 1,
++      "status": "NOT_RUN",
++      "question": "replace替代朗读",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "R00",
++      "group": "repeat_seed",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "这个收纳盒拿起来很顺手。今天这套99元。",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "instruction": "像熟人解释，清楚自然，别播音。"
++        }
++      },
++      "plannedCalls": 3,
++      "status": "NOT_RUN",
++      "question": "完全相同输入与seed重复的PCM/hash及听感差异",
++      "requiresPaidApproval": true
++    },
++    {
++      "caseId": "R01",
++      "group": "repeat_seed_ssml",
++      "requestBody": {
++        "model": "cosyvoice-v3.5-plus",
++        "input": {
++          "text": "<speak rate=\"1\">这个收纳盒拿起来很顺手。</speak><speak rate=\"0.9\">今天这套99元。</speak>",
++          "voice": "<USER_APPROVED_EXISTING_CLONED_VOICE_ID>",
++          "format": "wav",
++          "sample_rate": 48000,
++          "rate": 1,
++          "pitch": 1,
++          "volume": 50,
++          "seed": 1234,
++          "enable_ssml": true,
++          "instruction": "自然解释，不喊。"
++        }
++      },
++      "plannedCalls": 3,
++      "status": "NOT_RUN",
++      "question": "相同完整SSML/指令输入重复表现",
++      "requiresPaidApproval": true
++    }
++  ],
++  "plannedCalls": 42,
++  "preflight": "核对账号、voice目标模型、官方HTTP当前字段和hot_fix格式后才可形成付费批准清单；不合格fixture不得发送"
++}
+--- R1/spike/付费调用批准单模板.md
++++ R2/spike/付费调用批准单模板.md
+@@ -0,0 +1,5 @@
++# 付费Spike批准单（未批准）
++
++需要用户明确填写/确认：现有复刻voice与账号/Workspace、选中caseId、每项次数、总调用上限、按当前账号价格估算费用、预算硬上限、允许执行时间和是否保留音频。无自动重试；所有计费调用含失败请求都计入请求预算。未知计费状态停止核账。
++
++现有复刻音色优先。若需要新复刻、资源上传或其他收费操作，另列费用和动作再次批准。设计确认不替代此批准。当前模板未批准，不能调用。

@@ -1,3 +1,5 @@
+import { RealSpeechV2Service } from "./realSpeech/v2/service.ts";
+import { SpeechDocumentWindows } from "./realSpeech/v2/documents.ts";
 import { libraryView } from "./services/libraryView.ts";
 import { ReplicaService } from "./services/replica.ts";
 import { LocalTools } from "./services/localTools.ts";
@@ -68,6 +70,8 @@ let localTools: LocalTools;
 let stage1TemplateService: Stage1TemplateService;
 let realSpeech: import("./realSpeech/service.ts").RealSpeechService | undefined;
 let realSpeechInit: Promise<import("./realSpeech/service.ts").RealSpeechService> | undefined;
+let realSpeechV2: RealSpeechV2Service | undefined;
+let speechDocuments: SpeechDocumentWindows | undefined;
 let closing = false;
 const WORKFLOW_FILES = {
   stage1: "阶段1_爆款逆向工程_V2.2.md",
@@ -223,6 +227,10 @@ else {
                 : a.managedPath || a.originalPath;
           } else if (kind === "output") {
             file = service.tasks.get(id).outputPath || "";
+          } else if (kind === "realSpeechV2" && realSpeechV2) {
+            file=realSpeechV2.output(id,String(u.searchParams.get("artifact")));
+          } else if (kind === "realSpeechLegacy" && realSpeechV2) {
+            file=realSpeechV2.legacyOutput(id,String(u.searchParams.get("artifact")));
           } else if (kind === "realSpeech" && realSpeech) {
             const artifact = u.searchParams.get("artifact");
             file=artifact ? realSpeech.output(id,artifact) : realSpeech.get(id).final?.path;
@@ -282,6 +290,31 @@ else {
         try {
           if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) throw new Error("不可信请求");
           const p = (payload ?? {}) as Record<string, any>;
+          if (action.startsWith("v2:")) {
+            const resources=join(app.getAppPath(),"resources","real-speech-v2");
+            if(action==="v2:document") {
+              speechDocuments ??= new SpeechDocumentWindows(resources,service.root,join(__dirname,"speech-document-preload.cjs"));
+              speechDocuments.open(String(p.documentId));return {ok:true,data:true};
+            }
+            realSpeechV2 ??= new RealSpeechV2Service(service.root,service,resources);
+            let result:unknown;
+            switch(action.slice(3)) {
+              case "list": result={tasks:realSpeechV2.list(),legacy:realSpeechV2.legacyList(),voices:realSpeechV2.voices()};break;
+              case "get": result=realSpeechV2.get(String(p.taskId));break;
+              case "preview": result=realSpeechV2.preview(String(p.text));break;
+              case "import": result=realSpeechV2.importPlan(p);break;
+              case "mutate": result=realSpeechV2.mutate(p);break;
+              case "patchPreview": result=realSpeechV2.previewPatch(p);break;
+              case "patchApply": {const applied=realSpeechV2.applyPatch(p);result=applied.jobId&&!applied.reused?await realSpeechV2.runJob(String(applied.jobId)):applied;break;}
+              case "generate": {const job=realSpeechV2.createJob(p);result=await realSpeechV2.runJob(job.jobId);break;}
+              case "concat": result=await realSpeechV2.concat(p);break;
+              case "acknowledge": result=realSpeechV2.acknowledge(p);break;
+              case "recover": result=await realSpeechV2.recover(p);break;
+              case "export": {const out=await realSpeechV2.exportDiagnosis(p);await shell.openPath(out.path);result=out;break;}
+              default:throw new Error("未知V2操作");
+            }
+            service.changed();return {ok:true,data:result};
+          }
           if (!realSpeech) {
             realSpeechInit ??= import("./realSpeech/service.ts").then(({ RealSpeechService })=>new RealSpeechService(service.root,service)).catch(error=>{realSpeechInit=undefined;throw error;});
             realSpeech=await realSpeechInit;
@@ -1181,6 +1214,8 @@ else {
   app.on("will-quit", () => {
     try {
       if (service) service.thumbnails.stopped = true;
+      speechDocuments?.closeAll();
+      realSpeechV2?.db.close();
       realSpeech?.close();
       service?.db.close();
     } catch {}
@@ -1206,7 +1241,7 @@ async function requestQuit() {
     const running =
       service.db.one<{ n: number }>(
         "SELECT count(*) n FROM task_versions WHERE status IN ('Queued','Uploading','Submitting','Processing','Downloading')",
-      )?.n || service.audio.cloning || realSpeech?.active.size;
+      )?.n || service.audio.cloning || realSpeech?.active.size || realSpeechV2?.active.size;
     if (running) window.show();
     if (
       running &&
@@ -1227,6 +1262,7 @@ async function requestQuit() {
     service.tasks.stop();
     service.audio.stop();
     tray?.destroy();
+    speechDocuments?.closeAll();
     app.quit();
   } finally {
     quitPending = false;

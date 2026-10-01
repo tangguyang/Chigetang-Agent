@@ -1,0 +1,877 @@
+{
+  "schema": "COSYVOICE_CAPABILITY_PROFILE",
+  "schemaVersion": "1.0",
+  "capabilityProfileId": "aliyun.cosyvoice-v3.5-plus.cn-beijing.http",
+  "capabilityVersion": "1.0.0-draft.2",
+  "status": "approved_architecture_development_pending_spike",
+  "engine": "aliyun-cosyvoice",
+  "model": "cosyvoice-v3.5-plus",
+  "verifiedAt": "2026-10-01",
+  "verificationMethod": "official_documentation_only",
+  "liveApiVerified": false,
+  "officialSources": [
+    {
+      "id": "S1",
+      "url": "https://help.aliyun.com/zh/model-studio/cosyvoice-tts-http-api",
+      "verifiedAt": "2026-10-01"
+    },
+    {
+      "id": "S2",
+      "url": "https://help.aliyun.com/zh/model-studio/non-realtime-tts-user-guide",
+      "verifiedAt": "2026-10-01"
+    },
+    {
+      "id": "S3",
+      "url": "https://help.aliyun.com/zh/model-studio/ssml-latex-user-guide",
+      "verifiedAt": "2026-10-01"
+    },
+    {
+      "id": "S4",
+      "url": "https://help.aliyun.com/zh/model-studio/voice-cloning-user-guide",
+      "verifiedAt": "2026-10-01"
+    },
+    {
+      "id": "S5",
+      "url": "https://help.aliyun.com/zh/model-studio/voice-clone-design-http-api",
+      "verifiedAt": "2026-10-01"
+    },
+    {
+      "id": "S6",
+      "url": "https://help.aliyun.com/zh/model-studio/cosyvoice-client-events",
+      "verifiedAt": "2026-10-01"
+    },
+    {
+      "id": "S7",
+      "url": "https://help.aliyun.com/en/model-studio/cosyvoice-v3-5-plus",
+      "verifiedAt": "2026-10-01"
+    }
+  ],
+  "confidenceLevels": {
+    "E0": "EXACT_STRUCTURAL: specified structure, not a guarantee of natural listening outcome",
+    "E1": "PARAMETER_CONTROLLED: accepted API parameter, generated acoustic effect",
+    "E2": "SEMANTIC_CONTROLLED: instruction interpretation, approximate",
+    "E3": "UNSUPPORTED: no verified exact interface for this requirement"
+  },
+  "transports": {
+    "http": {
+      "supported": true,
+      "regions": [
+        "cn-beijing"
+      ],
+      "ttsEndpoint": "https://{workspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
+      "enrollmentEndpoint": "https://{workspaceId}.cn-beijing.maas.aliyuncs.com/api/v1/services/audio/tts/customization",
+      "requestEnvelope": {
+        "model": "model",
+        "fieldsContainer": "input"
+      },
+      "sampleRates": [
+        8000,
+        12000,
+        16000,
+        22050,
+        24000,
+        44100,
+        48000
+      ],
+      "formats": [
+        "mp3",
+        "pcm",
+        "wav",
+        "opus"
+      ],
+      "nonStreamingUrlTtlHours": 24,
+      "textMaxOfficial": null,
+      "sourceIds": [
+        "S1"
+      ]
+    },
+    "websocket": {
+      "supported": true,
+      "implementedInProduct": false,
+      "regions": [
+        "cn-beijing"
+      ],
+      "sampleRates": [
+        8000,
+        16000,
+        22050,
+        24000,
+        44100,
+        48000
+      ],
+      "ssmlMaxContinueEvents": 1,
+      "continueTextMax": 20000,
+      "totalTextMax": 200000,
+      "sourceIds": [
+        "S6"
+      ]
+    }
+  },
+  "modelCapabilities": {
+    "instruction": {
+      "confidence": "E2",
+      "scope": "request",
+      "sourceIds": [
+        "S2"
+      ],
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "weightedMax": 100,
+        "hanWeight": 2,
+        "otherCodePointWeight": 1
+      },
+      "countingImplementation": "Unicode code points; Script=Han counts 2; all others count 1; uncommon combining cases require cloud verification",
+      "languages": [
+        "zh",
+        "en",
+        "fr",
+        "de",
+        "ja",
+        "ko",
+        "ru",
+        "pt",
+        "th",
+        "id",
+        "vi"
+      ],
+      "requiresVoiceType": [
+        "cloned",
+        "designed"
+      ],
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "rate": {
+      "confidence": "E1",
+      "scope": "request",
+      "sourceIds": [
+        "S1"
+      ],
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0.5,
+        "max": 2,
+        "default": 1
+      },
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "pitch": {
+      "confidence": "E1",
+      "scope": "request",
+      "sourceIds": [
+        "S1"
+      ],
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0.5,
+        "max": 2,
+        "default": 1
+      },
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "volume": {
+      "confidence": "E1",
+      "scope": "request",
+      "sourceIds": [
+        "S1"
+      ],
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0,
+        "max": 100,
+        "default": 50,
+        "integer": true
+      },
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "seed": {
+      "confidence": "E1",
+      "scope": "request",
+      "sourceIds": [
+        "S1"
+      ],
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0,
+        "max": 65535,
+        "default": 0,
+        "integer": true
+      },
+      "reproducibility": "official: same model version and all inputs; do not guarantee cross-version or cross-time byte identity",
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "ssml": {
+      "confidence": "E0",
+      "scope": "text-structure",
+      "sourceIds": [
+        "S3"
+      ],
+      "requiredParameter": {
+        "enable_ssml": true
+      },
+      "tags": [
+        "speak",
+        "break",
+        "sub",
+        "phoneme",
+        "soundEvent",
+        "say-as"
+      ],
+      "speakAttributes": {
+        "rate": [
+          0.5,
+          2
+        ],
+        "pitch": [
+          0.5,
+          2
+        ],
+        "volume": [
+          0,
+          100
+        ]
+      },
+      "parallelSpeakSupported": true,
+      "nestedSpeakSupported": false,
+      "tagListScope": "All six elements in the current official SSML tag-reference section; attribute support is separately inventoried",
+      "modelSupport": "MODEL_SUPPORTED",
+      "speakAttributeInventory": {
+        "voice": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "rate": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "pitch": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "volume": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "effect": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "effectValue": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "bgm": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        "backgroundMusicVolume": {
+          "modelSupport": "MODEL_SUPPORTED",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      }
+    },
+    "break": {
+      "confidence": "E0",
+      "scope": "text-offset",
+      "sourceIds": [
+        "S3"
+      ],
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "timeMsMin": 50,
+        "timeMsMax": 10000,
+        "integer": true,
+        "secondsMin": 1,
+        "secondsMax": 10,
+        "defaultMs": 1000,
+        "consecutiveMaxMs": 10000
+      },
+      "outputCaveat": "Inserted silence request is explicit; perceived total gap can include natural silence",
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "phoneme": {
+      "confidence": "E0",
+      "scope": "text-range",
+      "sourceIds": [
+        "S3"
+      ],
+      "alphabets": [
+        "py",
+        "cmu"
+      ],
+      "plainTextOnly": true,
+      "pinyinToneNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "sayAs": {
+      "confidence": "E0",
+      "scope": "text-range",
+      "sourceIds": [
+        "S3"
+      ],
+      "interpretAs": [
+        "cardinal",
+        "digits",
+        "telephone",
+        "name",
+        "address",
+        "id",
+        "characters",
+        "punctuation",
+        "date",
+        "time",
+        "currency",
+        "measure"
+      ],
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "hotFix": {
+      "confidence": "E0",
+      "scope": "pre-synthesis-text",
+      "sourceIds": [
+        "S1"
+      ],
+      "apiField": "hot_fix",
+      "children": [
+        "pronunciation",
+        "replace"
+      ],
+      "pronunciationWireShape": "array of single-key objects: word -> pinyin",
+      "replaceWireShape": "array of single-key objects: source -> target",
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "pronunciation": {
+      "confidence": "E0",
+      "scope": "product-abstraction",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "directApiField": false,
+      "routes": [
+        "phoneme",
+        "hot_fix.pronunciation"
+      ],
+      "noDoubleApplication": true,
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "languageHints": {
+      "confidence": "E1",
+      "scope": "request",
+      "sourceIds": [
+        "S1"
+      ],
+      "apiField": "language_hints",
+      "firstElementOnly": true,
+      "apiEnum": [
+        "zh",
+        "en",
+        "fr",
+        "de",
+        "ja",
+        "ko",
+        "ru",
+        "pt",
+        "th",
+        "id",
+        "vi",
+        "es",
+        "it",
+        "ms",
+        "fil",
+        "ar"
+      ],
+      "modelDocumentedLanguages": [
+        "zh",
+        "en",
+        "fr",
+        "de",
+        "ja",
+        "ko",
+        "ru",
+        "pt",
+        "th",
+        "id",
+        "vi"
+      ],
+      "note": "API enum is not a claim of equal model quality in every listed language",
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "voiceClone": {
+      "confidence": "E1",
+      "scope": "voice-enrollment",
+      "sourceIds": [
+        "S4",
+        "S5"
+      ],
+      "enrollmentModel": "voice-enrollment",
+      "action": "create_voice",
+      "targetModelMustMatch": true,
+      "systemVoiceSupported": false,
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "uploadMaxSeconds": 60,
+        "maxFileMB": 10,
+        "minSampleRateHz": 16000,
+        "minContinuousSpeechSeconds": 5,
+        "maxShortPauseSeconds": 2,
+        "formats": [
+          "wav16bit",
+          "mp3",
+          "m4a"
+        ],
+        "prefixMax": 10,
+        "prefixPattern": "^[A-Za-z0-9]+$",
+        "maxPromptAudioLength": {
+          "min": 3,
+          "max": 30,
+          "default": 10
+        }
+      },
+      "officialRecommendedSeconds": [
+        10,
+        20
+      ],
+      "enablePreprocessDefault": false,
+      "enableVolumeNormalizationType": "string enum true/false",
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "sampleRate": {
+      "confidence": "E0",
+      "scope": "audio-format",
+      "sourceIds": [
+        "S1",
+        "S6"
+      ],
+      "apiField": "sample_rate",
+      "valuesByTransport": {
+        "http": [
+          8000,
+          12000,
+          16000,
+          22050,
+          24000,
+          44100,
+          48000
+        ],
+        "websocket": [
+          8000,
+          16000,
+          22050,
+          24000,
+          44100,
+          48000
+        ]
+      },
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "wordLevelRate": {
+      "confidence": "E1",
+      "scope": "isolated-speak-range-not-acoustic-word-curve",
+      "sourceIds": [
+        "S3"
+      ],
+      "exactAcousticControl": false,
+      "route": "A word-sized speak segment is a supported range-control approximation; no exact acoustic duration curve",
+      "modelSupport": "MODEL_APPROXIMATE"
+    },
+    "wordLevelPitch": {
+      "confidence": "E1",
+      "scope": "isolated-speak-range-not-F0-curve",
+      "sourceIds": [
+        "S3"
+      ],
+      "exactAcousticControl": false,
+      "route": "A word-sized speak segment is a supported range-control approximation; no exact F0 +8% guarantee",
+      "modelSupport": "MODEL_APPROXIMATE"
+    },
+    "wordLevelEmotion": {
+      "confidence": "E3",
+      "scope": "exact-word-control",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "approximation": {
+        "confidence": "E2",
+        "route": "instruction with user approval"
+      },
+      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+    },
+    "wordLevelEmphasis": {
+      "confidence": "E3",
+      "scope": "exact-word-control",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "approximation": {
+        "confidence": "E2",
+        "route": "instruction with user approval"
+      },
+      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+    },
+    "prosodyCurve": {
+      "confidence": "E3",
+      "scope": "continuous-acoustic-curve",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+    },
+    "wordTimestamps": {
+      "confidence": "E0",
+      "scope": "output-observation-only",
+      "sourceIds": [
+        "S1"
+      ],
+      "requiresStreaming": true,
+      "modelSupport": "MODEL_SUPPORTED"
+    },
+    "exactDuration": {
+      "confidence": "E3",
+      "scope": "target-audio-duration",
+      "sourceIds": [
+        "S1",
+        "S3"
+      ],
+      "modelSupport": "MODEL_UNSUPPORTED_EXACT"
+    },
+    "sub": {
+      "modelSupport": "MODEL_SUPPORTED",
+      "confidence": "E0",
+      "scope": "text-range",
+      "sourceIds": [
+        "S3"
+      ],
+      "requiredAttribute": "alias",
+      "plainTextOnly": true,
+      "executionMeaning": "Replace the pronunciation text of one specified span without modifying originalText",
+      "liveValidation": "NOT_RUN"
+    },
+    "speakRangeRate": {
+      "modelSupport": "MODEL_SUPPORTED",
+      "confidence": "E1",
+      "scope": "parallel-speak-segment",
+      "sourceIds": [
+        "S3"
+      ],
+      "attribute": "rate",
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0.5,
+        "max": 2,
+        "default": 1
+      },
+      "liveValidation": "NOT_RUN",
+      "acousticGuarantee": false,
+      "protocolCandidateIncluded": true
+    },
+    "speakRangePitch": {
+      "modelSupport": "MODEL_SUPPORTED",
+      "confidence": "E1",
+      "scope": "parallel-speak-segment",
+      "sourceIds": [
+        "S3"
+      ],
+      "attribute": "pitch",
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0.5,
+        "max": 2,
+        "default": 1
+      },
+      "liveValidation": "NOT_RUN",
+      "acousticGuarantee": false,
+      "protocolCandidateIncluded": true
+    },
+    "speakRangeVolume": {
+      "modelSupport": "MODEL_SUPPORTED",
+      "confidence": "E1",
+      "scope": "parallel-speak-segment",
+      "sourceIds": [
+        "S3"
+      ],
+      "attribute": "volume",
+      "limits": {
+        "classification": "MODEL_HARD_LIMIT",
+        "min": 0,
+        "max": 100,
+        "default": 50,
+        "integer": true
+      },
+      "liveValidation": "NOT_RUN",
+      "acousticGuarantee": false,
+      "protocolCandidateIncluded": true
+    },
+    "parallelSpeak": {
+      "modelSupport": "MODEL_SUPPORTED",
+      "confidence": "E0",
+      "scope": "SSML root-sequence",
+      "sourceIds": [
+        "S3"
+      ],
+      "nestedSpeakAllowed": false,
+      "liveValidation": "NOT_RUN",
+      "protocolCandidateIncluded": true
+    },
+    "soundEvent": {
+      "modelSupport": "MODEL_SUPPORTED",
+      "confidence": "E0",
+      "scope": "external-audio-insertion",
+      "sourceIds": [
+        "S3"
+      ],
+      "apiTag": "soundEvent",
+      "liveValidation": "NOT_RUN",
+      "productDecision": "Outside first-release speech-only scope; retained in model inventory"
+    }
+  },
+  "productPolicy": {
+    "recommendedRanges": {
+      "classification": "PRODUCT_RECOMMENDED_RANGE",
+      "empiricallyOptimized": false,
+      "instructionWeightedMax": 80,
+      "initialRate": [
+        0.9,
+        1.1
+      ],
+      "initialPitch": 1,
+      "initialVolume": 50,
+      "initialSeed": 0,
+      "exceedingRecommendation": "warn_and_allow_within_hard_limits"
+    },
+    "hardLimits": {
+      "classification": "PRODUCT_HARD_LIMIT",
+      "format": "wav",
+      "sampleRate": 48000,
+      "maxLanguageHints": 1,
+      "rawXmlAllowed": false,
+      "synthesisTextCodePointMax": 20000,
+      "serializedTextCodePointMax": 20000,
+      "importBytesMax": 1048576,
+      "maxWindows": 500,
+      "maxAnchors": 500,
+      "instructionHanMax": null,
+      "doubleBoundaryPauseAllowed": false,
+      "physicalVersionDeletionAllowed": false,
+      "ssmlSchemaCandidateTags": [
+        "break",
+        "phoneme",
+        "say-as",
+        "sub"
+      ],
+      "parallelSpeakReleaseDecision": "PENDING_SPIKE",
+      "releaseTagAllowlist": null
+    },
+    "semanticRules": [
+      "no automatic directing",
+      "no automatic segmentation",
+      "no automatic rehearsal selection",
+      "E3 must be confirmed approximation or unresolved",
+      "schema and capability validation before every paid request"
+    ],
+    "scope": "realSpeech V2 only; shared modelCapabilities may be used by ordinary audio with its own explicit product policy",
+    "availabilityStateDefinitions": {
+      "PRODUCT_ENABLED": "Candidate design allows this path; not a claim of implemented V2 or completed cloud validation",
+      "PRODUCT_DISABLED_PENDING_VALIDATION": "Documented model support retained in candidate schemas; release decision awaits spike, not pre-excluded",
+      "PRODUCT_DISABLED_OUT_OF_SCOPE": "Deliberately outside this product scope, still recorded as model-supported",
+      "PRODUCT_UNSUPPORTED": "No verified exact execution interface"
+    },
+    "capabilityAvailability": {
+      "instruction": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "rate": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "pitch": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "volume": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "seed": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "ssml": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "break": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "phoneme": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "sayAs": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "hotFix": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "pronunciation": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "languageHints": {
+        "state": "PRODUCT_ENABLED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "voiceClone": {
+        "state": "PRODUCT_ENABLED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "sampleRate": {
+        "state": "PRODUCT_ENABLED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "wordLevelRate": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "wordLevelPitch": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "wordLevelEmotion": {
+        "state": "PRODUCT_UNSUPPORTED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "wordLevelEmphasis": {
+        "state": "PRODUCT_UNSUPPORTED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "prosodyCurve": {
+        "state": "PRODUCT_UNSUPPORTED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "wordTimestamps": {
+        "state": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "exactDuration": {
+        "state": "PRODUCT_UNSUPPORTED",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      },
+      "sub": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "speakRangeRate": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "speakRangePitch": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "speakRangeVolume": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "parallelSpeak": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "evidenceStatus": "NOT_RUN",
+        "spikeRequired": true
+      },
+      "soundEvent": {
+        "state": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+        "evidenceStatus": "DOCUMENTATION_ONLY",
+        "spikeRequired": false
+      }
+    },
+    "ssmlAttributeAvailability": {
+      "voice": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+      "rate": "PRODUCT_DISABLED_PENDING_VALIDATION",
+      "pitch": "PRODUCT_DISABLED_PENDING_VALIDATION",
+      "volume": "PRODUCT_DISABLED_PENDING_VALIDATION",
+      "effect": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+      "effectValue": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+      "bgm": "PRODUCT_DISABLED_OUT_OF_SCOPE",
+      "backgroundMusicVolume": "PRODUCT_DISABLED_OUT_OF_SCOPE"
+    },
+    "combinationAvailability": {
+      "instructionWithSsml": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "modelSupport": "NOT_ESTABLISHED_BY_INDIVIDUAL_SUPPORT",
+        "evidenceStatus": "NOT_RUN"
+      },
+      "parallelSpeakWithInstruction": {
+        "state": "PRODUCT_DISABLED_PENDING_VALIDATION",
+        "modelSupport": "NOT_ESTABLISHED_BY_INDIVIDUAL_SUPPORT",
+        "evidenceStatus": "NOT_RUN"
+      }
+    }
+  },
+  "unsupportedEvidencePolicy": "No verified documented exact interface => unavailable for execution; not a permanent assertion about future model versions",
+  "freezeAllowed": false,
+  "capabilitySpike": {
+    "status": "NOT_RUN",
+    "approvalRequiredBeforeAnyPaidCall": true,
+    "matrixFile": "spike/test-matrix.json",
+    "reportFile": "spike/result-report-template.json",
+    "freezePreconditions": [
+      "approved and completed scoped live spike",
+      "record per-feature API and perceptual evidence",
+      "user approves enablement decisions",
+      "freeze manifest and Plan/Patch schemas together"
+    ]
+  }
+}

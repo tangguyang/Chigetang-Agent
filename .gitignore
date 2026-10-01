@@ -55,3 +55,9 @@ scripts/.bundle-smoke.cjs
 *.mov
 *.wav
 *.mp3
+# Capability Spike local approval/output; never commit credentials or approval records
+scripts/.spike-run.cjs
+*.spike-approval.json
+.spike-private/
+# Native document regression bundle
+scripts/.v2-doc-tests.cjs

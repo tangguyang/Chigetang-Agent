@@ -1,0 +1,460 @@
+{
+  "batchId": "COSYVOICE35PLUS-BATCH1",
+  "status": "NOT_APPROVED_NOT_RUN",
+  "model": "cosyvoice-v3.5-plus",
+  "region": "cn-beijing",
+  "anchors": {
+    "A": "少吃多动，谁不知道？\n问题是——\n你就是坚持不了。",
+    "B": "懒宝宝，早上喝。\n馋宝宝，中午喝。\n又懒、又馋——\n一天两杯。",
+    "C": "专研配方，一杯不到一块钱。\n99块到手100杯。\n每天喝，也不心疼。"
+  },
+  "plannedCalls": 16,
+  "expectedAudioCount": {
+    "normal": 15,
+    "possibleMaximum": 16,
+    "minimumOnFailures": 0
+  },
+  "pricing": {
+    "cnyPer10000Characters": 1.5,
+    "source": "https://help.aliyun.com/en/model-studio/cosyvoice-v3-5-plus",
+    "verifiedAt": "2026-10-01",
+    "rawTextCharacters": 1160,
+    "instructionCharacters": 188,
+    "roughInputEnvelopeCny": 0.2022,
+    "caveat": "原始XML正文及instruction字符粗估，非计费口径；实际usage与账号价格为准，失败也可能计费；本批不创建音色"
+  },
+  "cases": [
+    {
+      "caseId": "01",
+      "title": "克隆基线/锚点A",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "少吃多动，谁不知道？\n问题是——\n你就是坚持不了。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "clonedVoice"
+      ],
+      "listeningOnly": "反问、转折与句尾仅观察",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "02",
+      "title": "instruction/锚点A",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "像熟人直接提醒，开头轻反问，中间留一下，最后收稳，不责备。",
+        "text": "少吃多动，谁不知道？\n问题是——\n你就是坚持不了。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "instruction"
+      ],
+      "listeningOnly": "指令方向，不保证活人感",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "03",
+      "title": "instruction加权100边界",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢",
+        "text": "少吃多动，谁不知道？\n问题是——\n你就是坚持不了。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "instruction.limits"
+      ],
+      "listeningOnly": "重复字符不作听感判断",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "04",
+      "title": "instruction加权101越界",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢慢A",
+        "text": "少吃多动，谁不知道？\n问题是——\n你就是坚持不了。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "instruction.limits"
+      ],
+      "listeningOnly": "意外接受不自动放宽官方上限",
+      "expected": "预期4xx；失败也可能计费，预期无音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "05",
+      "title": "单speak/锚点A",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak>少吃多动，谁不知道？\n问题是——\n你就是坚持不了。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "ssml"
+      ],
+      "listeningOnly": "对照01自然静默",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "06",
+      "title": "break 400ms",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak>少吃多动，谁不知道？\n<break time=\"400ms\"/>问题是——\n你就是坚持不了。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "break"
+      ],
+      "listeningOnly": "含自然停顿总间隙不等于400ms",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "07",
+      "title": "instruction与SSML同时",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "像熟人直接提醒，开头轻反问，中间留一下，最后收稳，不责备。",
+        "text": "<speak>少吃多动，谁不知道？\n<break time=\"400ms\"/>问题是——\n你就是坚持不了。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "instruction+ssml"
+      ],
+      "listeningOnly": "对照06状态变化",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "08",
+      "title": "连续多个speak同参数/锚点B",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak rate=\"1\" pitch=\"1\">懒宝宝，早上喝。\n</speak><speak rate=\"1\" pitch=\"1\">馋宝宝，中午喝。\n</speak><speak rate=\"1\" pitch=\"1\">又懒、又馋——\n</speak><speak rate=\"1\" pitch=\"1\">一天两杯。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "parallelSpeak"
+      ],
+      "listeningOnly": "对照15的接缝",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "09",
+      "title": "局部speak rate/锚点B",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak rate=\"1\" pitch=\"1\">懒宝宝，早上喝。\n</speak><speak rate=\"1\" pitch=\"1\">馋宝宝，中午喝。\n</speak><speak rate=\"0.85\" pitch=\"1\">又懒、又馋——\n</speak><speak rate=\"1\" pitch=\"1\">一天两杯。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "speakRangeRate"
+      ],
+      "listeningOnly": "目标短语时长方向及邻段泄漏",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "10",
+      "title": "局部speak pitch/锚点B",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak rate=\"1\" pitch=\"1\">懒宝宝，早上喝。\n</speak><speak rate=\"1\" pitch=\"1\">馋宝宝，中午喝。\n</speak><speak rate=\"1\" pitch=\"1.1\">又懒、又馋——\n</speak><speak rate=\"1\" pitch=\"1\">一天两杯。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "speakRangePitch"
+      ],
+      "listeningOnly": "有声帧F0变化与人物连续性",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "11",
+      "title": "sub/锚点C",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak>专研配方，一杯不到一块钱。\n99块到手<sub alias=\"一百杯\">100杯</sub>。\n每天喝，也不心疼。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "sub"
+      ],
+      "listeningOnly": "alias朗读，广告力度不保证",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "12",
+      "title": "say-as/锚点C",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak>专研配方，一杯不到一块钱。\n<say-as interpret-as=\"cardinal\">99</say-as>块到手<say-as interpret-as=\"cardinal\">100</say-as>杯。\n每天喝，也不心疼。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "sayAs"
+      ],
+      "listeningOnly": "读法证据，数字爆点不保证",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "13",
+      "title": "phoneme定点读法/锚点C",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": true,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "<speak><phoneme alphabet=\"py\" ph=\"zhuan1 yan2\">专研</phoneme>配方，一杯不到一块钱。\n99块到手100杯。\n每天喝，也不心疼。</speak>"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "phoneme"
+      ],
+      "listeningOnly": "样本本来读对不能证明纠错提升",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "14",
+      "title": "同seed同完整输入重复02",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "像熟人直接提醒，开头轻反问，中间留一下，最后收稳，不责备。",
+        "text": "少吃多动，谁不知道？\n问题是——\n你就是坚持不了。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "seed"
+      ],
+      "listeningOnly": "PCM/hash/时长差异；仅两次不能推广全局确定性",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": "02"
+    },
+    {
+      "caseId": "15",
+      "title": "真实带货锚点B纯文本",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "懒宝宝，早上喝。\n馋宝宝，中午喝。\n又懒、又馋——\n一天两杯。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "clonedVoice"
+      ],
+      "listeningOnly": "短句连续与关系感，仅观察",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    },
+    {
+      "caseId": "16",
+      "title": "真实带货锚点C纯文本",
+      "model": "cosyvoice-v3.5-plus",
+      "voice": "APPROVED_EXISTING_CLONED_VOICE",
+      "input": {
+        "format": "wav",
+        "sample_rate": 48000,
+        "rate": 1,
+        "pitch": 1,
+        "volume": 50,
+        "seed": 1234,
+        "enable_ssml": false,
+        "language_hints": [
+          "zh"
+        ],
+        "instruction": "",
+        "text": "专研配方，一杯不到一块钱。\n99块到手100杯。\n每天喝，也不心疼。"
+      },
+      "calls": 1,
+      "affectsProfile": [
+        "clonedVoice"
+      ],
+      "listeningOnly": "价格和收尾；不验证配方和价格事实",
+      "expected": "200并返回可下载音频",
+      "identicalInputTo": null
+    }
+  ]
+}

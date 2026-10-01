@@ -1,0 +1,90 @@
+.rs-v2 {
+  max-width: 1500px;
+}
+.rs-v2-docs,
+.rs-v2-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.rs-v2 section,
+.rs-v2-window {
+  border: 1px solid var(--border, #ccc);
+  border-radius: 10px;
+  margin: 16px 0;
+  padding: 16px;
+}
+.rs-v2 label {
+  display: block;
+  margin: 8px 0;
+}
+.rs-v2 input:not([type="checkbox"]),
+.rs-v2 select,
+.rs-v2 textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  padding: 8px;
+}
+.rs-v2 textarea {
+  font-family: monospace;
+  resize: vertical;
+}
+.rs-v2 pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 360px;
+  overflow: auto;
+  font-size: 13px;
+}
+.rs-v2-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 20px;
+}
+.rs-v2-layout > aside button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
+.rs-v2-layout > main {
+  min-width: 0;
+}
+.rs-v2-error {
+  color: #b22;
+  white-space: pre-wrap;
+}
+.rs-v2 audio {
+  display: block;
+  max-width: 100%;
+  margin: 8px 0;
+}
+.rs-v2-version {
+  padding: 10px 0;
+  border-bottom: 1px solid #ccc;
+}
+.rs-v2-ab {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.rs-v2-ab label {
+  flex: 1;
+  min-width: 160px;
+}
+.rs-v2-note {
+  padding: 12px;
+  background: #fff3cc;
+  color: #493b0d;
+}
+.rs-v2 button {
+  margin: 4px;
+}
+.rs-v2 input[type="checkbox"] {
+  margin-right: 8px;
+}
+@media (max-width: 900px) {
+  .rs-v2-layout {
+    grid-template-columns: 1fr;
+  }
+}
