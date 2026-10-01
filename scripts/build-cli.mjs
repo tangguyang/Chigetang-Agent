@@ -1,4 +1,13 @@
 import { build } from "esbuild";
+await import("./build-native-pipe.mjs");
+await build({
+  entryPoints: ["scripts/chigetang.mjs"],
+  bundle: true,
+  platform: "node",
+  format: "cjs",
+  target: "node24",
+  outfile: "dist/cli/launcher.cjs",
+});
 await build({
   entryPoints: ["src/cli/index.ts"],
   bundle: true,

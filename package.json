@@ -14,7 +14,7 @@
     "test:repair2:windows": "node scripts/run-repair2-electron.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs",
-    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts tests/agent-control.test.ts",
+    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts tests/agent-control.test.ts tests/agent-control-ipc.test.ts",
     "start": "electron .",
     "pack:win": "npm run build && node scripts/package-win.mjs",
     "typecheck": "tsc --noEmit",
@@ -35,7 +35,9 @@
     "spike:preflight": "node scripts/run-cosyvoice-spike.mjs --preflight",
     "build:cli": "node scripts/build-cli.mjs",
     "speech": "node scripts/chigetang.mjs speech",
-    "test:agent-control": "npm run build:cli && node --experimental-strip-types --test tests/agent-control.test.ts"
+    "test:agent-control": "npm run build:cli && node --experimental-strip-types --test tests/agent-control.test.ts tests/agent-control-ipc.test.ts",
+    "pack:agent-control:win": "npm run build && node scripts/package-agent-control-ipc.mjs",
+    "test:agent-control:portable": "node --experimental-strip-types scripts/test-agent-control-portable.ts"
   },
   "dependencies": {
     "ajv": "8.20.0",

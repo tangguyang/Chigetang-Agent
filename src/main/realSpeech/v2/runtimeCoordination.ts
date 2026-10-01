@@ -70,7 +70,10 @@ export function assertCoordinatedDesktop(
   try {
     registered = JSON.parse(readFileSync(marker(root), "utf8"));
   } catch {}
-  const allowed = new Set<number>();
+  // A portable CLI uses the bundled Electron exe as Node; it is not a GUI writer.
+  const allowed = new Set<number>([process.pid]);
+  if (Number(process.env.CHIGETANG_CLI_LAUNCHER_PID) === process.ppid)
+    allowed.add(process.ppid);
   if (registered?.protocol === "1" && registered?.pid) {
     try {
       process.kill(registered.pid, 0);
@@ -82,7 +85,8 @@ export function assertCoordinatedDesktop(
       if (allowed.has(p.ParentProcessId)) allowed.add(p.ProcessId);
   for (const p of processes!) {
     if (allowed.has(p.ProcessId)) continue;
-    if (!p.ExecutablePath) throw Error("无法确认当前软件运行路径；CLI写操作已拒绝，请先退出旧程序");
+    if (!p.ExecutablePath)
+      throw Error("无法确认当前软件运行路径；CLI写操作已拒绝，请先退出旧程序");
     const manifest = join(
       dirname(p.ExecutablePath),
       "resources",

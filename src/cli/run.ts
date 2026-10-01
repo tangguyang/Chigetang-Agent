@@ -1,4 +1,5 @@
-import { resolve } from "node:path";
+import { resolve,join } from "node:path";
+import {existsSync} from 'node:fs';
 import type { Application } from "../main/services/application.ts";
 import {
   RealSpeechV2Service,
@@ -9,6 +10,8 @@ import { assertCoordinatedDesktop } from "../main/realSpeech/v2/runtimeCoordinat
 import { WINDOWS_DATA_ROOT } from "../main/services/storage.ts";
 import { parseArgs, commands, writeCommand, paidCommand } from "./args.ts";
 import { SecretFilter, resultOutput } from "./output.ts";
+import { requestBridge } from "../main/realSpeech/v2/controlPipe.ts";
+import { acquireWriter } from "../main/realSpeech/v2/writerLease.ts";
 
 export type CliDependencies = {
   projectRoot: string;
@@ -27,6 +30,7 @@ export async function runCli(argv: string[], deps: CliDependencies) {
     err = deps.stderr || ((s: string) => process.stderr.write(s));
   let service: RealSpeechV2Service | undefined,
     closeApp: (() => void) | undefined,
+    releaseWriter: (() => void) | undefined,
     command = "unknown";
   try {
     const args = parseArgs(argv);
@@ -49,8 +53,22 @@ export async function runCli(argv: string[], deps: CliDependencies) {
     }
     const root = resolve(args.values["data-root"] || WINDOWS_DATA_ROOT),
       resources = resolve(deps.projectRoot, "resources/real-speech-v2");
-    if (writeCommand(command) || command === "export-diagnosis")
+    const remote = await requestBridge(root, argv, deps.projectRoot);
+    if (remote) {
+      out(JSON.stringify(filter.clean(remote)) + "\n");
+      if (!remote.ok) err(filter.text(remote.error.message) + "\n");
+      return remote.ok ? 0 : 1;
+    }
+    if (writeCommand(command) || command === "export-diagnosis") {
+      if(!existsSync(join(root,'real-speech-v2/real_speech_v2.db')))throw Error('V2数据库不存在；CLI不会创建或迁移数据库');
       assertCoordinatedDesktop(root);
+      // Paid runtime bootstrap must happen before opening any business database.
+      if (paidCommand(command) && !deps.adapter && !deps.paidApp)
+        throw Object.assign(Error("需要本地凭据运行器"), {
+          code: "PAID_RUNTIME_REQUIRED",
+        });
+      releaseWriter = acquireWriter(root);
+    }
     let app: Application | undefined;
     if (paidCommand(command) && !deps.adapter) {
       if (!deps.paidApp) throw Error("付费动作必须使用受控Electron凭据运行器");
@@ -71,11 +89,15 @@ export async function runCli(argv: string[], deps: CliDependencies) {
     return 0;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    out(resultOutput(command, message, filter, true));
+    const envelope = JSON.parse(resultOutput(command, message, filter, true));
+    if ((e as any)?.code === "PAID_RUNTIME_REQUIRED")
+      envelope.error.code = "PAID_RUNTIME_REQUIRED";
+    out(JSON.stringify(envelope) + "\n");
     err(filter.text(message) + "\n");
     return 1;
   } finally {
     service?.close();
     closeApp?.();
+    releaseWriter?.();
   }
 }

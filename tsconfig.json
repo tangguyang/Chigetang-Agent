@@ -21,6 +21,8 @@
     "scripts/test-v2-workflow-ui.tsx",
     "scripts/test-v2-documents-native.ts",
     "tests/agent-control.test.ts",
-    "scripts/agent-control-gw002-offline.ts"
+    "scripts/agent-control-gw002-offline.ts",
+    "tests/agent-control-ipc.test.ts",
+    "scripts/test-agent-control-portable.ts"
   ]
 }

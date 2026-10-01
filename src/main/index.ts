@@ -1,4 +1,9 @@
-import { registerControlRuntime, watchSpeechChanges } from "./realSpeech/v2/runtimeCoordination.ts";
+import { watchSpeechChanges } from "./realSpeech/v2/runtimeCoordination.ts";
+import {acquireWriter} from './realSpeech/v2/writerLease.ts';
+import {startControlBridge} from './realSpeech/v2/controlPipe.ts';
+import {SpeechAgentControl} from './realSpeech/v2/agentControl.ts';
+import {SecretFilter} from '../cli/output.ts';
+import {acceptanceMode,acceptanceAdapter,observeAcceptance} from './realSpeech/v2/ipcAcceptance.ts';
 import { RealSpeechV2Service } from "./realSpeech/v2/service.ts";
 import { SpeechDocumentWindows } from "./realSpeech/v2/documents.ts";
 import { libraryView } from "./services/libraryView.ts";
@@ -75,6 +80,14 @@ let realSpeechV2: RealSpeechV2Service | undefined;
 let speechDocuments: SpeechDocumentWindows | undefined;
 let stopSpeechWatch: (() => void) | undefined;
 let unregisterControl: (() => void) | undefined;
+let releaseSpeechWriter: (()=>void)|undefined;
+const agentFilter=new SecretFilter();
+const isolatedAcceptance=acceptanceMode(process.argv,process.env);
+const agentAdapter=isolatedAcceptance?acceptanceAdapter:undefined;
+function speechControl() {
+  realSpeechV2 ??= new RealSpeechV2Service(service.root,service,join(app.getAppPath(),'resources/real-speech-v2'));
+  return new SpeechAgentControl(realSpeechV2,agentAdapter);
+}
 let closing = false;
 const WORKFLOW_FILES = {
   stage1: "阶段1_爆款逆向工程_V2.2.md",
@@ -113,6 +126,7 @@ const previousUserDataRoot = join(
   "UserData",
 );
 const root =
+  isolatedAcceptance?.root ||
   process.env.AIVIDEO_TEST_ROOT ||
   (process.platform === "win32"
     ? WINDOWS_DATA_ROOT
@@ -120,6 +134,8 @@ const root =
       join(app.isPackaged ? packagedDir : process.cwd(), "UserData"));
 let rootError: unknown;
 try {
+  releaseSpeechWriter=acquireWriter(root);
+  if(!isolatedAcceptance) {
   migrateLegacyRoot(
     root,
     process.env.AIVIDEO_LEGACY_ROOT
@@ -134,6 +150,7 @@ try {
         ],
   );
   validateDataRoot(root);
+  }
 } catch (error) {
   rootError = error;
 }
@@ -143,7 +160,7 @@ if (!rootError) {
 }
 app.setName(brand.name);
 app.setAppUserModelId(brand.name);
-if (!app.requestSingleInstanceLock()) app.quit();
+if (!app.requestSingleInstanceLock()) {releaseSpeechWriter?.();releaseSpeechWriter=undefined;app.quit();}
 else {
   app.on("second-instance", () => {
     if (window) {
@@ -213,8 +230,10 @@ else {
           });
           n.show();
         },
-        (input, init) =>
-          net.fetch(input instanceof URL ? input.href : input, init),
+        (input, init) => {
+          if(isolatedAcceptance)throw Error('隔离IPC验收禁止所有真实网络请求');
+          return net.fetch(input instanceof URL ? input.href : input, init);
+        },
         app.getAppPath(),
       );
       protocol.handle("aivideo", async (request) => {
@@ -309,8 +328,8 @@ else {
               case "import": result=realSpeechV2.importPlan(p);break;
               case "mutate": result=realSpeechV2.mutate(p);break;
               case "patchPreview": result=realSpeechV2.previewPatch(p);break;
-              case "patchApply": {const applied=realSpeechV2.applyPatch(p);result=applied.jobId&&!applied.reused?await realSpeechV2.runJob(String(applied.jobId)):applied;break;}
-              case "generate": {const job=realSpeechV2.createJob(p);result=await realSpeechV2.runJob(job.jobId);break;}
+              case "patchApply": {const applied=realSpeechV2.applyPatch(p);result=applied.jobId&&!applied.reused?await realSpeechV2.runJob(String(applied.jobId),agentAdapter):applied;break;}
+              case "generate": {const job=realSpeechV2.createJob(p);result=await realSpeechV2.runJob(job.jobId,agentAdapter);break;}
               case "concat": result=await realSpeechV2.concat(p);break;
               case "acknowledge": result=realSpeechV2.acknowledge(p);break;
               case "recover": result=await realSpeechV2.recover(p);break;
@@ -1180,7 +1199,14 @@ else {
       } catch {
         service.logger.write("application", "tray_unavailable");
       }
-      unregisterControl = registerControlRuntime(root, app.getPath("exe"));
+      const getKey=service.credentials.getKey.bind(service.credentials);
+      service.credentials.getKey=(id:string)=>{const key=getKey(id);agentFilter.remember(key);return key;};
+      if(process.platform==='win32') {
+        // Finish the normal GUI startup/recovery before accepting READ commands.
+        speechControl();
+        unregisterControl=await startControlBridge(root,app.getAppPath(),speechControl,()=>service.changed(),agentFilter,()=>{closing=true;app.quit();});
+      }
+      if(isolatedAcceptance)observeAcceptance(window,root,isolatedAcceptance.taskId,()=>{closing=true;app.quit();});
       service.logger.write("application", "started", {
         version: service.bootstrap().version,
       });
@@ -1225,6 +1251,7 @@ else {
       realSpeechV2?.db.close();
       realSpeech?.close();
       service?.db.close();
+      releaseSpeechWriter?.();releaseSpeechWriter=undefined;
     } catch {}
   });
   app.on("window-all-closed", () => app.quit());
