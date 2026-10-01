@@ -1,3 +1,4 @@
+import { registerControlRuntime, watchSpeechChanges } from "./realSpeech/v2/runtimeCoordination.ts";
 import { RealSpeechV2Service } from "./realSpeech/v2/service.ts";
 import { SpeechDocumentWindows } from "./realSpeech/v2/documents.ts";
 import { libraryView } from "./services/libraryView.ts";
@@ -72,6 +73,8 @@ let realSpeech: import("./realSpeech/service.ts").RealSpeechService | undefined;
 let realSpeechInit: Promise<import("./realSpeech/service.ts").RealSpeechService> | undefined;
 let realSpeechV2: RealSpeechV2Service | undefined;
 let speechDocuments: SpeechDocumentWindows | undefined;
+let stopSpeechWatch: (() => void) | undefined;
+let unregisterControl: (() => void) | undefined;
 let closing = false;
 const WORKFLOW_FILES = {
   stage1: "阶段1_爆款逆向工程_V2.2.md",
@@ -297,6 +300,7 @@ else {
               speechDocuments.open(String(p.documentId));return {ok:true,data:true};
             }
             realSpeechV2 ??= new RealSpeechV2Service(service.root,service,resources);
+            stopSpeechWatch ??= watchSpeechChanges(root, () => service.changed());
             let result:unknown;
             switch(action.slice(3)) {
               case "list": result={tasks:realSpeechV2.list(),legacy:realSpeechV2.legacyList(),voices:realSpeechV2.voices()};break;
@@ -313,7 +317,7 @@ else {
               case "export": {const out=await realSpeechV2.exportDiagnosis(p);await shell.openPath(out.path);result=out;break;}
               default:throw new Error("未知V2操作");
             }
-            service.changed();return {ok:true,data:result};
+            if (!["v2:list","v2:get","v2:preview","v2:patchPreview"].includes(action)) service.changed();return {ok:true,data:result};
           }
           if (!realSpeech) {
             realSpeechInit ??= import("./realSpeech/service.ts").then(({ RealSpeechService })=>new RealSpeechService(service.root,service)).catch(error=>{realSpeechInit=undefined;throw error;});
@@ -1176,6 +1180,7 @@ else {
       } catch {
         service.logger.write("application", "tray_unavailable");
       }
+      unregisterControl = registerControlRuntime(root, app.getPath("exe"));
       service.logger.write("application", "started", {
         version: service.bootstrap().version,
       });
@@ -1214,6 +1219,8 @@ else {
   app.on("will-quit", () => {
     try {
       if (service) service.thumbnails.stopped = true;
+      stopSpeechWatch?.();
+      unregisterControl?.();
       speechDocuments?.closeAll();
       realSpeechV2?.db.close();
       realSpeech?.close();

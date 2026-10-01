@@ -59,3 +59,7 @@ python scripts/package-source.py
 Windows 默认使用软件目录内的 `UserData`，整个软件目录移到其他盘符后可继续读取内部数据。可用设置页分别更改素材、音频、视频和备份目录；历史文件不自动搬移。首次升级会安全复制旧 AppData/便携数据，不删除旧目录。
 
 更多配置、迁移与限制见随包文档。
+
+## 真人口播 Agent Control Interface（源码 CLI）
+
+第一版 CLI 复用现有 V2 Service，提供只读上下文、Patch 预览、受控生成和版本回滚。使用方法、费用确认边界、旧绿色版并发限制与 GW002 离线验收见 [Agent Control Interface V1](docs/agent-control-v1/README.md)。入口为 `node scripts/chigetang.mjs speech <command> --json`；首次执行前用 `npm run build:cli` 准备运行器。

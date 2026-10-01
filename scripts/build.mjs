@@ -28,3 +28,5 @@ copyFileSync(
 import { cpSync } from "node:fs";
 for (const folder of ["cmaps","standard_fonts","wasm"]) cpSync("node_modules/pdfjs-dist/"+folder,"dist/renderer/pdf/"+folder,{recursive:true});
 await build({ entryPoints: ["src/main/realSpeech/v2/documentPreload.ts"], bundle:true, platform:"node", format:"cjs", outfile:"dist/speech-document-preload.cjs", external:["electron"] });
+
+await import("./build-cli.mjs");

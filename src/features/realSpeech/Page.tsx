@@ -46,6 +46,21 @@ export default function Page() {
     refresh().catch((e) => setError(String(e)));
   }, []);
   useEffect(() => {
+    let cancelled = false;
+    const unsubscribe = window.aiVideo.onChange?.(() => {
+      if (busy) return; // The UI's own action already refreshes after completion.
+      void (async () => {
+        const [list, current] = await Promise.all([
+          api<Obj>("list"), task?.taskId ? api<Obj>("get", { taskId: task.taskId }) : Promise.resolve(null),
+        ]);
+        if (cancelled) return;
+        setTasks(list.tasks); setLegacy(list.legacy); setVoices(list.voices);
+        if (current) setTask(current);
+      })().catch(e => { if (!cancelled) setError(String(e)); });
+    });
+    return () => { cancelled = true; unsubscribe?.(); };
+  }, [task?.taskId, busy]);
+  useEffect(() => {
     try {
       localStorage.setItem("real-speech-v2-plan-draft", text);
     } catch {

@@ -6,6 +6,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Page from "../src/features/realSpeech/Page.tsx";
 import { RealSpeechV2Service } from "../src/main/realSpeech/v2/service.ts";
+import { runCli } from "../src/cli/run.ts";
+import { resolve } from "node:path";
 const service = new RealSpeechV2Service(
   mkdtempSync(join(tmpdir(), "ctg-v2-ui-workflow-")),
 );
@@ -31,8 +33,10 @@ const fake = async (_body: any, path: string) => {
   return { requestId: "offline-ui-test" };
 };
 let exported = "";
+let changed: (()=>void)|undefined;
 Object.assign(window, {
   aiVideo: {
+    onChange: (listener:()=>void) => { changed=listener; return ()=>{if(changed===listener)changed=undefined;}; },
     invoke: async (action: string, p: any) => {
       switch (action.replace("realSpeech:v2:", "")) {
         case "list":
@@ -181,6 +185,11 @@ assert.equal(
   t.windows[1].selectedVersionId,
   t.windows[1].versions[0].versionId,
 );
+let cliOutput="";
+assert.equal(await runCli(["speech","generate","--task",t.taskId,"--window","GW002","--data-root",service.dataRoot,"--confirm","--json"],{projectRoot:resolve("."),adapter:fake,stdout:s=>cliOutput+=s,stderr:s=>{throw Error(s);}}),0);
+assert.equal(JSON.parse(cliOutput).data.task.windows[1].versions.length,3);
+await act(async()=>{changed?.();await new Promise(r=>setTimeout(r,20));});
+assert.equal(card(1).querySelectorAll(".rs-v2-version").length,3,"CLI新版本通过onChange出现在现有UI");
 await click("最终拼接当前版本");
 t = service.get(t.taskId);
 assert.ok(existsSync(t.finals[0].path));

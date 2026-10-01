@@ -31,10 +31,13 @@ import {
   resolvePointer,
 } from "./validator.ts";
 import { buildRequest } from "./request.ts";
+import { readSnapshot } from "./readSnapshot.ts";
+import { TaskLocks } from "./taskLock.ts";
 import { controlAssessment, primaryVariableDiff } from "./productionPolicy.ts";
 const exec = promisify(execFile);
 const now = () => new Date().toISOString();
-type Adapter = (body: Obj, path: string) => Promise<Obj>;
+export type Adapter = (body: Obj, path: string) => Promise<Obj>;
+export type ServiceOpenMode = "managed" | "readOnly" | "existingWrite";
 export class RealSpeechV2Service {
   db: DatabaseSync;
   root: string;
@@ -42,13 +45,26 @@ export class RealSpeechV2Service {
   app?: Application;
   validator: PlanValidator;
   active = new Set<string>();
-  constructor(root: string, app?: Application, resources?: string) {
+  locks: TaskLocks;
+  readOnly: boolean;
+  snapshotCleanup?: () => void;
+  constructor(root: string, app?: Application, resources?: string, mode: ServiceOpenMode = "managed") {
     this.app = app;
     this.dataRoot = root;
     this.root = join(root, "real-speech-v2");
-    mkdirSync(this.root, { recursive: true });
+    this.readOnly = mode === "readOnly";
+    this.locks = new TaskLocks(this.root);
+    if (mode === "managed") mkdirSync(this.root, { recursive: true });
+    else if (!existsSync(join(this.root, "real_speech_v2.db"))) throw Error("V2数据库不存在；CLI不会创建或迁移数据库");
     this.validator = new PlanValidator(resources);
-    this.db = new DatabaseSync(join(this.root, "real_speech_v2.db"));
+    const snapshot = this.readOnly ? readSnapshot(join(this.root, "real_speech_v2.db")) : null;
+    this.snapshotCleanup = snapshot?.cleanup;
+    try { this.db = new DatabaseSync(snapshot?.path || join(this.root, "real_speech_v2.db"), { readOnly: this.readOnly }); }
+    catch(e) { snapshot?.cleanup(); throw e; }
+    if (mode !== "managed") {
+      this.db.exec("PRAGMA busy_timeout=5000" + (this.readOnly ? "; PRAGMA query_only=ON" : ""));
+      return; // No DDL, WAL-mode changes, directory creation, or recovery on CLI opens.
+    }
     this.db.exec(
       "PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000; CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY,data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS revisions(id TEXT PRIMARY KEY,task_id TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY,task_id TEXT NOT NULL,data TEXT NOT NULL); CREATE TABLE IF NOT EXISTS patches(id TEXT PRIMARY KEY,task_id TEXT NOT NULL,hash TEXT NOT NULL,job_id TEXT,data TEXT NOT NULL);",
     );
@@ -56,29 +72,34 @@ export class RealSpeechV2Service {
       this.db.prepare("PRAGMA integrity_check").get()?.integrity_check !== "ok"
     )
       throw Error("V2数据库校验失败；旧任务库未改动");
-    for (const task of this.list()) {
-      let changed = false;
-      for (const w of task.windows)
-        for (const a of w.attempts)
-          if (a.status === "submitting") {
-            a.status = "unknown";
-            a.error = "程序中断，禁止自动重发；先核对控制台";
-            changed = true;
+    for (const listed of this.list()) {
+      try {
+        this.locks.run(listed.taskId, () => this.tx(() => {
+          // Re-read only after acquiring the lease; a CLI may have just completed.
+          const task = this.get(listed.taskId);
+          let changed = false;
+          for (const w of task.windows)
+            for (const a of w.attempts)
+              if (a.status === "submitting") {
+                a.status = "unknown";
+                a.error = "程序中断，禁止自动重发；先核对控制台";
+                changed = true;
+              }
+          if (changed) { task.taskRevision++; this.save(task); }
+          for (const row of this.db.prepare("SELECT data FROM jobs WHERE task_id=?").all(task.taskId)) {
+            const j = JSON.parse(String(row.data));
+            if (j.status === "running") { j.status = "interrupted"; this.saveJob(j); }
           }
-      if (changed) {
-        task.taskRevision++;
-        this.save(task);
-      }
-    }
-    for (const row of this.db.prepare("SELECT data FROM jobs").all()) {
-      const j = JSON.parse(String(row.data));
-      if (j.status === "running") {
-        j.status = "interrupted";
-        this.saveJob(j);
+        }));
+      } catch (e: any) {
+        if (e.code !== "TASK_LOCK_BUSY") throw e;
+        // Live or stale leases are never reclaimed by UI startup recovery.
       }
     }
   }
+  assertWritable() { if (this.readOnly) throw Error("只读Service禁止修改"); }
   tx<T>(fn: () => T) {
+    this.assertWritable();
     this.db.exec("BEGIN IMMEDIATE");
     try {
       const out = fn();
@@ -90,6 +111,7 @@ export class RealSpeechV2Service {
     }
   }
   save(t: Obj) {
+    this.assertWritable();
     this.db
       .prepare(
         "INSERT INTO tasks VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data",
@@ -98,6 +120,7 @@ export class RealSpeechV2Service {
     return t;
   }
   saveJob(j: Obj) {
+    this.assertWritable();
     this.db
       .prepare(
         "INSERT INTO jobs VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data",
@@ -122,6 +145,7 @@ export class RealSpeechV2Service {
     return JSON.parse(String(r.data));
   }
   revision(t: Obj, reason: string) {
+    this.assertWritable();
     this.db.prepare("INSERT INTO revisions VALUES(?,?,?)").run(
       randomUUID(),
       t.taskId,
@@ -135,7 +159,7 @@ export class RealSpeechV2Service {
     );
   }
   checkIdle(t: Obj, expected?: number) {
-    if (this.active.has(t.taskId)) throw Error("任务正在运行");
+    if (this.active.has(t.taskId) || (!this.locks.held.has(t.taskId) && this.locks.busy(t.taskId))) throw Error("任务正在运行");
     if (
       arguments.length > 1 &&
       (!Number.isSafeInteger(expected) || expected !== t.taskRevision)
@@ -345,7 +369,8 @@ export class RealSpeechV2Service {
     );
   }
   mutate(p: Obj) {
-    return this.tx(() => this.mutateImpl(p));
+    this.assertWritable();
+    return this.locks.run(String(p.taskId), () => this.tx(() => this.mutateImpl(p)));
   }
   private mutateImpl(p: Obj) {
     const t = this.get(p.taskId);
@@ -627,6 +652,10 @@ export class RealSpeechV2Service {
     };
   }
   applyPatch(p: Obj): { task: Obj; jobId: string | null; reused: boolean } {
+    this.assertWritable();
+    return this.locks.run(String(p.taskId), () => this.applyPatchImpl(p));
+  }
+  private applyPatchImpl(p: Obj): { task: Obj; jobId: string | null; reused: boolean } {
     if (p.confirmed !== true) throw Error("需要明确确认Diff");
     const patch = strictJSON(p.text);
     if (patch.taskId !== p.taskId) throw Error("Patch任务不匹配");
@@ -707,6 +736,11 @@ export class RealSpeechV2Service {
     return { task: t, jobId: j?.jobId || null, reused: false };
   }
   createJob(p: Obj) {
+    this.assertWritable();
+    return this.locks.run(String(p.taskId), () => this.createJobImpl(p));
+  }
+  private createJobImpl(p: Obj) {
+    this.assertWritable();
     const t = this.get(p.taskId);
     this.checkIdle(t, p.taskRevision);
     const ids = p.windowIds as string[];
@@ -733,6 +767,10 @@ export class RealSpeechV2Service {
     return j;
   }
   async runJob(jobId: string, adapter?: Adapter) {
+    this.assertWritable();
+    return this.locks.run(this.job(jobId).taskId, () => this.runJobImpl(jobId, adapter));
+  }
+  private async runJobImpl(jobId: string, adapter?: Adapter) {
     const j = this.job(jobId);
     if (
       ["completed", "running", "unknown", "failed", "interrupted"].includes(
@@ -779,6 +817,7 @@ export class RealSpeechV2Service {
     return { task: this.get(t.taskId), job: j };
   }
   async generateWindow(t: Obj, id: string, adapter?: Adapter) {
+    this.assertWritable();
     this.validator.validate(t.plan);
     if (t.profileHash !== planHash(this.validator.profile))
       throw Error("受信Profile已变化，请重新确认方案");
@@ -794,7 +833,7 @@ export class RealSpeechV2Service {
     if (state.locked) throw Error("Window已锁定");
     if (
       state.attempts.some(
-        (a: Obj) => a.status === "unknown" && !a.billingAcknowledged,
+        (a: Obj) => a.status === "submitting" || (a.status === "unknown" && !a.billingAcknowledged),
       )
     )
       throw Error("旧请求结果未知，请先核账");
@@ -856,6 +895,7 @@ export class RealSpeechV2Service {
         path,
         fileHash: sha256(readFileSync(path)),
         fingerprint: this.executionFingerprint(t, config),
+        configRevision: attempt.configRevision,
         requestSnapshot: body,
         config: structuredClone(config),
         intentRanges: structuredClone(attempt.intentRanges),
@@ -914,6 +954,10 @@ export class RealSpeechV2Service {
     return RealSpeechService.prototype.verifyWav.call(this as any, path);
   }
   acknowledge(p: Obj) {
+    this.assertWritable();
+    return this.locks.run(String(p.taskId), () => this.acknowledgeImpl(p));
+  }
+  private acknowledgeImpl(p: Obj) {
     const t = this.get(p.taskId);
     this.checkIdle(t, p.taskRevision);
     if (p.confirmed !== true) throw Error("请明确确认已核账");
@@ -929,6 +973,10 @@ export class RealSpeechV2Service {
     return this.save(t);
   }
   async recover(p: Obj) {
+    this.assertWritable();
+    return this.locks.run(String(p.taskId), () => this.recoverImpl(p));
+  }
+  private async recoverImpl(p: Obj) {
     const t = this.get(p.taskId);
     this.checkIdle(t, p.taskRevision);
     const state = t.windows.find((w: Obj) => w.windowId === p.windowId),
@@ -949,6 +997,7 @@ export class RealSpeechV2Service {
         path,
         fileHash: sha256(readFileSync(path)),
         fingerprint: this.executionFingerprint(t, attempt.config),
+        configRevision: attempt.configRevision,
         config: attempt.config,
         intentRanges: attempt.intentRanges,
         requestSnapshot: attempt.body,
@@ -966,6 +1015,10 @@ export class RealSpeechV2Service {
     }
   }
   async concat(p: Obj) {
+    this.assertWritable();
+    return this.locks.run(String(p.taskId), () => this.concatImpl(p));
+  }
+  private async concatImpl(p: Obj) {
     const t = this.get(p.taskId);
     this.checkIdle(t, p.taskRevision);
     const selected = t.windows.map((w: Obj) => this.selected(t, w.windowId).v);
@@ -1029,6 +1082,9 @@ export class RealSpeechV2Service {
     }
   }
   async exportDiagnosis(p: Obj) {
+    return this.locks.run(String(p.taskId), () => this.exportDiagnosisImpl(p));
+  }
+  private async exportDiagnosisImpl(p: Obj) {
     const t = this.get(p.taskId);
     this.checkIdle(t, p.taskRevision);
     const ids =
@@ -1130,5 +1186,6 @@ export class RealSpeechV2Service {
   close() {
     if (this.active.size) throw Error("V2任务仍在运行");
     this.db.close();
+    this.snapshotCleanup?.();
   }
 }

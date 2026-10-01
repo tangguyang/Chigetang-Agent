@@ -9,12 +9,12 @@
   "license": "UNLICENSED",
   "main": "dist/main.cjs",
   "scripts": {
-    "pretest": "node scripts/prepare-test-resources.mjs",
+    "pretest": "node scripts/prepare-test-resources.mjs && node scripts/build-cli.mjs",
     "test:repair2": "node --experimental-strip-types --test tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v129-media.test.ts && node scripts/run-real-speech-ui.mjs && node scripts/run-repair-ui.mjs && node scripts/run-repair2-workflow-ui.mjs",
     "test:repair2:windows": "node scripts/run-repair2-electron.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs",
-    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts",
+    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts tests/agent-control.test.ts",
     "start": "electron .",
     "pack:win": "npm run build && node scripts/package-win.mjs",
     "typecheck": "tsc --noEmit",
@@ -32,7 +32,10 @@
     "test:repair": "node --experimental-strip-types tests/v129-repair.test.ts && node scripts/run-repair-ui.mjs",
     "test:real-speech:v2": "node --experimental-strip-types --test tests/v2-real-speech.test.ts && node scripts/run-real-speech-ui.mjs && node scripts/run-v2-documents-native.mjs",
     "spike:dry-run": "node scripts/run-cosyvoice-spike.mjs --dry-run",
-    "spike:preflight": "node scripts/run-cosyvoice-spike.mjs --preflight"
+    "spike:preflight": "node scripts/run-cosyvoice-spike.mjs --preflight",
+    "build:cli": "node scripts/build-cli.mjs",
+    "speech": "node scripts/chigetang.mjs speech",
+    "test:agent-control": "npm run build:cli && node --experimental-strip-types --test tests/agent-control.test.ts"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -59,5 +62,8 @@
   },
   "engines": {
     "node": ">=24.19.0"
+  },
+  "bin": {
+    "chigetang": "scripts/chigetang.mjs"
   }
 }

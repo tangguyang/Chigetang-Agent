@@ -19,6 +19,8 @@
     "tests/v2-real-speech.test.ts",
     "scripts/test-real-speech-ui.tsx",
     "scripts/test-v2-workflow-ui.tsx",
-    "scripts/test-v2-documents-native.ts"
+    "scripts/test-v2-documents-native.ts",
+    "tests/agent-control.test.ts",
+    "scripts/agent-control-gw002-offline.ts"
   ]
 }
