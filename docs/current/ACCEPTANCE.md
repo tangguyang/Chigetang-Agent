@@ -1,7 +1,11 @@
 # 当前验收入口
 
-见 [v1.4.2 验收报告](../acceptance/v1.4.2-acceptance-report.md)。本地测试、原生IPC、绿色包结构、结果文件与FFmpeg验证构成非付费证据；不把 fake/offline 的 success 标成真实生成 PASS。
+【v1.4.2 后台视频生产能力：ACCEPTED，按4/4验收完成】
 
-四项真实验收：参考生视频、一键生成、一键复刻、独立任务复制。每项仅获用户明确批准后运行一次，追踪真实taskId/Processing/Completed、下载MP4、验证size>0/ffprobe/时长/路径。UI人工听感和桌面交互观察独立记录，不虚构现场已完成。
+用户于2026-10-02决定结束本轮验收：三项真实WAN验收PASS；一键生成状态为ACCEPTED / WAIVED，用户接受现有控制链验证并免除再次真实付费验收。不得再为这四项产生验收费用，不再修改底层Capability控制架构；当前控制平台作为正式可用基础设施，版本保持v1.4.x，禁止进入v1.5.0。
 
-最终真实验收更新：参考生视频、一键复刻、独立任务复制PASS，一键生成FAIL（本次任务包缺少Prompt素材引用，未付费提交）；实际生成调用3次。详见[真实生产报告](../acceptance/v142-real-production-report.md)，整体四链路未完全通过。一次性授权已消费，重启失效。
+一键生成上轮因测试任务包素材引用问题未进入付费提交，没有真实WAN taskId或MP4。不得写成真实WAN任务成功。
+
+[最终验收报告](../acceptance/v142-real-production-report.md) · [真实执行证据](../acceptance/v142-real-production-results.json) · [项目状态](PROJECT_STATUS.md)
+
+[非付费阶段历史报告](../acceptance/v1.4.2-acceptance-report.md)仅为阶段证据，不能据旧待验收清单重启WAN验收。GUI人工观察与真实执行证据分开，不虚构观察结论。

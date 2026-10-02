@@ -46,8 +46,16 @@
       "sha256": "dadae3677842aa91f4ff05afab90adbd75cd0c84ba0a30ab1e4b108458806f94"
     },
     "B": {
-      "grade": "FAIL",
-      "error": "Error: {\"schema\":\"CHIGETANG_CAPABILITY_RESULT_V1\",\"executionId\":\"34ba1574-9ab3-4f09-93b4-7109d2f25b42\",\"capability\":\"packages.import\",\"status\":\"failed\",\"error\":{\"code\":\"CAPABILITY_REJECTED\",\"message\":\"任务包共发现 1 项问题，请一次修复后重新导入：\\n1. segments[0] 有声明但未使用的素材引用 motion\"},\"logs\":[{\"at\":\"2026-10-02T04:51:59.143Z\",\"event\":\"accepted\"},{\"at\":\"2026-10-02T04:51:59.149Z\",\"event\":\"failed\"}]}"
+      "grade": "ACCEPTED / WAIVED",
+      "error": "Error: {\"schema\":\"CHIGETANG_CAPABILITY_RESULT_V1\",\"executionId\":\"34ba1574-9ab3-4f09-93b4-7109d2f25b42\",\"capability\":\"packages.import\",\"status\":\"failed\",\"error\":{\"code\":\"CAPABILITY_REJECTED\",\"message\":\"任务包共发现 1 项问题，请一次修复后重新导入：\\n1. segments[0] 有声明但未使用的素材引用 motion\"},\"logs\":[{\"at\":\"2026-10-02T04:51:59.143Z\",\"event\":\"accepted\"},{\"at\":\"2026-10-02T04:51:59.149Z\",\"event\":\"failed\"}]}",
+      "historicalTechnicalGrade": "FAIL",
+      "realWanVerified": false,
+      "paidSubmitted": false,
+      "userWaiver": {
+        "decidedAt": "2026-10-02",
+        "reason": "用户主动接受现有控制链验证结果，免除后续真实付费验收",
+        "historicalFact": "因测试任务包素材引用问题，未进入付费提交"
+      }
     },
     "C": {
       "grade": "PASS",
@@ -204,9 +212,20 @@
   "windowCountStart": 0,
   "windowCountEnd": 0,
   "authorizationConsumed": true,
-  "formalAcceptance": "NOT_FULLY_ACCEPTED_B_FAILED_PRE_SUBMISSION",
+  "formalAcceptance": "ACCEPTED",
   "loggedHTTPAPIResponses": {
     "GET": 121,
     "POST": 3
+  },
+  "projectAcceptance": {
+    "conclusion": "【v1.4.2 后台视频生产能力：ACCEPTED，按4/4验收完成】",
+    "acceptedItems": 4,
+    "totalItems": 4,
+    "realWanPassItems": 3,
+    "userWaivedItems": 1,
+    "closed": true,
+    "furtherAcceptanceChargesAllowed": false,
+    "capabilityArchitectureChangesAllowed": false,
+    "versionLine": "v1.4.x"
   }
 }
