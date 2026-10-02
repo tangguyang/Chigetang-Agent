@@ -33,6 +33,7 @@ export function registerApplicationCapabilities(
     );
   add('library.hide',{id:s,hidden:b},['id'],'write');
   add("audio.qwen.generate", { model: { const: "qwen-audio-3.0-tts-plus" }, voice: s, text: s, instruction: s, outputPath: s, accountId: s }, ["model", "voice", "text", "instruction", "outputPath"], "paid");
+  add("audio.qwen.clone", { referencePath: s, name: s, prefix: s, language: { const: "zh" }, accountId: s }, ["referencePath", "name", "prefix", "language"], "paid");
   add('assets.thumbnail.ensure',{id:s,force:b},['id'],'write');
   for (const id of [
     "bootstrap",

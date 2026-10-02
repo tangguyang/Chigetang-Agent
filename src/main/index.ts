@@ -432,6 +432,9 @@ else {
               case "audio.qwen.generate":
                 result = await (await import("./services/qwenAudio.ts")).generateQwenAudio(service, p as unknown as import("./services/qwenAudio.ts").QwenAudioInput);
                 break;
+              case "audio.qwen.clone":
+                result = await (await import("./services/qwenAudio.ts")).cloneQwenAudio(service, p as unknown as Parameters<typeof import("./services/qwenAudio.ts").cloneQwenAudio>[1]);
+                break;
               case "audio.capabilities":
                 result = {
                   ffmpeg: await hasFFmpeg(service.settings().ffmpegPath),
