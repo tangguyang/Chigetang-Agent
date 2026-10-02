@@ -429,6 +429,9 @@ else {
                 const input=p.assetId?await service.assets.verify(service.assets.get(String(p.assetId)),false):service.tasks.get(String(p.taskId)).outputPath;
                 if(!input)throw Error('没有可导出的本地文件');await copyFile(input,String(p.output),1);result={path:p.output};break;
               }
+              case "audio.qwen.generate":
+                result = await (await import("./services/qwenAudio.ts")).generateQwenAudio(service, p as unknown as import("./services/qwenAudio.ts").QwenAudioInput);
+                break;
               case "audio.capabilities":
                 result = {
                   ffmpeg: await hasFFmpeg(service.settings().ffmpegPath),
