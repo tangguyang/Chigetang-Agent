@@ -41,7 +41,7 @@ async function rpc(message: any) {
           )
             ? message.params.protocolVersion
             : "2025-11-25",
-          serverInfo: { name: "chigetang-agent", version: "1.4.0" },
+          serverInfo: { name: "chigetang-agent", version: "1.4.1" },
           capabilities: { tools: { listChanged: false } },
         };
         break;

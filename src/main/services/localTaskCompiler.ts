@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { createReadStream } from 'node:fs';
-import { lstat, mkdir, mkdtemp, readFile, realpath, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { createReadStream, constants } from 'node:fs';
+import { lstat, mkdir, mkdtemp, readFile, realpath, copyFile, rm, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, join, resolve, sep } from 'node:path';
 import { detectFileSignature, hashFile } from './assets.ts';
 import { probeMedia } from './media.ts';
@@ -103,7 +103,8 @@ export async function compileLocalTask(planPath:string,destination:string,option
   const zip=new SafeTaskZip(await readFile(zipFile)),declared=packageDeclaredPaths(manifest);
   for(const path of zip.paths()){if(!declared.has(path))throw new Error('ZIP 有未声明文件 '+path);zip.read(path);}
   for(const a of assets)if(createHash('sha256').update(zip.read(a.path)).digest('hex')!==a.sha256)throw new Error('ZIP 素材哈希不符：'+a.id);
-  const digest=await hashFile(zipFile);await mkdir(dirname(destination),{recursive:true});await rename(zipFile,destination);
+  const digest=await hashFile(zipFile);await mkdir(dirname(destination),{recursive:true});await copyFile(zipFile,destination,constants.COPYFILE_EXCL);
+  if(await hashFile(destination)!==digest)throw new Error('编译任务包输出哈希不符，请保留文件检查磁盘。');
   return{path:destination,sha256:digest,taskId:plan.task_id,segments:segments.length,warnings};
  }finally{await rm(stage,{recursive:true,force:true});}
 }

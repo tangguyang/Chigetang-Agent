@@ -14,7 +14,7 @@ export class SecretFilter {
         "$1[REDACTED]",
       );
   }
-  clean(value: unknown): any {
+  clean(value: unknown, parameterDefinition = false): any {
     if (typeof value === "string") return this.text(value);
     if (Array.isArray(value)) return value.map((x) => this.clean(x));
     if (value && typeof value === "object")
@@ -22,11 +22,11 @@ export class SecretFilter {
         Object.entries(value)
           .filter(
             ([key]) =>
-              !/^(?:key|api[_-]?key|authorization|encrypted|secret|secretKey|accessToken|credentials|headers|keyEnc)$/i.test(
+              (parameterDefinition && key==='key') || !/^(?:key|api[_-]?key|authorization|encrypted|secret|secretKey|accessToken|credentials|headers|keyEnc)$/i.test(
                 key,
               ),
           )
-          .map(([k, v]) => [k, this.clean(v)]),
+          .map(([k, v]) => [k, k==='parameters'&&Array.isArray(v)?v.map(x=>this.clean(x,true)):this.clean(v)]),
       );
     return value;
   }

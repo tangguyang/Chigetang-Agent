@@ -1415,7 +1415,7 @@ export class TaskService {
     if (this.active.has(id))
       throw new AppError("ValidationError", "正在执行网络操作，请稍后取消。");
     const t = this.get(id);
-    if (t.status === "Queued") {
+    if (t.status === "Queued" || t.status === "Draft") {
       t.status = "Cancelled";
       this.save(t);
       return;

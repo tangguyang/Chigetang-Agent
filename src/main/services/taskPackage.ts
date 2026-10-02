@@ -343,6 +343,7 @@ export class TaskPackageService {
   }).replace(/@@/g,'＠'); // visually equivalent literal at-sign; cannot be auto-bound as a Wan reference
  }
  async update(sessionId:string,segmentId:string,patch:{prompt?:string;params?:Record<string,unknown>}) {
+  if(!patch||typeof patch!=='object'||Array.isArray(patch)||Object.keys(patch).some(key=>!['prompt','params'].includes(key)))throw new Error('当前一键生成仅支持修改 prompt/params；素材绑定来自任务包，不能通过 patch 静默修改。');
   return this.withSessionMutation(sessionId,async()=>{
   const s=this.get(sessionId);
   if(s.state!=='ready'||this.submitting.has(sessionId))throw new Error('当前会话正在提交或状态未知，禁止编辑');

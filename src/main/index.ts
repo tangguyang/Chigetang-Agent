@@ -4,7 +4,7 @@ import {registerJobs} from './capabilities/jobs.ts';
 import {TextService} from './services/text.ts';
 import {registerApplicationCapabilities} from './capabilities/catalog.ts';
 import { watchSpeechChanges } from "./realSpeech/v2/runtimeCoordination.ts";
-import {acquireWriter} from './realSpeech/v2/writerLease.ts';
+import {acquireWriter,completeWriterRecovery} from './realSpeech/v2/writerLease.ts';
 import {startControlBridge} from './realSpeech/v2/controlPipe.ts';
 import {SpeechAgentControl} from './realSpeech/v2/agentControl.ts';
 import {SecretFilter} from '../cli/output.ts';
@@ -88,7 +88,7 @@ let realSpeechV2: RealSpeechV2Service | undefined;
 let speechDocuments: SpeechDocumentWindows | undefined;
 let stopSpeechWatch: (() => void) | undefined;
 let unregisterControl: (() => void) | undefined;
-let releaseSpeechWriter: (()=>void)|undefined;
+let releaseSpeechWriter: ReturnType<typeof acquireWriter>|undefined;
 const agentFilter=new SecretFilter();
 const isolatedAcceptance=acceptanceMode(process.argv,process.env);
 const agentAdapter=isolatedAcceptance?acceptanceAdapter:undefined;
@@ -141,7 +141,15 @@ const root =
     : process.env.AIVIDEO_USER_DATA_ROOT ||
       join(app.isPackaged ? packagedDir : process.cwd(), "UserData"));
 let rootError: unknown;
+let ownsInstance=true;
 try {
+  mkdirSync(join(root, "config", "chromium"), { recursive: true });
+  app.setPath("userData", join(root, "config", "chromium"));
+  ownsInstance=app.requestSingleInstanceLock();
+} catch(error) {rootError=error;}
+if(ownsInstance) {
+try {
+  if(rootError)throw rootError;
   releaseSpeechWriter=acquireWriter(root);
   if(!isolatedAcceptance) {
   migrateLegacyRoot(
@@ -162,15 +170,20 @@ try {
 } catch (error) {
   rootError = error;
 }
+}
 if (!rootError) {
   mkdirSync(join(root, "config", "chromium"), { recursive: true });
   app.setPath("userData", join(root, "config", "chromium"));
 }
 app.setName(brand.name);
 app.setAppUserModelId(brand.name);
-if (!app.requestSingleInstanceLock()) {releaseSpeechWriter?.();releaseSpeechWriter=undefined;app.quit();}
+if (!ownsInstance) {app.quit();}
 else {
   app.on("second-instance", (_event, argv) => {
+    if(headless&&!argv.includes('--agent-headless')) {
+      dialog.showErrorBox(brand.name,`后台主进程 PID ${process.pid} 正在运行，GUI未另开数据库。后台调用可继续使用现有 Agent Control。若要切换GUI，请先等待任务空闲后运行 agent-stop.cmd，再启动GUI。`);
+      return;
+    }
     if (window && !headless && !argv.includes('--agent-headless')) {
       window.show();
       window.restore();
@@ -1049,6 +1062,8 @@ else {
                 result = await service.tasks.create(
                   p.draft as Draft,
                   String(p.requestId),
+                  undefined,
+                  agent && p.deferQueue === true,
                 );
                 break;
               case "tasks.list":
@@ -1197,7 +1212,7 @@ else {
       capabilityRegistry = new CapabilityRegistry(agentFilter);
       capabilityRegistry.registerWorkflow();
       registerJobs(capabilityRegistry,root);
-      capabilityRegistry.register({id:'runtime.status',description:'本机执行进程状态',service:'Application',effect:'read',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>({version:brand.version,pid:process.pid,headless,windowCount:BrowserWindow.getAllWindows().length,dataRoot:root}));
+      capabilityRegistry.register({id:'runtime.status',description:'本机执行进程状态',service:'Application',effect:'read',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>({version:brand.version,pid:process.pid,headless,windowCount:BrowserWindow.getAllWindows().length,dataRoot:root,writerRecovery:releaseSpeechWriter?.recovered??null,queuePaused:service.settings().queuePaused}));
       capabilityRegistry.register({id:'runtime.stop',description:'任务空闲时关闭本机执行进程，须 confirm:true',service:'Application',effect:'destructive',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>{
         const active=service.db.one<{n:number}>("SELECT count(*) n FROM task_versions WHERE status IN ('Queued','Uploading','Submitting','Processing','Downloading')")?.n;
         if(active||transcriptionService.progress().busy||service.audio.cloning||service.audio.active.size||realSpeech?.active.size||realSpeechV2?.active.size)throw Error('仍有任务执行，先等待完成或取消');
@@ -1214,6 +1229,7 @@ else {
       if (!headless) {
       await window.loadFile(join(__dirname, "renderer", "index.html"));
       }
+      if(releaseSpeechWriter?.recovered) {await service.saveSettings({queuePaused:true});completeWriterRecovery(root,releaseSpeechWriter.recovered);service.logger.write('runtime','stale_writer_recovered',{backup:releaseSpeechWriter.recovered,queuePaused:true});}
       service.tasks.start();
       service.audio.start();
       if (!headless) try {
@@ -1251,7 +1267,7 @@ else {
         speechControl();
         unregisterControl=await startControlBridge(root,app.getAppPath(),speechControl,()=>service.changed(),agentFilter,()=>{closing=true;app.quit();}, capabilityRegistry);
       }
-      if(isolatedAcceptance&&!headless)observeAcceptance(window,root,isolatedAcceptance.taskId,()=>{closing=true;app.quit();});
+      if(isolatedAcceptance&&!headless&&!process.argv.includes('--agent-control-manual-observation'))observeAcceptance(window,root,isolatedAcceptance.taskId,()=>{closing=true;app.quit();});
       service.logger.write("application", "started", {
         version: service.bootstrap().version,
       });
@@ -1297,8 +1313,7 @@ else {
       realSpeechV2?.db.close();
       realSpeech?.close();
       service?.db.close();
-      releaseSpeechWriter?.();releaseSpeechWriter=undefined;
-    } catch {}
+    } catch {} finally {releaseSpeechWriter?.();releaseSpeechWriter=undefined;}
   });
   app.on("window-all-closed", () => app.quit());
 }

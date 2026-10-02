@@ -1,4 +1,5 @@
 import { TaskService } from './tasks.ts';
+import {brand} from '../../shared/brand.ts';
 import { randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
 import { access,mkdir } from 'node:fs/promises';
@@ -80,7 +81,7 @@ export class EngineTaskService extends TaskService {
         kind: "unknown",
         note: "",
       },
-      appVersion: "1.2.8",
+      appVersion: brand.version,
       createdAt: new Date().toISOString(),
     };
     const adapter = this.d.adapter(model);

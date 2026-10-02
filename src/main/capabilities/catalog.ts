@@ -366,11 +366,11 @@ export function registerApplicationCapabilities(
   );
   add("audio.batch.retry", { id: s }, ["id"], "paid");
   for (const id of ["tasks.create", "tasks.segment.create"])
-    add(id, { draft: obj, requestId: s }, ["draft", "requestId"], "paid");
+    add(id, { draft: obj, requestId: s, ...(id==='tasks.create'?{deferQueue:b}:{}) }, ["draft", "requestId"], "paid");
   for (const id of ["tasks.again", "tasks.segment.retry"])
     add(id, { id: s, requestId: s }, ["id", "requestId"], "paid");
   add("tasks.clone", { id: s, independent: b }, ["id"], "write");
-  add("tasks.resume", { id: s, apiTaskId: s }, ["id"], "write");
+  add("tasks.resume", { id: s, apiTaskId: s }, ["id"], "paid");
   for (const id of ["tasks.cancel", "tasks.redownload", "tasks.refreshStatus"])
     add(id, { id: s }, ["id"], "write");
   for (const id of ["tasks.estimate", "tasks.segment.plan"])

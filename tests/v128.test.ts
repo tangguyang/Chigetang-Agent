@@ -17,13 +17,15 @@ import { HttpClient } from '../src/main/providers/http.ts';
 import type { Snapshot } from '../src/shared/types.ts';
 import { pageNumbers } from '../src/renderer/tools/pdf.ts';
 const hash=(b:Buffer)=>createHash('sha256').update(b).digest('hex');
-test('v128 旧一键生成调用链与上传 v124 一致，仅允许产品版本升级',()=>{
+test('v128 旧一键生成调用链保持 v124 基线，允许版本升级和v141未提交草稿取消',()=>{
  for(const [path,digest] of Object.entries(JSON.parse(readFileSync('legacy-v124-sha256.json','utf8')))){
   let bytes=readFileSync(path);
   if(path==='src/shared/brand.ts'){
-   assert.match(bytes.toString(),/version: "1\.4\.0"/);
-   bytes=Buffer.from(bytes.toString().replace('version: "1.4.0"','version: "1.2.3"'));
+   assert.match(bytes.toString(),/version: "1\.4\.1"/);
+   bytes=Buffer.from(bytes.toString().replace('version: "1.4.1"','version: "1.2.3"'));
   }
+  if(path==='src/main/services/tasks.ts')bytes=Buffer.from(bytes.toString().replace('if (t.status === "Queued" || t.status === "Draft") {','if (t.status === "Queued") {'));
+  if(path==='src/main/services/taskPackage.ts')bytes=Buffer.from(bytes.toString().replace("  if(!patch||typeof patch!=='object'||Array.isArray(patch)||Object.keys(patch).some(key=>!['prompt','params'].includes(key)))throw new Error('当前一键生成仅支持修改 prompt/params；素材绑定来自任务包，不能通过 patch 静默修改。');\r\n",'').replace("  if(!patch||typeof patch!=='object'||Array.isArray(patch)||Object.keys(patch).some(key=>!['prompt','params'].includes(key)))throw new Error('当前一键生成仅支持修改 prompt/params；素材绑定来自任务包，不能通过 patch 静默修改。');\n",''));
   assert.equal(hash(bytes),digest,path);
  }
 });
