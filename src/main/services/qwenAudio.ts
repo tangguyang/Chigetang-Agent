@@ -17,6 +17,10 @@ export type QwenAudioInput = {
   instruction: string;
   outputPath: string;
   accountId?: string;
+  rate?: number;
+  pitch?: number;
+  volume?: number;
+  seed?: number;
 };
 
 function qwenAccount(app: Application, accountId?: string) {
@@ -76,6 +80,15 @@ export async function cloneQwenAudio(app: Application, input: { referencePath: s
 
 // Called only by the existing main-process dispatcher. Credentials never cross IPC.
 export async function generateQwenAudio(app: Application, input: QwenAudioInput) {
+  const controls = [
+    ["rate", 0.5, 2, false], ["pitch", 0.5, 2, false],
+    ["volume", 0, 100, true], ["seed", 0, 65535, true],
+  ] as const;
+  for (const [key, min, max, integer] of controls) {
+    const value = input[key];
+    if (value !== undefined && (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max || (integer && !Number.isInteger(value))))
+      throw Error(`Qwen 参数 ${key} 无效：须为 ${min}–${max}${integer ? " 的整数" : " 的有限数"}`);
+  }
   if (input.model !== QWEN_AUDIO_MODEL) throw Error("仅支持 " + QWEN_AUDIO_MODEL);
   if (!input.voice.trim() || !input.text.trim()) throw Error("voice 和 text 不能为空");
   if (input.voice.startsWith("cosyvoice-")) throw Error("不能沿用 CosyVoice 音色；需要 Qwen-Audio voice ID");
@@ -106,7 +119,13 @@ export async function generateQwenAudio(app: Application, input: QwenAudioInput)
     app.credentials.getKey(account.id),
     { method: "POST", paidSubmit: true, body: {
       model: input.model,
-      input: { voice: input.voice, text: input.text, instruction: input.instruction, format: "wav", sample_rate: 24000 },
+      input: {
+        voice: input.voice, text: input.text, instruction: input.instruction, format: "wav", sample_rate: 24000,
+        ...(input.rate !== undefined ? { rate: input.rate } : {}),
+        ...(input.pitch !== undefined ? { pitch: input.pitch } : {}),
+        ...(input.volume !== undefined ? { volume: input.volume } : {}),
+        ...(input.seed !== undefined ? { seed: input.seed } : {}),
+      },
     } },
   ));
   if (response.code && response.code !== "Success") throw Error(`Qwen-Audio 拒绝请求：${String(response.code)} ${String(response.message || "")}`);

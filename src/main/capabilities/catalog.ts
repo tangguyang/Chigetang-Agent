@@ -32,7 +32,13 @@ export function registerApplicationCapabilities(
       (p) => invoke(id, p),
     );
   add('library.hide',{id:s,hidden:b},['id'],'write');
-  add("audio.qwen.generate", { model: { const: "qwen-audio-3.0-tts-plus" }, voice: s, text: s, instruction: s, outputPath: s, accountId: s }, ["model", "voice", "text", "instruction", "outputPath"], "paid");
+  add("audio.qwen.generate", {
+    model: { const: "qwen-audio-3.0-tts-plus" }, voice: s, text: s, instruction: s, outputPath: s, accountId: s,
+    rate: { type: "number", minimum: 0.5, maximum: 2 },
+    pitch: { type: "number", minimum: 0.5, maximum: 2 },
+    volume: { type: "integer", minimum: 0, maximum: 100 },
+    seed: { type: "integer", minimum: 0, maximum: 65535 },
+  }, ["model", "voice", "text", "instruction", "outputPath"], "paid");
   add("audio.qwen.clone", { referencePath: s, name: s, prefix: s, language: { const: "zh" }, accountId: s }, ["referencePath", "name", "prefix", "language"], "paid");
   add('assets.thumbnail.ensure',{id:s,force:b},['id'],'write');
   for (const id of [
