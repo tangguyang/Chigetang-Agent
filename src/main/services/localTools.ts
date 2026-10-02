@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import { readFile,writeFile,mkdir,stat,rm,rename } from 'node:fs/promises';
 import { basename,dirname,extname,join,resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { ffmpegBinary } from './transcode.ts';
+import { ffmpegBinary, trimMediaSegment, concatVideoWithAudio, convertAudio } from './transcode.ts';
 const exec=promisify(execFile);
 export class LocalTools {
  private outputs=new Set<string>();
@@ -12,10 +12,26 @@ export class LocalTools {
  constructor(ffmpeg:()=>string|undefined){this.ffmpeg=ffmpeg;}
  async input(path:string,extensions:string[]){if(!extensions.includes(extname(path).toLowerCase()))throw new Error('文件格式不支持');const s=await stat(path);if(!s.isFile()||!s.size)throw new Error('文件为空或无法读取');return resolve(path);}
  async audio(path:string,format:string,directory?:string){
- if(!['mp3','wav'].includes(format))throw new Error('请选择 MP3 或 WAV');const input=await this.input(path,['.mp4','.mov','.mkv']);const dir=resolve(directory||dirname(input));await mkdir(dir,{recursive:true});
+ if(!['mp3','wav'].includes(format))throw new Error('请选择 MP3 或 WAV');const input=await this.input(path,['.mp4','.mov','.mkv','.avi','.mp3','.wav','.m4a','.aac','.flac','.ogg']);const dir=resolve(directory||dirname(input));await mkdir(dir,{recursive:true});
  const folder=await this.outputFolder(dir,basename(input,extname(input))+'-音频');const output=join(folder,basename(input,extname(input))+'.'+format);const temp=join(folder,'processing.'+format);
  try{await exec(ffmpegBinary(this.ffmpeg()),['-nostdin','-v','error','-n','-i',input,'-map','0:a:0','-vn',...(format==='mp3'?['-c:a','libmp3lame','-q:a','2']:['-c:a','pcm_s16le']),temp],{windowsHide:true,timeout:60*60*1000,maxBuffer:1024*1024});await rename(temp,output);this.outputs.add(folder);return {folder,files:[output]};}
  catch(e){await rm(folder,{recursive:true,force:true});throw new Error('音频提取失败：请确认视频含可解码音轨、输出目录可写及 FFmpeg 可用。');}
+ }
+ async media(operation:string,p:Record<string,any>) {
+  const inputs=operation==='concat'?p.paths:[p.path];
+  for(const path of inputs)await this.input(path,['.mp4','.mov','.mkv','.avi','.mp3','.wav','.m4a','.aac','.flac','.ogg']);
+  if(p.audio)await this.input(p.audio,['.wav','.mp3','.m4a','.aac']);
+  const folder=await this.outputFolder(resolve(p.directory||dirname(inputs[0])),'Agent-'+operation);
+  const output=join(folder,operation==='frames'?'frame_%04d.png':'result.'+(p.format||'mp4'));
+  try {
+   if(operation==='trim')await trimMediaSegment(inputs[0],output,p.start,p.duration,p.kind,this.ffmpeg());
+   else if(operation==='concat')await concatVideoWithAudio(inputs,p.audio||null,output,this.ffmpeg());
+   else if(operation==='audio')await convertAudio(inputs[0],output,this.ffmpeg());
+   else if(operation==='frames')await exec(ffmpegBinary(this.ffmpeg()),['-nostdin','-v','error','-n','-i',inputs[0],'-vf',`fps=1/${p.interval||5},scale=1280:-2`,'-frames:v',String(p.count||20),output],{windowsHide:true,timeout:600000,maxBuffer:1024*1024});
+   else if(operation==='convert')await exec(ffmpegBinary(this.ffmpeg()),['-nostdin','-v','error','-n','-i',inputs[0],'-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',output],{windowsHide:true,timeout:3600000,maxBuffer:1024*1024});
+   else throw Error('未知媒体操作');
+   this.outputs.add(folder);return {folder,output};
+  }catch(e){await rm(folder,{recursive:true,force:true});throw e;}
  }
  async pdfRead(path:string){const input=await this.input(path,['.pdf']);if((await stat(input)).size>200*1024*1024)throw new Error('PDF 超过 200MB');return new Uint8Array(await readFile(input));}
  async pdfStart(path:string,format:string,directory?:string){if(!['png','jpg'].includes(format))throw new Error('请选择 PNG 或 JPG');const input=await this.input(path,['.pdf']);const folder=await this.outputFolder(resolve(directory||dirname(input)),basename(input,extname(input))+'-图片');const id=randomUUID();this.jobs.set(id,{folder,format:format as 'png'|'jpg',pages:[]});return {id,folder};}

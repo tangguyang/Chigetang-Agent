@@ -21,8 +21,8 @@ test('v128 旧一键生成调用链与上传 v124 一致，仅允许产品版本
  for(const [path,digest] of Object.entries(JSON.parse(readFileSync('legacy-v124-sha256.json','utf8')))){
   let bytes=readFileSync(path);
   if(path==='src/shared/brand.ts'){
-   assert.match(bytes.toString(),/version: "1\.3\.0"/);
-   bytes=Buffer.from(bytes.toString().replace('version: "1.3.0"','version: "1.2.3"'));
+   assert.match(bytes.toString(),/version: "1\.4\.0"/);
+   bytes=Buffer.from(bytes.toString().replace('version: "1.4.0"','version: "1.2.3"'));
   }
   assert.equal(hash(bytes),digest,path);
  }

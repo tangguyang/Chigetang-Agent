@@ -1,3 +1,8 @@
+import {registerSpeechCapabilities} from './capabilities/speech.ts';
+import {CapabilityRegistry} from './capabilities/registry.ts';
+import {registerJobs} from './capabilities/jobs.ts';
+import {TextService} from './services/text.ts';
+import {registerApplicationCapabilities} from './capabilities/catalog.ts';
 import { watchSpeechChanges } from "./realSpeech/v2/runtimeCoordination.ts";
 import {acquireWriter} from './realSpeech/v2/writerLease.ts';
 import {startControlBridge} from './realSpeech/v2/controlPipe.ts';
@@ -65,6 +70,8 @@ import type {
   InstructionPreset,
 } from "../shared/types.ts";
 const exec = promisify(execFile);
+const headless = process.argv.includes('--agent-headless');
+let capabilityRegistry: CapabilityRegistry;
 let tray: Tray | undefined;
 let quitPending = false;
 let window: BrowserWindow;
@@ -74,6 +81,7 @@ let taskPackageService: TaskPackageService;
 let replicaService: ReplicaService;
 let localTools: LocalTools;
 let stage1TemplateService: Stage1TemplateService;
+const textService=new TextService();
 let realSpeech: import("./realSpeech/service.ts").RealSpeechService | undefined;
 let realSpeechInit: Promise<import("./realSpeech/service.ts").RealSpeechService> | undefined;
 let realSpeechV2: RealSpeechV2Service | undefined;
@@ -162,8 +170,8 @@ app.setName(brand.name);
 app.setAppUserModelId(brand.name);
 if (!app.requestSingleInstanceLock()) {releaseSpeechWriter?.();releaseSpeechWriter=undefined;app.quit();}
 else {
-  app.on("second-instance", () => {
-    if (window) {
+  app.on("second-instance", (_event, argv) => {
+    if (window && !headless && !argv.includes('--agent-headless')) {
       window.show();
       window.restore();
       window.focus();
@@ -218,7 +226,7 @@ else {
         probe,
         () => window?.webContents.send("changed"),
         (task) => {
-          if (!service.settings().notifications || !Notification.isSupported())
+          if (headless || !service.settings().notifications || !Notification.isSupported())
             return;
           const n = new Notification({
             title: brand.name,
@@ -282,6 +290,7 @@ else {
         content: readFileSync(workflowFile("stage1"), "utf8"),
         name: "阶段1 爆款逆向工程 V2.2（v1.2.2 内置）",
       });
+      if (!headless) {
       window = new BrowserWindow({
         width: 1440,
         height: 960,
@@ -308,15 +317,14 @@ else {
       window.webContents.session.setPermissionRequestHandler(
         (_wc, _permission, callback) => callback(false),
       );
-      ipcMain.handle("realSpeech:invoke", async (event, action: string, payload: unknown) => {
-        try {
-          if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) throw new Error("不可信请求");
+      }
+      async function invokeSpeech(action:string,payload:unknown,agent=false):Promise<unknown> {
           const p = (payload ?? {}) as Record<string, any>;
           if (action.startsWith("v2:")) {
             const resources=join(app.getAppPath(),"resources","real-speech-v2");
             if(action==="v2:document") {
               speechDocuments ??= new SpeechDocumentWindows(resources,service.root,join(__dirname,"speech-document-preload.cjs"));
-              speechDocuments.open(String(p.documentId));return {ok:true,data:true};
+              speechDocuments.open(String(p.documentId));return true;
             }
             realSpeechV2 ??= new RealSpeechV2Service(service.root,service,resources);
             stopSpeechWatch ??= watchSpeechChanges(root, () => service.changed());
@@ -333,10 +341,10 @@ else {
               case "concat": result=await realSpeechV2.concat(p);break;
               case "acknowledge": result=realSpeechV2.acknowledge(p);break;
               case "recover": result=await realSpeechV2.recover(p);break;
-              case "export": {const out=await realSpeechV2.exportDiagnosis(p);await shell.openPath(out.path);result=out;break;}
+              case "export": {const out=await realSpeechV2.exportDiagnosis(p);if(!agent)await shell.openPath(out.path);result=out;break;}
               default:throw new Error("未知V2操作");
             }
-            if (!["v2:list","v2:get","v2:preview","v2:patchPreview"].includes(action)) service.changed();return {ok:true,data:result};
+            if (!["v2:list","v2:get","v2:preview","v2:patchPreview"].includes(action)) service.changed();return result;
           }
           if (!realSpeech) {
             realSpeechInit ??= import("./realSpeech/service.ts").then(({ RealSpeechService })=>new RealSpeechService(service.root,service)).catch(error=>{realSpeechInit=undefined;throw error;});
@@ -356,27 +364,42 @@ else {
             case "recover": data = await realSpeech.recover(p); break;
             case "concat": data = await realSpeech.concat(p); break;
             case "feedback": data = realSpeech.feedback(p); break;
-            case "export": { const out=realSpeech.exportTask(p,docs); clipboard.writeText(out.text); if(p.attachments) await shell.openPath(out.dir); data=out.task; break; }
+            case "export": { const out=realSpeech.exportTask(p,docs); if(!agent){clipboard.writeText(out.text); if(p.attachments) await shell.openPath(out.dir);} data=out; break; }
             case "copy": clipboard.writeText(String(p.text)); data=true; break;
             case "reveal": { const file=realSpeech.output(String(p.taskId),String(p.resultId)); if(!existsSync(file))throw new Error("音频文件不存在"); shell.showItemInFolder(file); data=true; break; }
             case "document": { const files: Record<string,string> = { stage1:"阶段1_真人带货口播导演对齐_V1.0.md",stage2:"阶段2_真人口播执行编译_V1.0.md",manual:"真人口播表演生产系统_使用手册_V5.0.md",protocol:"ChatGPT_真人口播返回协议_V1.2.md",diagnosis:"真人口播小白听感诊断手册_V1.1.md" }; if(!files[p.kind])throw new Error("文档不存在"); data=readFileSync(join(docs,files[p.kind]),"utf8"); break; }
             default: throw new Error("未知真人口播操作");
           }
-          return {ok:true,data};
-        } catch(error) { return {ok:false,error:String(error)}; }
+
+        return data;
+      }
+      ipcMain.handle("realSpeech:invoke", async(event,action:string,payload:unknown)=>{
+        try{if(headless||event.sender!==window.webContents||event.senderFrame!==window.webContents.mainFrame)throw Error("不可信请求");return {ok:true,data:await invokeSpeech(action,payload)};}catch(error){return {ok:false,error:String(error)};}
       });
-      ipcMain.handle(
-        "ai-video",
-        async (event, action: string, payload: unknown) => {
-          try {
-            if (
-              event.sender !== window.webContents ||
-              event.senderFrame !== window.webContents.mainFrame
-            )
-              throw new Error("不可信请求。");
+      async function invokeOperation(action: string, payload: unknown, agent = false): Promise<unknown> {
+        const confirm = agent ? async (_message: string) => true : globalConfirm;
             const p = (payload ?? {}) as Record<string, unknown>;
             let result: unknown;
             switch (action) {
+              case 'text.process':result=textService.process(String(p.text),String(p.operation));break;
+              case 'text.subtitles':result=await textService.subtitles(p.segments as {startMs:number;endMs:number;text:string}[],String(p.output));break;
+              case 'video.frames': result=await localTools.media('frames',p);break;
+              case 'video.convert': result=await localTools.media('convert',p);break;
+              case 'media.trim': if((p.kind==='audio')!==(p.format==='wav'))throw Error('音频裁切使用 wav，视频裁切使用 mp4');result=await localTools.media('trim',p);break;
+              case 'video.concat': result=await localTools.media('concat',p);break;
+              case 'audio.convert': result=await localTools.media('audio',p);break;
+              case 'image.process': {
+                const input=await localTools.input(String(p.path),['.png','.jpg','.jpeg','.webp','.bmp']);
+                let image=nativeImage.createFromPath(input);if(image.isEmpty())throw Error('图片解码失败');
+                if(p.width||p.height)image=image.resize({width:p.width as number|undefined,height:p.height as number|undefined});
+                await writeFile(String(p.output),p.format==='jpg'?image.toJPEG(Number(p.quality||90)):image.toPNG(),{flag:'wx'});
+                result={path:p.output,...image.getSize()};break;
+              }
+              case 'files.export': {
+                if(Boolean(p.assetId)===Boolean(p.taskId))throw Error('指定且仅指定 assetId 或 taskId');
+                const input=p.assetId?await service.assets.verify(service.assets.get(String(p.assetId)),false):service.tasks.get(String(p.taskId)).outputPath;
+                if(!input)throw Error('没有可导出的本地文件');await copyFile(input,String(p.output),1);result={path:p.output};break;
+              }
               case "audio.capabilities":
                 result = {
                   ffmpeg: await hasFFmpeg(service.settings().ffmpegPath),
@@ -481,6 +504,7 @@ else {
                 result = selected.canceled || !selected.filePaths[0] ? null : await transcriptionService.inspect(selected.filePaths[0]);
                 break;
               }
+              case "transcription.result": result=(await readFile(transcriptionService.resultPath(String(p.taskId),p.kind as "full"|"timeline"),"utf8")).replace(/^\uFEFF/,"");break;
               case "transcription.inspect":
                 result = await transcriptionService.inspect(String(p.path || ""));
                 break;
@@ -490,6 +514,14 @@ else {
               case "transcription.start":
                 result = transcriptionService.start(String(p.path || ""));
                 break;
+              case 'transcription.wait': result=await transcriptionService.wait();break;
+              case 'transcription.run': {
+                await transcriptionService.inspect(String(p.path));
+                transcriptionService.start(String(p.path));
+                const completed=await transcriptionService.wait();
+                if(completed.stage!=='completed')throw Error(completed.detail||'转写未完成');
+                result=completed.result;break;
+              }
               case "transcription.cancel":
                 result = await transcriptionService.cancel();
                 break;
@@ -579,13 +611,14 @@ else {
               case "tools.pdfPage": result=await localTools.pdfPage(String(p.id),Number(p.page),p.bytes as Uint8Array);break;
               case "tools.pdfFinish": result=await localTools.pdfFinish(String(p.id),p.success===true);break;
               case "tools.open": result=await localTools.open(String(p.folder),shell.openPath);break;
-              case "replica.import": {const r=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:'复刻任务包',extensions:['zip']}]});result=r.canceled?null:await replicaService.importZip(r.filePaths[0]);break;}
+              case "replica.import": {if(agent){result=await replicaService.importZip(String(p.path));break;}const r=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:'复刻任务包',extensions:['zip']}]});result=r.canceled?null:await replicaService.importZip(r.filePaths[0]);break;}
               case "replica.list": result=replicaService.list();break;
               case "replica.update": result=replicaService.update(String(p.id),String(p.segmentId),p.draft as Draft);break;
               case "replica.preflight": result=await replicaService.preflight(String(p.id));break;
               case "replica.confirm": result=await replicaService.confirm(String(p.id),Number(p.revision));break;
               case "replica.submit": result=await replicaService.submit(String(p.id));break;
               case "packages.import": {
+                if(agent){result=await taskPackageService.importZip(String(p.path));break;}
                 const selected = await dialog.showOpenDialog(window, {
                   defaultPath: app.getPath("desktop"),
                   title: "选择 ChatGPT 标准任务包",
@@ -598,6 +631,7 @@ else {
                 break;
               }
               case "replica.compile": {
+                if(agent){result=await compileLocalTask(String(p.path),String(p.output),{tempRoot:join(root,"cache","task-compile"),wasmPath:join(app.getAppPath(),"resources","MediaInfoModule.wasm"),ffmpegPath:service.settings().ffmpegPath});break;}
                 const selected=await dialog.showOpenDialog(window,{title:"选择已确认的编译方案",properties:["openFile"],filters:[{name:"JSON 方案",extensions:["json"]}]});
                 if(!selected.filePaths[0]){result=null;break;}
                 const saved=await dialog.showSaveDialog(window,{title:"保存标准任务包",defaultPath:join(app.getPath("desktop"),"吃个糖Agent-本地编译任务.zip"),filters:[{name:"ZIP 任务包",extensions:["zip"]}]});
@@ -607,6 +641,7 @@ else {
                 break;
               }
               case "packages.compileTemplate": {
+                if(agent){await copyFile(join(app.getAppPath(),"resources","workflow","本地任务编译模板_v1.0.json"),String(p.output),1);result=p.output;break;}
                 const saved=await dialog.showSaveDialog(window,{title:"保存编译模板",defaultPath:join(app.getPath("desktop"),"本地任务编译模板_v1.0.json"),filters:[{name:"JSON 编译模板",extensions:["json"]}]});
                 if(!saved.filePath){result=null;break;}
                 await copyFile(join(app.getAppPath(),"resources","workflow","本地任务编译模板_v1.0.json"),saved.filePath);
@@ -660,6 +695,7 @@ else {
                 break;
               }
               case "packages.stage1Inspect": {
+                if(agent){result=await stage1TemplateService.inspect(String(p.path));break;}
                 const selected = await dialog.showOpenDialog(window, {
                   title: "选择第一阶段指令 (.md / .docx)", properties: ["openFile"],
                   filters: [{name:"指令文档",extensions:["md","docx"]}],
@@ -676,6 +712,7 @@ else {
                 break;
               }
               case "packages.exportGuide": {
+                if(agent){const k=String(p.kind) as keyof typeof WORKFLOW_FILES|"spec";const target=String(p.output);if(k==="singleTemplate"||k==="multiTemplate")await copyFile(workflowFile(k),target,1);else await writeFile(target,k==="stage1"?stage1TemplateService.current().content:k==="spec"?packageGuide("spec"):readFileSync(workflowFile(k),"utf8"),{flag:"wx"});result=target;break;}
                 if (!["stage1", "stage2", "converter", "spec", "singleTemplate", "multiTemplate"].includes(String(p.kind)))
                   throw new Error("未知文档类型");
                 const kind = String(p.kind) as keyof typeof WORKFLOW_FILES | "spec";
@@ -900,6 +937,7 @@ else {
                 break;
               }
               case "assets.relocate": {
+                if(agent){result=await service.assets.relocate(String(p.id),String(p.path));break;}
                 const asset = service.assets.get(String(p.id));
                 const file = await dialog.showOpenDialog(window, {
                   defaultPath: existsSync(dirname(asset.originalPath))
@@ -916,6 +954,7 @@ else {
                 break;
               }
               case "assets.relocateFolder": {
+                if(agent){result=await service.assets.relocateFolder(String(p.id),String(p.path));service.changed();break;}
                 const folder = await dialog.showOpenDialog(window, {
                   defaultPath: app.getPath("desktop"),
                   properties: ["openDirectory"],
@@ -1152,26 +1191,32 @@ else {
               default:
                 throw new Error("不支持的操作。");
             }
-            return { ok: true, data: result };
-          } catch (e) {
-            const err = toError(e);
-            service.logger.write("error", "operation_failed", {
-              action,
-              code: err.code,
-            });
-            return {
-              ok: false,
-              error: err.message,
-              code: err.code,
-              details: err.details,
-            };
-          }
-        },
-      );
+
+        return result;
+      }
+      capabilityRegistry = new CapabilityRegistry(agentFilter);
+      capabilityRegistry.registerWorkflow();
+      registerJobs(capabilityRegistry,root);
+      capabilityRegistry.register({id:'runtime.status',description:'本机执行进程状态',service:'Application',effect:'read',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>({version:brand.version,pid:process.pid,headless,windowCount:BrowserWindow.getAllWindows().length,dataRoot:root}));
+      capabilityRegistry.register({id:'runtime.stop',description:'任务空闲时关闭本机执行进程，须 confirm:true',service:'Application',effect:'destructive',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>{
+        const active=service.db.one<{n:number}>("SELECT count(*) n FROM task_versions WHERE status IN ('Queued','Uploading','Submitting','Processing','Downloading')")?.n;
+        if(active||transcriptionService.progress().busy||service.audio.cloning||service.audio.active.size||realSpeech?.active.size||realSpeechV2?.active.size)throw Error('仍有任务执行，先等待完成或取消');
+        setTimeout(()=>{closing=true;app.quit();},200);return {stopping:true};
+      });
+      registerSpeechCapabilities(capabilityRegistry,(id,p)=>invokeSpeech(id,p,true));
+      registerApplicationCapabilities(capabilityRegistry, (id,p) => invokeOperation(id,p,true));
+      ipcMain.handle("ai-video", async (event, action: string, payload: unknown) => {
+        try {
+          if (headless || event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) throw Error("不可信请求");
+          return {ok:true,data:await invokeOperation(action,payload)};
+        } catch(e) { const err=toError(e); service.logger.write("error","operation_failed",{action,code:err.code}); return {ok:false,error:err.message,code:err.code,details:err.details}; }
+      });
+      if (!headless) {
       await window.loadFile(join(__dirname, "renderer", "index.html"));
+      }
       service.tasks.start();
       service.audio.start();
-      try {
+      if (!headless) try {
         tray = new Tray(
           nativeImage
             .createFromPath(join(app.getAppPath(), "resources", "brand.png"))
@@ -1204,13 +1249,13 @@ else {
       if(process.platform==='win32') {
         // Finish the normal GUI startup/recovery before accepting READ commands.
         speechControl();
-        unregisterControl=await startControlBridge(root,app.getAppPath(),speechControl,()=>service.changed(),agentFilter,()=>{closing=true;app.quit();});
+        unregisterControl=await startControlBridge(root,app.getAppPath(),speechControl,()=>service.changed(),agentFilter,()=>{closing=true;app.quit();}, capabilityRegistry);
       }
-      if(isolatedAcceptance)observeAcceptance(window,root,isolatedAcceptance.taskId,()=>{closing=true;app.quit();});
+      if(isolatedAcceptance&&!headless)observeAcceptance(window,root,isolatedAcceptance.taskId,()=>{closing=true;app.quit();});
       service.logger.write("application", "started", {
         version: service.bootstrap().version,
       });
-      window.on("close", (event) => {
+      if (!headless) window.on("close", (event) => {
         if (closing) return;
         event.preventDefault();
         if (
@@ -1225,7 +1270,8 @@ else {
       });
     })
     .catch((error) => {
-      dialog.showErrorBox(
+      if (headless) console.error("后台启动失败", agentFilter.text(error instanceof Error?error.message:String(error)));
+      else dialog.showErrorBox(
         brand.name,
         "启动失败，现有数据不会被重置。请检查目录权限与数据库版本。\n" +
           (error instanceof Error ? error.message : "未知错误"),
@@ -1256,7 +1302,8 @@ else {
   });
   app.on("window-all-closed", () => app.quit());
 }
-async function confirm(message: string) {
+const confirm = globalConfirm;
+async function globalConfirm(message: string) {
   const r = await dialog.showMessageBox(window, {
     type: "question",
     message,

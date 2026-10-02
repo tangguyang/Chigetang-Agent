@@ -1,4 +1,5 @@
 import { build } from "esbuild";
+await build({entryPoints:['src/cli/capability.ts'],bundle:true,platform:'node',format:'esm',target:'node24',outfile:'dist/cli/capability.mjs'});
 await import("./build-native-pipe.mjs");
 await build({
   entryPoints: ["scripts/chigetang.mjs"],

@@ -13,7 +13,8 @@ const paid =
   args[0] === "speech" &&
   ["generate", "patch-apply"].includes(args[1]) &&
   args.includes("--confirm");
-const entry = resolve(project, "dist/cli/index.mjs");
+const capabilityMode = ['capability','mcp'].includes(args[0]);
+const entry = resolve(project, capabilityMode ? "dist/cli/capability.mjs" : "dist/cli/index.mjs");
 const failure = (message) => {
   process.stdout.write(
     JSON.stringify({
@@ -36,6 +37,10 @@ else {
   if (portable) env.ELECTRON_RUN_AS_NODE = "1";
   else delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_ENABLE_LOGGING;
+  if (args[0] === 'mcp') {
+    const r = spawnSync(process.execPath,[entry,...args],{env,cwd:project,windowsHide:true,stdio:'inherit'});
+    process.exit(r.status ?? 1);
+  }
   let r = spawnSync(process.execPath, [entry, ...args], {
     env,
     cwd: project,

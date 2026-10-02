@@ -9,7 +9,7 @@ import {
 } from "node:fs";
 import { resolve, join } from "node:path";
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-const base = resolve("release/agent-control-ipc-" + Date.now()),
+const base = resolve("release/capability-platform-" + Date.now()),
   stage = join(base, "app-staging");
 // Unique output: preserve every previous green package. No recursive deletion.
 mkdirSync(stage, { recursive: true });
@@ -46,7 +46,7 @@ const [packed] = await packager({
 });
 const dir = join(
   base,
-  "吃个糖Agent-v" + pkg.version + "-AgentControl-IPC-Windows-x64-绿色版",
+  "吃个糖Agent-v" + pkg.version + "-LocalAI-Windows-x64-绿色版",
 );
 renameSync(packed, dir);
 for (const folder of ["docs", "licenses"])
@@ -57,14 +57,35 @@ writeFileSync(
 );
 writeFileSync(
   join(dir, "AGENT-CONTROL-README.txt"),
-  "GUI保持运行时，chigetang.cmd speech <command> --json 通过当前用户本机会话 Named Pipe 调用主进程。\r\n无需安装Node。确认付费前勿运行generate/patch-apply --confirm。详见docs/agent-control-v1/IPC-ACCEPTANCE.md。\r\n",
+  "v1.4.0 本地AI执行平台：双击 agent-start.cmd 无窗口启动，或运行GUI。\r\nchigetang.cmd capability list 发现全部能力；capability execute request.json 执行。\r\nchigetang.cmd mcp 提供 stdio MCP。无需安装Node，不模拟鼠标键盘。\r\n付费/删除动作必须确认。详见docs/capabilities-v140/README.md。\r\n",
 );
+writeFileSync(join(dir,'agent-start.ps1'),"$ErrorActionPreference = 'Stop'\r\nStart-Process -FilePath (Join-Path $PSScriptRoot '吃个糖Agent.exe') -ArgumentList '--agent-headless' -WorkingDirectory $PSScriptRoot -WindowStyle Hidden\r\n");
+writeFileSync(join(dir,'agent-start.cmd'),'@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent-start.ps1"\r\n');
+writeFileSync(join(dir,'agent-stop-request.json'),JSON.stringify({capability:'runtime.stop',params:{},confirm:true},null,2));
+writeFileSync(join(dir,'agent-stop.cmd'),'@echo off\r\ncall "%~dp0chigetang.cmd" capability execute "%~dp0agent-stop-request.json"\r\n');
+const mcpConfig={mcpServers:{chigetang:{command:join(dir,'吃个糖Agent.exe'),args:[join(dir,'resources/app/dist/cli/launcher.cjs'),'mcp'],env:{ELECTRON_RUN_AS_NODE:'1'}}}};
+writeFileSync(join(dir,'mcp-config.example.json'),JSON.stringify(mcpConfig,null,2));
+const tomlPath=p=>JSON.stringify(p.replaceAll('\\','/'));
+writeFileSync(join(dir,'codex-mcp.example.toml'),`[mcp_servers.chigetang]\ncommand = ${tomlPath(join(dir,'吃个糖Agent.exe'))}\nargs = [${tomlPath(join(dir,'resources/app/dist/cli/launcher.cjs'))}, "mcp"]\ntool_timeout_sec = 300\n[mcp_servers.chigetang.env]\nELECTRON_RUN_AS_NODE = "1"\n`);
+writeFileSync(join(dir,'make-mcp-config.ps1'),`$ErrorActionPreference = 'Stop'
+$taskExe = (Join-Path $PSScriptRoot '吃个糖Agent.exe').Replace('\\','/')
+$taskEntry = (Join-Path $PSScriptRoot 'resources/app/dist/cli/launcher.cjs').Replace('\\','/')
+$taskConfig = @{ mcpServers = @{ chigetang = @{ command = $taskExe; args = @($taskEntry, 'mcp'); env = @{ ELECTRON_RUN_AS_NODE = '1' } } } }
+$taskConfig | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'mcp-config.example.json') -Encoding UTF8
+$taskExeJson = ConvertTo-Json -InputObject $taskExe -Compress
+$taskEntryJson = ConvertTo-Json -InputObject $taskEntry -Compress
+$taskToml = "[mcp_servers.chigetang]" + [Environment]::NewLine + "command = " + $taskExeJson + [Environment]::NewLine + "args = [" + $taskEntryJson + ', "mcp"]' + [Environment]::NewLine + "tool_timeout_sec = 300" + [Environment]::NewLine + "[mcp_servers.chigetang.env]" + [Environment]::NewLine + 'ELECTRON_RUN_AS_NODE = "1"'
+$taskToml | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'codex-mcp.example.toml') -Encoding UTF8
+Write-Output 'MCP configuration generated for this extracted directory.'
+`);
+writeFileSync(join(dir,'make-mcp-config.cmd'),'@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0make-mcp-config.ps1"\r\n');
 for (const file of [
   "吃个糖Agent.exe",
   "chigetang.cmd",
   "resources/app/dist/cli/launcher.cjs",
   "resources/app/dist/cli/index.mjs",
   "resources/app/dist/cli/paid.cjs",
+  "resources/app/dist/cli/capability.mjs",
   "resources/app/dist/agent-control/local-pipe.exe",
 ])
   if (!existsSync(join(dir, file)))
