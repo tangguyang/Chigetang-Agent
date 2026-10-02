@@ -1,0 +1,212 @@
+{
+  "version": "1.4.2",
+  "results": {
+    "A": {
+      "grade": "PASS",
+      "localTaskId": "47d69907-3967-41c0-8214-f23734f080a5",
+      "apiTaskId": "97625e11-1c91-4ebd-8198-ca92cb60deae",
+      "states": [
+        {
+          "time": "2026-10-02T04:49:57.339Z",
+          "status": "Queued",
+          "downloadStatus": "none",
+          "apiTaskId": null,
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:49:59.585Z",
+          "status": "Processing",
+          "downloadStatus": "none",
+          "apiTaskId": "97625e11-1c91-4ebd-8198-ca92cb60deae",
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:51:57.778Z",
+          "status": "Completed",
+          "downloadStatus": "completed",
+          "apiTaskId": "97625e11-1c91-4ebd-8198-ca92cb60deae",
+          "error": null
+        }
+      ],
+      "bytes": 914948,
+      "duration": 2,
+      "ffprobe": true,
+      "finalPath": "D:\\Codex\\吃个糖Agent项目\\acceptance\\v1.4.2-video-2026-10-02\\paid-api-acceptance\\outputs\\A-wan3.0-2s.mp4",
+      "originalDownloadedPath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\ctg-ipc-acceptance-paid-v142-gyp6p4qc\\outputs\\video\\v142真实验收A.mp4",
+      "providerUsage": {
+        "video_count": 1,
+        "duration": 5,
+        "SR": 480,
+        "output_video_duration": 2,
+        "input_video_duration": 3,
+        "fps": 30,
+        "ratio": "9:16"
+      },
+      "originalPriceCalculation": 1.5,
+      "sha256": "dadae3677842aa91f4ff05afab90adbd75cd0c84ba0a30ab1e4b108458806f94"
+    },
+    "B": {
+      "grade": "FAIL",
+      "error": "Error: {\"schema\":\"CHIGETANG_CAPABILITY_RESULT_V1\",\"executionId\":\"34ba1574-9ab3-4f09-93b4-7109d2f25b42\",\"capability\":\"packages.import\",\"status\":\"failed\",\"error\":{\"code\":\"CAPABILITY_REJECTED\",\"message\":\"任务包共发现 1 项问题，请一次修复后重新导入：\\n1. segments[0] 有声明但未使用的素材引用 motion\"},\"logs\":[{\"at\":\"2026-10-02T04:51:59.143Z\",\"event\":\"accepted\"},{\"at\":\"2026-10-02T04:51:59.149Z\",\"event\":\"failed\"}]}"
+    },
+    "C": {
+      "grade": "PASS",
+      "localTaskId": "ae4f9980-7345-4220-be18-402980c01c4e",
+      "apiTaskId": "5e97901e-7e1a-49cb-91cc-87dd69a183e7",
+      "states": [
+        {
+          "time": "2026-10-02T04:52:00.820Z",
+          "status": "Queued",
+          "downloadStatus": "none",
+          "apiTaskId": null,
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:52:03.050Z",
+          "status": "Processing",
+          "downloadStatus": "none",
+          "apiTaskId": "5e97901e-7e1a-49cb-91cc-87dd69a183e7",
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:53:18.904Z",
+          "status": "Completed",
+          "downloadStatus": "completed",
+          "apiTaskId": "5e97901e-7e1a-49cb-91cc-87dd69a183e7",
+          "error": null
+        }
+      ],
+      "bytes": 909068,
+      "duration": 2,
+      "ffprobe": true,
+      "finalPath": "D:\\Codex\\吃个糖Agent项目\\acceptance\\v1.4.2-video-2026-10-02\\paid-api-acceptance\\outputs\\C-wan3.0-2s.mp4",
+      "originalDownloadedPath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\ctg-ipc-acceptance-paid-v142-gyp6p4qc\\outputs\\video\\v142真实验收C G001.mp4",
+      "providerUsage": {
+        "video_count": 1,
+        "duration": 5,
+        "SR": 480,
+        "output_video_duration": 2,
+        "input_video_duration": 3,
+        "fps": 30,
+        "ratio": "9:16"
+      },
+      "originalPriceCalculation": 1.5,
+      "sha256": "c660042ea79f6acc7ba230090c65713c1e6588a6ef5571b28bc72897e2b5afbd"
+    },
+    "D": {
+      "grade": "PASS",
+      "localTaskId": "426d93c3-5f88-491e-9d2e-236e49116c35",
+      "apiTaskId": "a58f3db7-d864-4ef6-8ec5-44e0160ac0a0",
+      "states": [
+        {
+          "time": "2026-10-02T04:53:20.072Z",
+          "status": "Uploading",
+          "downloadStatus": "none",
+          "apiTaskId": null,
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:53:22.287Z",
+          "status": "Processing",
+          "downloadStatus": "none",
+          "apiTaskId": "a58f3db7-d864-4ef6-8ec5-44e0160ac0a0",
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:54:35.804Z",
+          "status": "Downloading",
+          "downloadStatus": "pending",
+          "apiTaskId": "a58f3db7-d864-4ef6-8ec5-44e0160ac0a0",
+          "error": null
+        },
+        {
+          "time": "2026-10-02T04:54:38.055Z",
+          "status": "Completed",
+          "downloadStatus": "completed",
+          "apiTaskId": "a58f3db7-d864-4ef6-8ec5-44e0160ac0a0",
+          "error": null
+        }
+      ],
+      "bytes": 911493,
+      "duration": 2,
+      "ffprobe": true,
+      "finalPath": "D:\\Codex\\吃个糖Agent项目\\acceptance\\v1.4.2-video-2026-10-02\\paid-api-acceptance\\outputs\\D-wan3.0-2s.mp4",
+      "originalDownloadedPath": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\ctg-ipc-acceptance-paid-v142-gyp6p4qc\\outputs\\video\\v142真实验收D.mp4",
+      "providerUsage": {
+        "video_count": 1,
+        "duration": 5,
+        "SR": 480,
+        "output_video_duration": 2,
+        "input_video_duration": 3,
+        "fps": 30,
+        "ratio": "9:16"
+      },
+      "originalPriceCalculation": 1.5,
+      "sha256": "430a12b6d8cb74bc2b5b7ceaedce0c3fa8331dba12774b54672cd6990c410822"
+    }
+  },
+  "generationRequests": 3,
+  "successfulSubmissionHTTPResponses": [
+    {
+      "time": "2026-10-02T04:49:58.411Z",
+      "event": "http_response",
+      "status": 200,
+      "method": "POST",
+      "attempt": 0
+    },
+    {
+      "time": "2026-10-02T04:52:01.819Z",
+      "event": "http_response",
+      "status": 200,
+      "method": "POST",
+      "attempt": 0
+    },
+    {
+      "time": "2026-10-02T04:53:20.395Z",
+      "event": "http_response",
+      "status": 200,
+      "method": "POST",
+      "attempt": 0
+    }
+  ],
+  "submissionAttempts": [
+    {
+      "time": "2026-10-02T04:49:58.305Z",
+      "event": "paid_acceptance_submit",
+      "chain": "A",
+      "call": 1,
+      "limit": 4
+    },
+    {
+      "time": "2026-10-02T04:52:01.569Z",
+      "event": "paid_acceptance_submit",
+      "chain": "C",
+      "call": 2,
+      "limit": 4
+    },
+    {
+      "time": "2026-10-02T04:53:20.297Z",
+      "event": "paid_acceptance_submit",
+      "chain": "D",
+      "call": 3,
+      "limit": 4
+    }
+  ],
+  "originalPriceUsageCalculation": 4.5,
+  "discountedCalculationIfEligible": 3.15,
+  "actualAccountBill": null,
+  "billLimitation": "当前 API Key 集成不提供实际余额/账单查询，不能将按官方价与返回用量计算的金额称为实际扣款",
+  "budget": 6,
+  "paidRetries": 0,
+  "productionDatabaseOpened": false,
+  "productionQueueResumed": false,
+  "guiAutomation": false,
+  "windowCountStart": 0,
+  "windowCountEnd": 0,
+  "authorizationConsumed": true,
+  "formalAcceptance": "NOT_FULLY_ACCEPTED_B_FAILED_PRE_SUBMISSION",
+  "loggedHTTPAPIResponses": {
+    "GET": 121,
+    "POST": 3
+  }
+}

@@ -1,11 +1,11 @@
-import json, hashlib, tempfile
+import json, hashlib, tempfile, sys
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
 base = Path.cwd()
 runtime = Path(json.loads((base / 'tmp/agent-control-package.json').read_text(encoding='utf-8'))['directory'])
 version = json.loads((base / 'package.json').read_text(encoding='utf-8'))['version']
-delivery = base / ('release/deliverables/吃个糖Agent-v' + version + '-本地AI执行平台-Windows-x64-绿色版.zip')
+delivery = base / ('release/deliverables/吃个糖Agent-v' + version + '-本地AI执行平台-Windows-x64-绿色版'+('-P1' if '--p1' in sys.argv else '')+'.zip')
 delivery.parent.mkdir(parents=True, exist_ok=True)
 if delivery.exists():
     raise RuntimeError('Existing delivery must be preserved')

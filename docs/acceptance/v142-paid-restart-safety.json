@@ -1,0 +1,7 @@
+{
+  "restartExitCode": 1,
+  "authorizationRejected": true,
+  "newNetworkCalls": 0,
+  "productionRootOpened": false,
+  "stderr": "真实验收授权已失效或无效 Error: EEXIST: file already exists, open 'C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\ctg-ipc-acceptance-paid-v142-gyp6p4qc\\paid-acceptance-consumed.json'\n"
+}

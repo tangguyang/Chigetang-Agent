@@ -1,0 +1,1 @@
+v1.4.2 UI: 12 assertions passed; new speech blank/history preserved; media tabs/audio exclusivity/duration/location/project origin/hide; no native GUI interaction

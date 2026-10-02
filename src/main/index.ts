@@ -1,3 +1,4 @@
+import {PaidAcceptanceGate} from './realSpeech/v2/paidAcceptanceGate.ts';
 import {registerSpeechCapabilities} from './capabilities/speech.ts';
 import {CapabilityRegistry} from './capabilities/registry.ts';
 import {registerDiscovery} from './capabilities/runtime.ts';
@@ -91,8 +92,14 @@ let stopSpeechWatch: (() => void) | undefined;
 let unregisterControl: (() => void) | undefined;
 let releaseSpeechWriter: ReturnType<typeof acquireWriter>|undefined;
 const agentFilter=new SecretFilter();
-const isolatedAcceptance=acceptanceMode(process.argv,process.env);
-const agentAdapter=isolatedAcceptance?acceptanceAdapter:undefined;
+const paidAcceptance=process.argv.includes('--agent-control-paid-acceptance');
+const isolatedAcceptance=acceptanceMode(paidAcceptance?[...process.argv,'--agent-control-acceptance']:process.argv,process.env);
+let paidGate:PaidAcceptanceGate|undefined;
+if(paidAcceptance) {
+  try {if(!headless)throw Error('真实验收必须无窗口运行');paidGate=new PaidAcceptanceGate(isolatedAcceptance!.root);}
+  catch(error){console.error('真实验收授权已失效或无效',String(error));app.exit(1);process.exit(1);}
+}
+const agentAdapter=isolatedAcceptance&&!paidAcceptance?acceptanceAdapter:undefined;
 function speechControl() {
   realSpeechV2 ??= new RealSpeechV2Service(service.root,service,join(app.getAppPath(),'resources/real-speech-v2'));
   return new SpeechAgentControl(realSpeechV2,agentAdapter);
@@ -253,7 +260,15 @@ else {
           n.show();
         },
         (input, init) => {
-          if(isolatedAcceptance)throw Error('隔离IPC验收禁止所有真实网络请求');
+          if(isolatedAcceptance&&!paidAcceptance)throw Error('隔离IPC验收禁止所有真实网络请求');
+          if(paidGate&&init?.method==='POST') {
+            const url=new URL(String(input));
+            if(url.pathname.endsWith('/video-synthesis')&&url.protocol==='https:'&&url.hostname.endsWith('.cn-beijing.maas.aliyuncs.com')) {
+              const submitting=service.tasks.list({pageSize:1000}).items.filter(t=>t.status==='Submitting');
+              if(submitting.length!==1||service.settings().maxRetries!==0)throw Error('真实验收仅允许单并发且禁止重试');
+              service.logger.write('api','paid_acceptance_submit',paidGate.reserve(submitting[0],JSON.parse(String(init.body))));
+            } else if(!url.hostname.endsWith('.aliyuncs.com')||!url.hostname.includes('.oss-'))throw Error('真实验收禁止其他付费POST');
+          }
           return net.fetch(input instanceof URL ? input.href : input, init);
         },
         app.getAppPath(),

@@ -1,0 +1,10 @@
+✔ four exact calls, failed attempts consumed, restart invalid, other tasks denied (6.0433ms)
+✔ expired authorizations rejected (1.772ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 125.3847

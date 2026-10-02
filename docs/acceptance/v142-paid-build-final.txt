@@ -1,0 +1,19 @@
+
+> chigetang-agent@1.4.2 build
+> node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs
+
+真人口播文档版本、阶段一/二镜像、模型边界、字段白名单和完整示例Schema校验通过
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 1625 modules transformed.
+rendering chunks...
+computing gzip size...
+../../dist/renderer/index.html                              0.71 kB │ gzip:   0.42 kB
+../../dist/renderer/assets/pdf.worker.min-C8PGFc0r.mjs  1,298.21 kB
+../../dist/renderer/assets/Page-qGDdOVlX.css                4.16 kB │ gzip:   1.33 kB
+../../dist/renderer/assets/index-4AWxYCdV.css              60.69 kB │ gzip:  12.01 kB
+../../dist/renderer/assets/pdf.worker.min-B-_nov1m.js       0.09 kB │ gzip:   0.11 kB
+../../dist/renderer/assets/Page-C7qv0DZf.js                15.10 kB │ gzip:   5.63 kB
+../../dist/renderer/assets/index-8e4ge4LW.js              396.79 kB │ gzip: 125.59 kB
+../../dist/renderer/assets/pdf-D4X9PViX.js                469.96 kB │ gzip: 143.40 kB
+✓ built in 2.34s
