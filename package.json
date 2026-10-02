@@ -1,7 +1,7 @@
 {
   "name": "chigetang-agent",
   "productName": "吃个糖Agent",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "private": true,
   "type": "module",
   "description": "多模型 AI 视频生成与资产管理工作台",
@@ -14,7 +14,7 @@
     "test:repair2:windows": "node scripts/run-repair2-electron.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "node --experimental-strip-types scripts/check-real-speech-docs.ts && tsc --noEmit && vite build && node scripts/build.mjs && node scripts/build-icon.mjs",
-    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts tests/agent-control.test.ts tests/agent-control-ipc.test.ts tests/capabilities.test.ts tests/v141-control.test.ts",
+    "test": "node --experimental-strip-types --test tests/v102.test.ts tests/v104.test.ts tests/v109.test.ts tests/v110.test.ts tests/v111.test.ts tests/v112.test.ts tests/v120.test.ts tests/v120-followup.test.ts tests/v120-r3.test.ts tests/v120-protocol.test.ts tests/v120-final.test.ts tests/v121.test.ts tests/v127.test.ts tests/v128.test.ts tests/v129.test.ts tests/v129-repair.test.ts tests/v129-repair2.test.ts tests/v2-real-speech.test.ts tests/agent-control.test.ts tests/agent-control-ipc.test.ts tests/capabilities.test.ts tests/v141-control.test.ts tests/v142-runtime.test.ts",
     "start": "electron .",
     "pack:win": "npm run build && node scripts/package-win.mjs",
     "typecheck": "tsc --noEmit",
@@ -39,7 +39,8 @@
     "pack:agent-control:win": "npm run build && node scripts/package-agent-control-ipc.mjs",
     "test:agent-control:portable": "node --experimental-strip-types scripts/test-agent-control-portable.ts",
     "test:capability:runtime": "node scripts/build.mjs && node scripts/test-capability-runtime.mjs",
-    "pack:capability:win": "npm run build && node scripts/package-agent-control-ipc.mjs"
+    "pack:capability:win": "npm run build && node scripts/package-agent-control-ipc.mjs",
+    "test:v142:ui": "node scripts/run-v142-ui.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

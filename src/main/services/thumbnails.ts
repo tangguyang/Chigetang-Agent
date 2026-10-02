@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdir, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
+import { existsSync } from 'node:fs';
 import type { Asset } from "../../shared/types.ts";
 import type { Application } from "./application.ts";
 import { ffmpegBinary } from "./transcode.ts";
@@ -13,17 +14,18 @@ export class ThumbnailQueue {
   constructor(app: Application) {
     this.app = app;
   }
-  enqueue(asset: Asset) {
-    if (asset.kind !== "video" || asset.thumbnailPath || this.stopped) return;
+  enqueue(asset: Asset,force=false) {
+    if (asset.kind !== "video" || (!force&&asset.thumbnailPath && existsSync(asset.thumbnailPath)) || this.stopped) return;
     this.pending = this.pending
       .then(async () => {
         if (this.stopped) return;
         const current = this.app.assets.get(asset.id);
-        if (current.thumbnailPath) return;
+        if (!force&&current.thumbnailPath && existsSync(current.thumbnailPath)) return;
         const folder = join(this.app.root, "cache", "thumbnails");
         await mkdir(folder, { recursive: true });
         const target = join(folder, asset.id + ".jpg");
         try {
+          if(force)await unlink(target).catch(()=>{});
           if (!(await stat(target).catch(() => null)))
             await exec(
               ffmpegBinary(this.app.settings().ffmpegPath),

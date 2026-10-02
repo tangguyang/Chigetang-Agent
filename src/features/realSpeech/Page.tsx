@@ -26,9 +26,7 @@ export default function Page() {
     [busy, setBusy] = useState(false);
   const [name, setName] = useState("新真人口播"),
     [voiceRef, setVoice] = useState(""),
-    [text, setText] = useState(
-      () => localStorage.getItem("real-speech-v2-plan-draft") || "",
-    ),
+    [text, setText] = useState(""),
     [preview, setPreview] = useState<Obj | null>(null),
     [attested, setAttested] = useState(false),
     [experimentalConfirmed, setExperimentalConfirmed] = useState(false),
@@ -60,13 +58,7 @@ export default function Page() {
     });
     return () => { cancelled = true; unsubscribe?.(); };
   }, [task?.taskId, busy]);
-  useEffect(() => {
-    try {
-      localStorage.setItem("real-speech-v2-plan-draft", text);
-    } catch {
-      /* draft editing remains usable */
-    }
-  }, [text]);
+
   async function run(fn: () => Promise<unknown>) {
     if (busy) return;
     setBusy(true);
@@ -245,6 +237,9 @@ export default function Page() {
                     experimentalConfirmed,
                   });
                   setOld(null);
+                  setText("");
+                  setAttested(false);
+                  setExperimentalConfirmed(false);
                   setPreview(null);
                   return t;
                 })

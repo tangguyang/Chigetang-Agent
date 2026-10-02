@@ -42,7 +42,7 @@ interface Store {
 let timer: ReturnType<typeof setTimeout>;
 let sequence = 0;
 export const useApp = create<Store>((set, get) => ({
-  assetKind: localStorage.getItem("library-kind") || "video",
+  assetKind: ['video','image','audio','hidden'].includes(localStorage.getItem('library-kind')||'')?localStorage.getItem('library-kind')!:'video',
   setAssetKind: (assetKind) => {localStorage.setItem("library-kind",assetKind);set({ assetKind, page: "资产库" });},
   boot: null,
   page: "一键生成",

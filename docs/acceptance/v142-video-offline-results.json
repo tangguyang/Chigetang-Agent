@@ -1,0 +1,29 @@
+{
+  "startup-single-writer": {
+    "status": "PASS"
+  },
+  "A-video-pre-submit": {
+    "status": "PASS"
+  },
+  "invalid-parameters-guard": {
+    "status": "PASS"
+  },
+  "B-oneclick": {
+    "status": "PASS"
+  },
+  "C-replica": {
+    "status": "PASS"
+  },
+  "compile-existing": {
+    "status": "PASS"
+  },
+  "D-copy": {
+    "status": "PASS"
+  },
+  "lifecycle-local": {
+    "status": "PASS"
+  },
+  "restart-preserves-staging": {
+    "status": "PASS"
+  }
+}

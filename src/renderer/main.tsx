@@ -151,7 +151,6 @@ function App() {
                     ["image", "图片"],
                     ["video", "视频"],
                     ["audio", "音频"],
-                    ["prompt", "Prompt"],
                     ["hidden", "隐藏资产"],
                   ].map(([k, v]) => (
                     <button
@@ -204,7 +203,7 @@ function App() {
           ) : state.page === "任务" ? (
             <LibraryPage />
           ) : state.page === "资产库" ? (
-            state.assetKind === "prompt" ? <PromptsPage /> : <LibraryPage />
+            <LibraryPage />
           ) : state.page === "Prompt" ? (
             <PromptsPage />
           ) : state.page === "模型与 API" ? (

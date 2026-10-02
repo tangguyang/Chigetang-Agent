@@ -1,5 +1,13 @@
 import { usageRoles } from "../../shared/mentions.ts";
-import { FileText, Heart, Music, Plus, RefreshCw, Trash2, Upload } from "lucide-react";
+import {
+  FileText,
+  Heart,
+  Music,
+  Plus,
+  RefreshCw,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Asset, Page, AssetFolder } from "../../shared/types.ts";
 import {
@@ -21,7 +29,15 @@ export function AssetPreview({
   if (asset.missing) return <div className="missing">原始资产不可用</div>;
   if (asset.kind === "image")
     return (
-      <img src={media("thumb", asset.id)} alt={asset.name} loading="lazy" />
+      <img
+        src={media(asset.thumbnailPath ? "thumb" : "asset", asset.id)}
+        alt={asset.name}
+        loading="lazy"
+        onError={(e) => {
+          if (asset.thumbnailPath)
+            e.currentTarget.src = media("asset", asset.id);
+        }}
+      />
     );
   if (asset.kind === "audio")
     return controls ? (
@@ -177,7 +193,6 @@ export function AssetsPage({
                 ["image", "图片"],
                 ["video", "视频"],
                 ["audio", "音频"],
-                ["prompt", "Prompt"],
                 ["hidden", "隐藏资产"],
               ].map(([value, label]) => (
                 <button
@@ -304,7 +319,12 @@ export function AssetsPage({
                 onChange={(event) =>
                   setSelected(
                     event.target.checked
-                      ? [...new Set([...selected, ...data.items.map((a) => a.id)])]
+                      ? [
+                          ...new Set([
+                            ...selected,
+                            ...data.items.map((a) => a.id),
+                          ]),
+                        ]
                       : selected.filter(
                           (id) => !data.items.some((asset) => asset.id === id),
                         ),
@@ -318,24 +338,37 @@ export function AssetsPage({
               disabled={!selected.length}
               onClick={() =>
                 void run(async () => {
-                  await api("assets.removeMany", { ids: selected });
+                  if (hidden)
+                    await Promise.all(
+                      selected.map((id) =>
+                        api("library.hide", { id, hidden: false }),
+                      ),
+                    );
+                  else await api("assets.removeMany", { ids: selected });
                   setSelected([]);
                   await refresh();
                 })
               }
             >
-              <Trash2 size={16} /> 批量移除记录（{selected.length}）
+              <Trash2 size={16} /> {hidden ? "恢复" : "隐藏"}（{selected.length}
+              ）
             </button>
           </div>
         )}
         {!data.total ? (
           <Empty
             title={hidden ? "没有隐藏资产" : "拖入你的第一份资产"}
-            description={hidden ? "路径恢复或重新定位成功后，素材会自动回到原分类。" : "产品图、人物肖像、参考视频、音乐，都可以从这里开始。"}
+            description={
+              hidden
+                ? "隐藏的媒体保留原文件，可随时恢复。"
+                : "产品图、人物肖像、参考视频、音乐，都可以从这里开始。"
+            }
             action={
-              !hidden && <button disabled={busy} onClick={() => void importFiles()}>
-                选择文件
-              </button>
+              !hidden && (
+                <button disabled={busy} onClick={() => void importFiles()}>
+                  选择文件
+                </button>
+              )
             }
           />
         ) : (
@@ -365,14 +398,40 @@ export function AssetsPage({
                     选择
                   </label>
                 )}
-                <button
-                  className="asset-visual"
-                  onClick={() => (picker ? onPick?.(a) : setDetail(a))}
-                >
-                  <AssetPreview asset={a} />
-                </button>
+                {a.kind === "audio" && !picker ? (
+                  <audio
+                    controls
+                    preload="none"
+                    src={media("asset", a.id)}
+                    onPlay={(e) =>
+                      document.querySelectorAll("audio").forEach((x) => {
+                        if (x !== e.currentTarget) x.pause();
+                      })
+                    }
+                  />
+                ) : (
+                  <button
+                    className="asset-visual"
+                    onClick={() => (picker ? onPick?.(a) : setDetail(a))}
+                  >
+                    <AssetPreview asset={a} />
+                  </button>
+                )}
                 <div className="asset-info">
-                  <strong title={a.name}>{a.name}</strong><button className="file-shortcut" title={a.missing ? "原文件缺失，请重新定位" : "打开原文件"} aria-label="打开原文件" disabled={a.missing} onClick={()=>void run(()=>api("open",{assetId:a.id}))}><FileText size={18}/></button>
+                  <strong title={a.name}>{a.name}</strong>
+                  <button
+                    className="file-shortcut"
+                    title={a.missing ? "原文件缺失，请重新定位" : "打开原文件"}
+                    aria-label="打开保存位置"
+                    disabled={a.missing}
+                    onClick={() =>
+                      void run(() =>
+                        api("open", { assetId: a.id, folder: true }),
+                      )
+                    }
+                  >
+                    <FileText size={18} />
+                  </button>
                   <button
                     title="收藏"
                     className={a.favorite ? "accent" : ""}
@@ -397,7 +456,9 @@ export function AssetsPage({
                     {(a.size / 1024 / 1024).toFixed(1)} MB
                   </small>
                   {a.missing && (
-                    <small className="danger">原始文件不可用 · 已自动隐藏 · 可重新定位</small>
+                    <small className="danger">
+                      原始文件不可用 · 可重新定位
+                    </small>
                   )}
                   <small>
                     {[
@@ -632,13 +693,15 @@ export function AssetsPage({
               className="danger"
               onClick={() =>
                 void run(async () => {
-                  await api("assets.remove", { id: detail.id });
+                  if (hidden)
+                    await api("library.hide", { id: detail.id, hidden: false });
+                  else await api("assets.remove", { id: detail.id });
                   setDetail(null);
                   await refresh();
                 })
               }
             >
-              移除记录
+              {hidden ? "恢复" : "隐藏"}
             </button>
           </div>
         </Modal>

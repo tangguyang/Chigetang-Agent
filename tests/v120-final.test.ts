@@ -105,7 +105,7 @@ test('P1 restart marks an interrupted current-protocol import as non-submittable
 });
 
 test('P0 three exported v1.2.0 documents exactly match their production functions',()=>{
- const base=new URL('../docs/v1.2.0/',import.meta.url);
+ const base=new URL('../docs/archive/acceptance/v1.2.0/',import.meta.url);
  for(const [kind,file] of [['stage1','吃个糖Agent_第一阶段复刻指令_v1.2.0.md'],['stage2','吃个糖Agent_第二阶段复刻指令_v1.2.0.md'],['spec','吃个糖Agent_标准ZIP任务包规范_v1.2.0.md']] as const)
   assert.equal(readFileSync(new URL(file,base),'utf8'),packageGuide(kind));
 });

@@ -9,7 +9,7 @@ import {
 import { join, relative } from "node:path";
 import { createHash } from "node:crypto";
 import * as pe from "resedit";
-const root = process.env.AIVIDEO_PACKAGE_ROOT || "release/吃个糖Agent-win32-x64",
+const root = process.env.AIVIDEO_PACKAGE_ROOT || JSON.parse(readFileSync('tmp/agent-control-package.json','utf8')).directory,
   app = join(root, "resources/app");
 const version = JSON.parse(readFileSync("package.json", "utf8")).version;
 const manifest = JSON.parse(readFileSync(join(app, "package.json"), "utf8"));
@@ -86,11 +86,11 @@ const report = {
   ffmpeg_x64_verified: true,
   ffmpeg_sha256: hash(ffmpeg),
   windows_case_insensitive_names_verified: true,
-  windows_native_launch: process.platform === "win32" && existsSync("docs/v1.3.0-acceptance/runtime.json") ? "Verified by packaged EXE UI acceptance; see docs/v1.3.0-acceptance/runtime.json" : "Not verified by this static checker",
+  windows_native_launch: "静态检查不声明GUI人工验收；最终包后台验证见v142-portable-report.json",
   paid_api_tested: false,
 };
 writeFileSync(
-  "docs/PACKAGE-VERIFICATION.json",
+  "docs/acceptance/v142-package-verification.json",
   JSON.stringify(report, null, 2) + "\n",
 );
 console.log(

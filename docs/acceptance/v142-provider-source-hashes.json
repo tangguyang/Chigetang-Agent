@@ -1,0 +1,10 @@
+{
+  "src/main/models/adapters.ts": "0427d74f03410d790f086e046377be87e1f0f6267944f169125c879874fd3e48",
+  "src/main/models/engineAdapters.ts": "699f6e69bf224c2e7eba44a2a17bda61e62cfad0be3105a45a1bd62f7b5000b6",
+  "src/main/models/registry.ts": "3c950d15a6983e199b7e53fbdcfdf258b9043e3b7a124496b6719478662579e8",
+  "src/main/models/validation.ts": "443d9e662bdbdd813dfa4d4fe53e515741e4ecf827773510d068dadceb4ec8d2",
+  "src/main/providers/accounts.ts": "d6522c23570fa52db8268ac3a081e86ff604c57f31548df107b5c1ef3ac315c3",
+  "src/main/providers/adapters.ts": "693618d85eee56e8d18df905860eab86d35baf2bb8f81b076354627426ab3834",
+  "src/main/providers/engineAccounts.ts": "7c91f0f3526afac372c6c27efe361b6bc507aeb968e9e9625d6d67b9ffec4510",
+  "src/main/providers/http.ts": "3d642248e694e75c26838c2cb7c92c630202a66574bc48dba8e6fbe976fdf77e"
+}

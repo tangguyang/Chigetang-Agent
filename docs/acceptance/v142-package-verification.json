@@ -1,0 +1,36 @@
+{
+  "verified_icon_sizes": [
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64,
+    128,
+    256
+  ],
+  "version": "1.4.2",
+  "platform": "win32",
+  "architecture": "x64",
+  "pe_strings": {
+    "CompanyName": "吃个糖Agent",
+    "FileDescription": "吃个糖Agent",
+    "FileVersion": "1.4.2",
+    "InternalName": "吃个糖Agent",
+    "LegalCopyright": "Copyright (C) 2015 GitHub, Inc. All rights reserved.",
+    "OriginalFilename": "吃个糖Agent.exe",
+    "ProductName": "吃个糖Agent",
+    "ProductVersion": "1.4.2",
+    "SquirrelAwareVersion": "1"
+  },
+  "exe_sha256": "27f6488863b592ed7f835df7c0004d312e99b2cfaecbda88f0ef9cbe4f0ed6c7",
+  "runtime_structure_verified": true,
+  "bundled_application_matches_current_build": true,
+  "user_data_directories_absent_from_program": true,
+  "ffmpeg_x64_verified": true,
+  "ffmpeg_sha256": "04e1307997530f9cf2fe35cba2ca7e8875ca91da02f89d6c7243df819c94ad00",
+  "windows_case_insensitive_names_verified": true,
+  "windows_native_launch": "静态检查不声明GUI人工验收；最终包后台验证见v142-portable-report.json",
+  "paid_api_tested": false
+}

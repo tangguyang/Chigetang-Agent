@@ -65,7 +65,7 @@ function setup() {
 
 test("bootstrap and task snapshot report the current app version", async () => {
   const { app, draft } = setup();
-  assert.equal(app.bootstrap().version, "1.4.1");
+  assert.equal(app.bootstrap().version, brand.version);
   const task = await app.tasks.create(draft, "req-version");
   assert.equal(task.snapshot.appVersion, brand.version);
   app.close();

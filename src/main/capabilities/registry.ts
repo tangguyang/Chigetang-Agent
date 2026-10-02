@@ -25,7 +25,7 @@ export const capabilityOutputSchema = {
       },
     },
   },
-  required: ["schema", "executionId", "capability", "status", "logs"],
+  required: ["schema", "executionId", "capability", "status"],
 };
 export type Definition = {
   id: string;
@@ -39,6 +39,7 @@ export type CapabilityRequest = {
   capability: string;
   params?: Params;
   confirm?: boolean;
+  responseMode?: "compact" | "normal" | "debug";
 };
 export type CapabilityResult = {
   schema: "CHIGETANG_CAPABILITY_RESULT_V1";
@@ -90,10 +91,15 @@ export class CapabilityRegistry {
           typeof request.params !== "object" ||
           Array.isArray(request.params))) ||
       Object.keys(request).some(
-        (k) => !["capability", "params", "confirm"].includes(k),
+        (k) => !["capability", "params", "confirm", "responseMode"].includes(k),
       )
     )
       throw Error("请求字段无效");
+    if (
+      request.responseMode !== undefined &&
+      !["compact", "normal", "debug"].includes(request.responseMode)
+    )
+      throw Error("responseMode无效");
     const entry = this.entries.get(request.capability);
     if (!entry) throw Error("未知能力：" + request.capability);
     const params = request.params ?? {};

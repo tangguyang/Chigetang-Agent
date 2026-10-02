@@ -13,10 +13,18 @@ export function LibraryPage() {
       return {
         ...JSON.parse(sessionStorage.getItem("library-query") || "{}"),
         kind: state.assetKind === "hidden" ? "" : state.assetKind,
+        source: state.page === "任务" ? "tasks" : "all",
+        module: "",
+        hidden: state.assetKind === "hidden",
+        showHidden: false,
         page: 1,
       };
     } catch {
-      return { kind: "video", source: "tasks", page: 1 };
+      return {
+        kind: "video",
+        source: state.page === "任务" ? "tasks" : "all",
+        page: 1,
+      };
     }
   });
   const [data, setData] = useState<{ items: LibraryRow[]; total: number }>({
@@ -56,13 +64,14 @@ export function LibraryPage() {
     patch({
       kind: state.assetKind === "hidden" ? "" : state.assetKind,
       hidden: state.assetKind === "hidden",
+      source: state.page === "任务" ? "tasks" : "all",
     });
-  }, [state.assetKind]);
+  }, [state.assetKind, state.page]);
   const load = async () => {
     const seq = ++request.current;
     try {
       const next = await api<typeof data>("library.list", {
-        source: "tasks",
+        source: "all",
         ...q,
         hiddenIds: hidden,
       });
@@ -100,11 +109,15 @@ export function LibraryPage() {
       } else setDetail(row);
     });
   const hide = (id: string) => {
-    const next = hidden.includes(id)
-      ? hidden.filter((x) => x !== id)
-      : [...hidden, id];
+    const shouldHide = !(q.hidden || hidden.includes(id));
+    const next = shouldHide
+      ? [...new Set([...hidden, id])]
+      : hidden.filter((x) => x !== id);
     setHidden(next);
     localStorage.setItem("library-hidden", JSON.stringify(next));
+    void run(() => api("library.hide", { id, hidden: shouldHide })).then(
+      () => void load(),
+    );
   };
   const speechOpen = (id: string) => {
     localStorage.setItem("real-speech-selected", id);
@@ -135,17 +148,16 @@ export function LibraryPage() {
         </div>
         <div className="asset-kind-tabs" role="tablist" aria-label="资产类型">
           {[
-            ["", "全部"],
             ["video", "视频"],
             ["image", "图片"],
             ["audio", "音频"],
-            ["prompt", "脚本／Prompt"],
+            ["hidden", "隐藏"],
           ].map(([k, v]) => (
             <button
               key={k}
               role="tab"
-              aria-selected={q.kind === k}
-              className={q.kind === k ? "selected" : ""}
+              aria-selected={state.assetKind === k}
+              className={state.assetKind === k ? "selected" : ""}
               onClick={() => state.setAssetKind(k)}
             >
               {v}
@@ -158,13 +170,13 @@ export function LibraryPage() {
             value={q.source || "tasks"}
             onChange={(e) => patch({ source: e.target.value })}
           >
-            <option value="all">全部</option>
-            <option value="tasks">生成任务</option>
-            <option value="assets">结果资产／本地素材</option>
+            <option value="all">所有媒体</option>
+            {state.page === "任务" && <option value="tasks">生成任务</option>}
+            <option value="assets">本地媒体文件</option>
           </select>
           <input
             aria-label="搜索资产与任务"
-            placeholder="搜索名称、任务ID、Prompt／口播文本"
+            placeholder="搜索名称、任务ID或原始文本"
             value={q.search || ""}
             onChange={(e) => patch({ search: e.target.value })}
           />
@@ -195,6 +207,7 @@ export function LibraryPage() {
                 module: "",
                 folder: "",
                 project: "",
+                origin: "",
                 favorite: false,
                 showHidden: false,
               })
@@ -202,6 +215,38 @@ export function LibraryPage() {
           >
             清除筛选
           </button>
+        </div>
+        <div className="filters">
+          <select
+            aria-label="所属项目"
+            value={q.project || ""}
+            onChange={(e) =>
+              patch({
+                project: e.target.value,
+                origin: e.target.value ? "upload" : "",
+              })
+            }
+          >
+            <option value="">全部项目</option>
+            {state.boot?.projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          {q.project &&
+            [
+              ["upload", "上传"],
+              ["generated", "生成"],
+            ].map(([origin, label]) => (
+              <button
+                key={origin}
+                className={q.origin === origin ? "selected" : ""}
+                onClick={() => patch({ origin })}
+              >
+                {label}
+              </button>
+            ))}
         </div>
         <details>
           <summary>辅助筛选</summary>
@@ -281,41 +326,68 @@ export function LibraryPage() {
         <div className="asset-grid">
           {data.items.map((row) => (
             <article className="asset-card" key={row.id}>
-              <button className="asset-visual" onClick={() => showDetail(row)}>
-                {row.asset ? (
-                  <AssetPreview asset={row.asset as Asset} />
-                ) : (
-                  <span>
-                    {row.kind === "audio" ? "♫" : "▶"}{" "}
-                    {row.category === "task" && row.ids.length > 1
-                      ? `分段结果 ${row.children?.filter((t) => t.status === "Completed").length}/${row.ids.length}`
-                      : row.module}
-                  </span>
-                )}
-              </button>
+              {row.kind === "audio" ? (
+                <audio
+                  controls
+                  preload="none"
+                  aria-label={row.name}
+                  src={
+                    row.mediaAsset
+                      ? media("asset", row.mediaAsset.id)
+                      : row.children?.find((t) => t.outputPath)
+                        ? media(
+                            "output",
+                            row.children.find((t) => t.outputPath)!.id,
+                          )
+                        : undefined
+                  }
+                  onPlay={(e) =>
+                    document.querySelectorAll("audio").forEach((a) => {
+                      if (a !== e.currentTarget) a.pause();
+                    })
+                  }
+                />
+              ) : (
+                <button
+                  className="asset-visual"
+                  onClick={() => showDetail(row)}
+                >
+                  {row.mediaAsset ? (
+                    <AssetPreview asset={row.mediaAsset as Asset} />
+                  ) : (
+                    <span>尚无本地媒体</span>
+                  )}
+                </button>
+              )}
+
               <div className="asset-info">
                 <strong title={row.name}>{row.name}</strong>
-                {row.category === "asset" ? (
+                {row.mediaAsset ? (
                   <button
                     className="file-shortcut"
                     title={
-                      row.asset?.missing
+                      row.mediaAsset?.missing
                         ? "原文件缺失，可在素材管理重新定位"
-                        : "打开原文件"
+                        : "打开保存位置"
                     }
-                    aria-label="打开原文件"
-                    disabled={row.asset?.missing}
+                    aria-label="打开保存位置"
+                    disabled={row.mediaAsset?.missing}
                     onClick={() =>
-                      void run(() => api("open", { assetId: row.id }))
+                      void run(() =>
+                        api("open", {
+                          assetId: row.mediaAsset!.id,
+                          folder: true,
+                        }),
+                      )
                     }
                   >
-                    <FileText size={18} />
+                    <FolderOpen size={18} />
                   </button>
                 ) : row.category === "task" ? (
                   <button
                     className="file-shortcut"
                     title="选择并打开生成结果"
-                    aria-label="打开生成结果"
+                    aria-label="打开保存位置"
                     disabled={
                       !row.children?.some(
                         (t) => t.outputPath || t.outputs?.length,
@@ -327,11 +399,13 @@ export function LibraryPage() {
                         files?.length === 1 &&
                         (files[0].outputs || []).length <= 1
                       )
-                        void run(() => api("open", { taskId: files[0].id }));
+                        void run(() =>
+                          api("open", { taskId: files[0].id, folder: true }),
+                        );
                       else showDetail(row);
                     }}
                   >
-                    <FileText size={18} />
+                    <FolderOpen size={18} />
                   </button>
                 ) : (
                   <button
@@ -339,7 +413,7 @@ export function LibraryPage() {
                     title="查看口播结果"
                     onClick={() => showDetail(row)}
                   >
-                    <FileText size={18} />
+                    <FolderOpen size={18} />
                   </button>
                 )}
                 <small>
@@ -357,14 +431,22 @@ export function LibraryPage() {
                       } as Obj
                     )[row.status] ||
                     row.status}{" "}
-                  · {row.module}
+                  ·{" "}
+                  {row.origin === "upload"
+                    ? "上传"
+                    : row.origin === "generated"
+                      ? "生成"
+                      : "来源待核实"}
                 </small>
                 <small>
-                  {row.createdAt ? time(row.createdAt) : "历史记录"}
+                  {row.createdAt ? time(row.createdAt) : "历史记录"}{" "}
+                  {row.mediaAsset?.duration
+                    ? ` · ${Number(row.mediaAsset.duration).toFixed(1)}秒`
+                    : ""}
                   {row.deleted ? " · 来源任务已删除" : ""}
                 </small>
                 <button onClick={() => hide(row.id)}>
-                  {hidden.includes(row.id) ? "恢复显示" : "隐藏记录"}
+                  {q.hidden || hidden.includes(row.id) ? "恢复" : "隐藏"}
                 </button>
               </div>
             </article>
@@ -526,22 +608,13 @@ export function LibraryPage() {
                       <button
                         onClick={() =>
                           void run(async () => {
-                            if (
-                              !window.confirm(
-                                "删除工作任务记录？已生成音频保留在资产库，不删除文件。",
-                              )
-                            )
-                              return;
-                            await window.aiVideo.invoke("realSpeech:remove", {
-                              taskId: t.taskId,
-                              taskRevision: t.taskRevision,
-                            });
+                            await api("library.hide", { id: detail.id, hidden: true });
                             setDetail(null);
                             await load();
                           })
                         }
                       >
-                        删除任务记录（保留音频）
+                        隐藏
                       </button>
                     </>
                   )}

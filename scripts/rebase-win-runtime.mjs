@@ -51,14 +51,10 @@ writeFileSync(
 );
 writeFileSync(join(destination, "APP-VERSION.txt"), `${source.version}\n`, "utf8");
 for (const file of [
-  "HANDOFF.md",
+  "AGENTS.md",
   "README.md",
-  "README-USER.md",
-  `v${source.version}-Release-Notes.md`,
-  `v${source.version}-Upgrade-Guide.md`,
   "CHANGELOG.md",
   "THIRD-PARTY-NOTICES.md",
-  "DELIVERY.md",
 ])
   cpSync(join(project, file), join(destination, basename(file)));
 for (const folder of ["docs", "licenses"]) {

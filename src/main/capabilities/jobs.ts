@@ -42,6 +42,37 @@ export function registerJobs(registry: CapabilityRegistry, root: string) {
   }
   registry.register(
     {
+      id: "jobs.wait",
+      description: "本地等待job结束，超时返回当前状态；不会重发或取消",
+      service: "CapabilityJobs",
+      effect: "read",
+      inputSchema: objectSchema(
+        { jobId: s, timeout: { type: "integer", minimum: 0, maximum: 240000 } },
+        ["jobId"],
+      ),
+      outputSchema: {},
+    },
+    async (p) => {
+      const deadline = Date.now() + (p.timeout ?? 30000);
+      let record = records.get(p.jobId);
+      if (!record) throw Error("后台任务不存在");
+      while (
+        ["queued", "running"].includes(record.status) &&
+        Date.now() < deadline
+      ) {
+        await new Promise((r) =>
+          setTimeout(r, Math.min(200, deadline - Date.now())),
+        );
+        record = records.get(p.jobId)!;
+      }
+      return {
+        ...record,
+        timedOut: ["queued", "running"].includes(record.status),
+      };
+    },
+  );
+  registry.register(
+    {
       id: "jobs.status",
       description: "读取后台执行状态；unknown 表示结果未知，禁止自动重发",
       service: "CapabilityJobs",

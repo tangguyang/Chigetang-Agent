@@ -14,6 +14,8 @@ export type LibraryRow = {
   children?: Obj[];
   asset?: Obj;
   deleted?: boolean;
+  origin?: "upload" | "generated" | "unknown";
+  mediaAsset?: Obj;
 };
 export function stateGroup(status: string) {
   if (["Completed", "generated", "confirmed"].includes(status))
@@ -207,8 +209,6 @@ export async function libraryView(
       data.unavailableAt =
         data.unavailableAt ||
         (!existsSync(data.managedPath || data.originalPath) ? "missing" : null);
-      if (data.libraryDeletedAt) continue;
-      if (q.hidden && !data.unavailableAt) continue;
       if (
         (q.folder && data.folder !== q.folder) ||
         (q.favorite && !data.favorite) ||
@@ -218,7 +218,14 @@ export async function libraryView(
       const rs = JSON.parse(data.metadata?.realSpeechSources || "[]");
       const linked =
         taskIds.has(data.metadata?.taskId) || rs.some((x: Obj) => !x.deleted);
-      if (q.source === "all" && linked) continue;
+      if (
+        q.source === "all" &&
+        linked &&
+        !q.hidden &&
+        !q.showHidden &&
+        !data.libraryDeletedAt
+      )
+        continue;
       if (
         search &&
         ![data.name, ...(data.tags || []), ...rs.map((x: Obj) => x.name)].some(
@@ -305,8 +312,39 @@ export async function libraryView(
         ),
     );
   const hidden = new Set<string>(q.hiddenIds || []);
+  for (const id of app.db.get<string[]>("library-hidden", [])) hidden.add(id);
+  for (const a of assetRows)
+    if (JSON.parse(a.data).libraryDeletedAt) hidden.add(a.id);
+  for (const row of rows) {
+    if (row.category !== "asset") row.origin = "generated";
+    else {
+      const metadata = row.asset?.metadata || {},
+        source = String(metadata.source || "");
+      row.origin =
+        metadata.taskId ||
+        JSON.parse(metadata.realSpeechSources || "[]").length ||
+        [
+          "generated",
+          "segment-result",
+          "segment-temp",
+          "wan-audio-trim",
+        ].includes(source)
+          ? "generated"
+          : !source ||
+              [
+                "upload",
+                "uploaded",
+                "imported",
+                "local-import",
+                "manual",
+              ].includes(source)
+            ? "upload"
+            : "unknown";
+    }
+  }
+  if (q.origin) rows = rows.filter((r) => r.origin === q.origin);
   rows = rows.filter((r) =>
-    q.showHidden ? hidden.has(r.id) : !hidden.has(r.id),
+    q.hidden || q.showHidden ? hidden.has(r.id) : !hidden.has(r.id),
   );
   rows.sort(
     (a, b) =>
@@ -319,7 +357,18 @@ export async function libraryView(
   const total = rows.length;
   const page = Math.max(1, Number(q.page) || 1);
   rows = rows.slice((page - 1) * 24, page * 24);
-  for (const row of rows)
+  for (const row of rows) {
+    const linked = assetRows.find((a) => {
+      const v = JSON.parse(a.data);
+      return (
+        row.ids.includes(v.metadata?.taskId) ||
+        JSON.parse(v.metadata?.realSpeechSources || "[]").some((s: Obj) =>
+          row.ids.includes(s.taskId),
+        )
+      );
+    });
+    row.mediaAsset =
+      row.asset || (linked ? JSON.parse(linked.data) : undefined);
     if (row.category === "task")
       row.children = row.children
         ?.sort(
@@ -340,5 +389,6 @@ export async function libraryView(
         },
       ];
     }
+  }
   return { items: rows, total };
 }

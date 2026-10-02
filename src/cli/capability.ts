@@ -1,3 +1,4 @@
+import { brand } from "../shared/brand.ts";
 import { createInterface } from "node:readline";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -41,7 +42,7 @@ async function rpc(message: any) {
           )
             ? message.params.protocolVersion
             : "2025-11-25",
-          serverInfo: { name: "chigetang-agent", version: "1.4.1" },
+          serverInfo: { name: "chigetang-agent", version: brand.version },
           capabilities: { tools: { listChanged: false } },
         };
         break;
@@ -51,29 +52,43 @@ async function rpc(message: any) {
       case "tools/list": {
         const entries = await call(["capability", "list"]);
         result = {
-          tools: entries.map((e: any) => ({
-            name: e.id.replaceAll(".", "_"),
-            description:
-              e.description +
-              (e.effect === "paid"
-                ? "（可能产生云端费用，须 confirm:true）"
-                : ""),
-            inputSchema: {
-              type: "object",
-              properties: {
-                params: e.inputSchema,
-                confirm: { type: "boolean" },
+          tools: entries
+            .filter((e: any) =>
+              [
+                "capability.search",
+                "capability.describe",
+                "jobs.submit",
+                "jobs.wait",
+                "jobs.status",
+              ].includes(e.id),
+            )
+            .map((e: any) => ({
+              name: e.id.replaceAll(".", "_"),
+              description:
+                e.description +
+                (e.effect === "paid"
+                  ? "（可能产生云端费用，须 confirm:true）"
+                  : ""),
+              inputSchema: {
+                type: "object",
+                properties: {
+                  params: e.inputSchema,
+                  confirm: { type: "boolean" },
+                  responseMode: {
+                    enum: ["compact", "normal", "debug"],
+                    default: "compact",
+                  },
+                },
+                additionalProperties: false,
               },
-              additionalProperties: false,
-            },
-            outputSchema: e.outputSchema,
-            annotations: {
-              readOnlyHint: e.effect === "read",
-              destructiveHint: e.effect === "destructive",
-              idempotentHint: false,
-              openWorldHint: e.effect === "paid",
-            },
-          })),
+              outputSchema: e.outputSchema,
+              annotations: {
+                readOnlyHint: e.effect === "read",
+                destructiveHint: e.effect === "destructive",
+                idempotentHint: false,
+                openWorldHint: e.effect === "paid",
+              },
+            })),
         };
         break;
       }
@@ -84,7 +99,11 @@ async function rpc(message: any) {
         );
         if (!entry) throw Error("Unknown tool");
         const args = message.params.arguments ?? {};
-        if (Object.keys(args).some((k) => !["params", "confirm"].includes(k)))
+        if (
+          Object.keys(args).some(
+            (k) => !["params", "confirm", "responseMode"].includes(k),
+          )
+        )
           throw Error("Unknown tool argument");
         const output = await call([
           "capability",
@@ -93,6 +112,7 @@ async function rpc(message: any) {
             capability: entry.id,
             params: args.params ?? {},
             confirm: args.confirm ?? false,
+            responseMode: args.responseMode ?? "compact",
           }),
         ]);
         result = {

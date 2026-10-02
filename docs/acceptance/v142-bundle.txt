@@ -1,0 +1,5 @@
+
+> chigetang-agent@1.4.2 test:bundle
+> node scripts/build.mjs && node scripts/test-bundle.mjs
+
+Bundled MediaInfo reads real MP4 successfully.

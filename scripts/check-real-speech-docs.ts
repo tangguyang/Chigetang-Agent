@@ -26,9 +26,9 @@ for (const name of [manual, protocol, "真人口播_Runtime字段说明.md"]) {
 
 for (const name of [stage1, stage2]) {
   assert.ok(existsSync("resources/docs/" + name));
-  assert.ok(existsSync("docs/v129-repair2/" + name));
+  assert.ok(existsSync("docs/archive/acceptance/v129-repair2/" + name));
   assert.equal(
-    readFileSync("docs/v129-repair2/" + name, "utf8"),
+    readFileSync("docs/archive/acceptance/v129-repair2/" + name, "utf8"),
     readFileSync("resources/docs/" + name, "utf8"),
   );
 }

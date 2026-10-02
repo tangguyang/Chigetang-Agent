@@ -132,17 +132,20 @@ test("v110 signature detection distinguishes MP3 from AAC and detects PNG alpha"
   assert.equal((await detectFileSignature(png)).hasAlpha, true);
 });
 
-test("v110 missing assets hide reversibly without deleting records or IDs", async () => {
+test("v142 missing status is distinct from explicit reversible hiding", async () => {
   const { app, root } = appSetup();
   const path = join(root, "asset.png");
   const bytes = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 2, 208, 0, 0, 5, 0, 2, 0]);
   writeFileSync(path, bytes);
   const asset = (await app.assets.import(path, false)).asset;
   unlinkSync(path);
-  assert.equal((await app.assets.list({ kind: "image" })).total, 0);
+  assert.equal((await app.assets.list({ kind: "image" })).total, 1);
+  assert.equal((await app.assets.list({ hidden: true })).total, 0);
+  app.assets.removeRecords([asset.id]);
   const hidden = await app.assets.list({ hidden: true });
   assert.equal(hidden.items[0].id, asset.id);
   writeFileSync(path, bytes);
+  app.assets.save({...app.assets.get(asset.id),libraryDeletedAt:null});
   await app.assets.refresh();
   assert.equal((await app.assets.list({ kind: "image" })).items[0].id, asset.id);
   assert.equal((await app.assets.list({ hidden: true })).total, 0);

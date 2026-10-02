@@ -691,7 +691,7 @@ test("R3：发音完成度仅展示，不变更请求；原2.0不可静默升级
       v.validate(
         JSON.parse(
           readFileSync(
-            "docs/real-speech-v2-design-r2/examples/plan.json",
+            "docs/archive/real-speech-design/real-speech-v2-design-r2/examples/plan.json",
             "utf8",
           ),
         ),
@@ -746,7 +746,7 @@ test("R3：局部rate和pitch不能藏在同一个ssml对象绕过隔离", () =>
 
 test("R3：运行文档、Profile、Schema及词典镜像一致", () => {
   const source = "resources/real-speech-v2/",
-    review = "docs/real-speech-v2-production-r3/";
+    review = "docs/archive/acceptance/real-speech-v2-production-r3/";
   for (const name of [
     "COSYVOICE_CAPABILITY_PROFILE.v1.json",
     "schemas/common.schema.json",

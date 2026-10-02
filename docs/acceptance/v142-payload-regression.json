@@ -1,0 +1,8 @@
+{
+  "cases": 7,
+  "baseline": "2b184762814cfb6b464cecebeaa74cec2f96360e",
+  "canonicalPayloadEqual": true,
+  "ignoredOnly": "isolated imported asset UUID in fake OSS URL",
+  "inputPromptAndParametersUnchanged": true,
+  "realPaidRequests": 0
+}

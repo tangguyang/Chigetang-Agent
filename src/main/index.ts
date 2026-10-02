@@ -1,5 +1,6 @@
 import {registerSpeechCapabilities} from './capabilities/speech.ts';
 import {CapabilityRegistry} from './capabilities/registry.ts';
+import {registerDiscovery} from './capabilities/runtime.ts';
 import {registerJobs} from './capabilities/jobs.ts';
 import {TextService} from './services/text.ts';
 import {registerApplicationCapabilities} from './capabilities/catalog.ts';
@@ -867,6 +868,17 @@ else {
               case "assets.get":
                 result = service.assets.get(String(p.id));
                 break;
+              case "assets.thumbnail.ensure": {
+                const asset=service.assets.get(String(p.id));service.thumbnails.enqueue(asset,p.force===true);
+                await service.thumbnails.pending;result=service.assets.get(asset.id);break;
+              }
+              case "library.hide": {
+                const ids=service.db.get<string[]>('library-hidden',[]);
+                const id=String(p.id);
+                service.db.set('library-hidden',p.hidden===false?ids.filter(x=>x!==id):[...new Set([...ids,id])]);
+                if(p.hidden===false&&service.db.one('SELECT id FROM assets WHERE id=?',id)){const a=service.assets.get(id);service.assets.save({...a,libraryDeletedAt:null});}
+                result={id,hidden:p.hidden!==false};service.changed();break;
+              }
               case "assets.inspect":
                 result = await service.assets.refreshMetadata(String(p.id));
                 break;
@@ -1211,6 +1223,7 @@ else {
       }
       capabilityRegistry = new CapabilityRegistry(agentFilter);
       capabilityRegistry.registerWorkflow();
+      registerDiscovery(capabilityRegistry,root);
       registerJobs(capabilityRegistry,root);
       capabilityRegistry.register({id:'runtime.status',description:'本机执行进程状态',service:'Application',effect:'read',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>({version:brand.version,pid:process.pid,headless,windowCount:BrowserWindow.getAllWindows().length,dataRoot:root,writerRecovery:releaseSpeechWriter?.recovered??null,queuePaused:service.settings().queuePaused}));
       capabilityRegistry.register({id:'runtime.stop',description:'任务空闲时关闭本机执行进程，须 confirm:true',service:'Application',effect:'destructive',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>{

@@ -116,7 +116,7 @@ assert.ok(document.body.textContent?.includes("测试任务"));
 assert.ok(document.querySelector('[aria-label="来源"]'));
 assert.equal(
   (document.querySelector('[aria-label="来源"]') as HTMLSelectElement).value,
-  "tasks",
+  "all",
 );
 await act(async () => root.render(<ReplicaPage />));
 const icons = [...document.querySelectorAll(".workbench-heading button")];

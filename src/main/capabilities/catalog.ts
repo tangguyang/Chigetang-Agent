@@ -31,6 +31,8 @@ export function registerApplicationCapabilities(
       },
       (p) => invoke(id, p),
     );
+  add('library.hide',{id:s,hidden:b},['id'],'write');
+  add('assets.thumbnail.ensure',{id:s,force:b},['id'],'write');
   for (const id of [
     "bootstrap",
     "audio.capabilities",

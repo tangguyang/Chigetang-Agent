@@ -61,3 +61,6 @@ scripts/.spike-run.cjs
 .spike-private/
 # Native document regression bundle
 scripts/.v2-doc-tests.cjs
+
+# Local acceptance fixtures and private runtime metadata are not source.
+/acceptance/

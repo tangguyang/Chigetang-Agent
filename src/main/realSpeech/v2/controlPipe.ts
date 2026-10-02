@@ -7,7 +7,8 @@ import { sha256 } from "./validator.ts";
 import { parseArgs } from "../../../cli/args.ts";
 import { SecretFilter, resultOutput } from "../../../cli/output.ts";
 import type { SpeechAgentControl } from "./agentControl.ts";
-import type { CapabilityRegistry } from '../../capabilities/registry.ts';
+import { controlResponse } from "../../capabilities/runtime.ts";
+import type { CapabilityRegistry } from "../../capabilities/registry.ts";
 const marker = (root: string) =>
   join(root, "config", "agent-control-runtime.json");
 const normalize = (root: string) => resolve(root).toLowerCase();
@@ -176,16 +177,25 @@ export async function startControlBridge(
         )
       )
         throw Error("IPC请求不合法");
-      if (request.argv[0] === 'capability') {
-        if (!capabilities) throw Error('当前运行程序未提供 Capability Layer');
-        if(request.argv.length===2 && request.argv[1]==='list') {
-          result=JSON.parse(resultOutput('capability.list',capabilities.list(),filter));
-        } else if(request.argv.length===3 && request.argv[1]==='execute') {
-          const output=await capabilities.executeCapability(JSON.parse(request.argv[2]));
-          result=JSON.parse(resultOutput('capability.execute',output,filter));
+      if (request.argv[0] === "capability") {
+        if (!capabilities) throw Error("当前运行程序未提供 Capability Layer");
+        if (request.argv.length === 2 && request.argv[1] === "list") {
+          result = JSON.parse(
+            resultOutput("capability.list", capabilities.list(), filter),
+          );
+        } else if (request.argv.length === 3 && request.argv[1] === "execute") {
+          const input = JSON.parse(request.argv[2]);
+          const output = controlResponse(
+            root,
+            input,
+            await capabilities.executeCapability(input),
+          );
+          result = JSON.parse(
+            resultOutput("capability.execute", output, filter),
+          );
           changed();
-        } else throw Error('未知 Capability 命令');
-        if (!stopping) child.stdin.write(JSON.stringify({id,result})+'\n');
+        } else throw Error("未知 Capability 命令");
+        if (!stopping) child.stdin.write(JSON.stringify({ id, result }) + "\n");
         return;
       }
       const args = parseArgs(request.argv);

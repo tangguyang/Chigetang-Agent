@@ -350,10 +350,9 @@ export class AssetManager {
   async list(q: ListQuery = {}): Promise<Page<Asset>> {
     const where = [
         "COALESCE(json_extract(data,'$.metadata.source'),'') NOT IN ('segment-temp','segment-result','wan-audio-trim')",
-        "json_extract(data,'$.libraryDeletedAt') IS NULL",
         q.hidden
-          ? "json_extract(data,'$.unavailableAt') IS NOT NULL"
-          : "json_extract(data,'$.unavailableAt') IS NULL",
+          ? "json_extract(data,'$.libraryDeletedAt') IS NOT NULL"
+          : "json_extract(data,'$.libraryDeletedAt') IS NULL",
       ],
       p: (string | number)[] = [];
     if (q.search) {

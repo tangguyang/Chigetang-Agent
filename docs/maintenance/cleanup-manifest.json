@@ -1,0 +1,96 @@
+{
+  "dryRun": false,
+  "items": [
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\agent-control-ipc-1790869531570",
+      "bytes": 969336205,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\agent-control-ipc-1790870717860",
+      "bytes": 969346864,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\agent-control-ipc-1790870856580",
+      "bytes": 969348755,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790903330574",
+      "bytes": 290694300,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790903387069",
+      "bytes": 290694300,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790903405134",
+      "bytes": 290694300,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790903423594",
+      "bytes": 969731672,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790903625367",
+      "bytes": 969719265,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790906443906",
+      "bytes": 290704670,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790906592527",
+      "bytes": 969739635,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\capability-platform-1790906987556",
+      "bytes": 969740125,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\portable-acceptance\\6247d272-f190-4e4b-9fd3-fc5ea4b3b66b",
+      "bytes": 675169611,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\portable-acceptance\\v140-abih28g7",
+      "bytes": 679024346,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\portable-acceptance\\v141-6e3c5jn7",
+      "bytes": 679034776,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    },
+    {
+      "path": "D:\\Codex\\吃个糖Agent项目\\release\\portable-acceptance\\v141-qkw_vunb",
+      "bytes": 679034531,
+      "decision": "delete-rebuildable",
+      "reason": "obsolete isolated packaging/staging or duplicate extraction; historical delivered ZIP preserved"
+    }
+  ],
+  "deletedBytes": 10662013355
+}

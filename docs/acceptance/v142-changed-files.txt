@@ -1,0 +1,387 @@
+M	.gitignore
+A	AGENTS.md
+M	CHANGELOG.md
+M	README.md
+M	VERSION
+D	docs/ACCEPTANCE.md
+D	docs/KNOWN-ISSUES.md
+M	docs/README_文档版本说明.md
+A	docs/acceptance/FEE_CONFIRMATION.md
+A	docs/acceptance/v1.4.2-acceptance-report.md
+A	docs/acceptance/v142-archive-report.json
+A	docs/acceptance/v142-build.txt
+A	docs/acceptance/v142-bundle.txt
+A	docs/acceptance/v142-npm-ci.txt
+A	docs/acceptance/v142-package-verification.json
+A	docs/acceptance/v142-payload-regression.json
+A	docs/acceptance/v142-portable-report.json
+A	docs/acceptance/v142-portable.txt
+A	docs/acceptance/v142-provider-source-hashes.json
+A	docs/acceptance/v142-repair2.txt
+A	docs/acceptance/v142-runtime-report.json
+A	docs/acceptance/v142-runtime.txt
+A	docs/acceptance/v142-speech-v2.txt
+A	docs/acceptance/v142-token-metrics.json
+A	docs/acceptance/v142-typecheck.txt
+A	docs/acceptance/v142-ui-focused.txt
+A	docs/acceptance/v142-ui.txt
+A	docs/acceptance/v142-unit.txt
+A	docs/acceptance/v142-video-offline-results.json
+A	docs/acceptance/v142-windows.txt
+A	docs/acceptance/v142-zip-runtime.txt
+R100	docs/agent-control-v1/IPC-ACCEPTANCE.md	docs/archive/acceptance/agent-control-v1/IPC-ACCEPTANCE.md
+R100	docs/agent-control-v1/README.md	docs/archive/acceptance/agent-control-v1/README.md
+R100	docs/capabilities-v140/API.md	docs/archive/acceptance/capabilities-v140/API.md
+R100	docs/capabilities-v140/AUDIT.md	docs/archive/acceptance/capabilities-v140/AUDIT.md
+R100	docs/capabilities-v140/README.md	docs/archive/acceptance/capabilities-v140/README.md
+R100	docs/capabilities-v140/TEST-REPORT.md	docs/archive/acceptance/capabilities-v140/TEST-REPORT.md
+R100	docs/capabilities-v140/catalog.json	docs/archive/acceptance/capabilities-v140/catalog.json
+R100	docs/capabilities-v141/README.md	docs/archive/acceptance/capabilities-v141/README.md
+R100	docs/real-speech-v2-phase1/API-Key安全配置.md	docs/archive/acceptance/real-speech-v2-phase1/API-Key安全配置.md
+R100	docs/real-speech-v2-phase1/README.md	docs/archive/acceptance/real-speech-v2-phase1/README.md
+R100	docs/real-speech-v2-phase1/batch1-approval.template.json	docs/archive/acceptance/real-speech-v2-phase1/batch1-approval.template.json
+R100	docs/real-speech-v2-phase1/本地测试结果.md	docs/archive/acceptance/real-speech-v2-phase1/本地测试结果.md
+R100	docs/real-speech-v2-phase1/第一批Capability-Spike批准单.md	docs/archive/acceptance/real-speech-v2-phase1/第一批Capability-Spike批准单.md
+R100	docs/real-speech-v2-production-r3/COSYVOICE_CAPABILITY_PROFILE.v1.json	docs/archive/acceptance/real-speech-v2-production-r3/COSYVOICE_CAPABILITY_PROFILE.v1.json
+R100	docs/real-speech-v2-production-r3/README.md	docs/archive/acceptance/real-speech-v2-production-r3/README.md
+R100	docs/real-speech-v2-production-r3/director-dictionary.json	docs/archive/acceptance/real-speech-v2-production-r3/director-dictionary.json
+R100	docs/real-speech-v2-production-r3/docs/capability.md	docs/archive/acceptance/real-speech-v2-production-r3/docs/capability.md
+R100	docs/real-speech-v2-production-r3/docs/compiler.md	docs/archive/acceptance/real-speech-v2-production-r3/docs/compiler.md
+R100	docs/real-speech-v2-production-r3/docs/diagnosis.md	docs/archive/acceptance/real-speech-v2-production-r3/docs/diagnosis.md
+R100	docs/real-speech-v2-production-r3/docs/director.md	docs/archive/acceptance/real-speech-v2-production-r3/docs/director.md
+R100	docs/real-speech-v2-production-r3/docs/manual.md	docs/archive/acceptance/real-speech-v2-production-r3/docs/manual.md
+R100	docs/real-speech-v2-production-r3/docs/template.md	docs/archive/acceptance/real-speech-v2-production-r3/docs/template.md
+R100	docs/real-speech-v2-production-r3/evidence/batch1-record-manifest.json	docs/archive/acceptance/real-speech-v2-production-r3/evidence/batch1-record-manifest.json
+R100	docs/real-speech-v2-production-r3/examples/patch.json	docs/archive/acceptance/real-speech-v2-production-r3/examples/patch.json
+R100	docs/real-speech-v2-production-r3/examples/plan-l0-baseline.json	docs/archive/acceptance/real-speech-v2-production-r3/examples/plan-l0-baseline.json
+R100	docs/real-speech-v2-production-r3/examples/plan-with-optional-audit.json	docs/archive/acceptance/real-speech-v2-production-r3/examples/plan-with-optional-audit.json
+R100	docs/real-speech-v2-production-r3/examples/plan-with-speak-candidates.json	docs/archive/acceptance/real-speech-v2-production-r3/examples/plan-with-speak-candidates.json
+R100	docs/real-speech-v2-production-r3/examples/plan-with-sub-candidate.json	docs/archive/acceptance/real-speech-v2-production-r3/examples/plan-with-sub-candidate.json
+R100	docs/real-speech-v2-production-r3/examples/plan.json	docs/archive/acceptance/real-speech-v2-production-r3/examples/plan.json
+R093	docs/real-speech-v2-production-r3/review/change-inventory.json	docs/archive/acceptance/real-speech-v2-production-r3/review/change-inventory.json
+R100	docs/real-speech-v2-production-r3/review/runtime-and-source.patch	docs/archive/acceptance/real-speech-v2-production-r3/review/runtime-and-source.patch
+R100	docs/real-speech-v2-production-r3/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json	docs/archive/acceptance/real-speech-v2-production-r3/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
+R100	docs/real-speech-v2-production-r3/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json	docs/archive/acceptance/real-speech-v2-production-r3/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
+R100	docs/real-speech-v2-production-r3/schemas/common.schema.json	docs/archive/acceptance/real-speech-v2-production-r3/schemas/common.schema.json
+R100	docs/real-speech-v2-production-r3/validation-results.json	docs/archive/acceptance/real-speech-v2-production-r3/validation-results.json
+R100	docs/real-speech-v2-production-r3/validation/build.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/build.txt
+R100	docs/real-speech-v2-production-r3/validation/bundle.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/bundle.txt
+R100	docs/real-speech-v2-production-r3/validation/native.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/native.txt
+R100	docs/real-speech-v2-production-r3/validation/new-ui.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/new-ui.txt
+R100	docs/real-speech-v2-production-r3/validation/repair2.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/repair2.txt
+R100	docs/real-speech-v2-production-r3/validation/tests.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/tests.txt
+R100	docs/real-speech-v2-production-r3/validation/typecheck.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/typecheck.txt
+R100	docs/real-speech-v2-production-r3/validation/ui.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/ui.txt
+R100	docs/real-speech-v2-production-r3/validation/workflow-final.txt	docs/archive/acceptance/real-speech-v2-production-r3/validation/workflow-final.txt
+R100	docs/real-speech-v2-production-r3/关键Diff.md	docs/archive/acceptance/real-speech-v2-production-r3/关键Diff.md
+R100	docs/real-speech-v2-production-r3/第一批Spike人工听感结论.md	docs/archive/acceptance/real-speech-v2-production-r3/第一批Spike人工听感结论.md
+R100	docs/v1.0.3-Test-Report.md	docs/archive/acceptance/v1.0.3-Test-Report.md
+R100	docs/v1.0.4-Test-Report.md	docs/archive/acceptance/v1.0.4-Test-Report.md
+R100	docs/v1.0.5-Audio-Models.md	docs/archive/acceptance/v1.0.5-Audio-Models.md
+R100	docs/v1.0.5-Known-Issues.md	docs/archive/acceptance/v1.0.5-Known-Issues.md
+R100	docs/v1.0.5-Test-Report.md	docs/archive/acceptance/v1.0.5-Test-Report.md
+R100	docs/v1.0.5-Voice-Cloning.md	docs/archive/acceptance/v1.0.5-Voice-Cloning.md
+R100	docs/v1.0.6-Test-Report.md	docs/archive/acceptance/v1.0.6-Test-Report.md
+R100	docs/v1.0.7-Test-Report.md	docs/archive/acceptance/v1.0.7-Test-Report.md
+R100	docs/v1.0.8-Test-Report.md	docs/archive/acceptance/v1.0.8-Test-Report.md
+R100	docs/v1.0.9-Test-Report.md	docs/archive/acceptance/v1.0.9-Test-Report.md
+R100	docs/v1.1.0-Test-Report.md	docs/archive/acceptance/v1.1.0-Test-Report.md
+R100	docs/v1.1.1-Test-Report.md	docs/archive/acceptance/v1.1.1-Test-Report.md
+R100	docs/v1.1.2-Test-Report.md	docs/archive/acceptance/v1.1.2-Test-Report.md
+R087	docs/v1.2.0/R4-FINAL-CHANGED-FILES.md	docs/archive/acceptance/v1.2.0/R4-FINAL-CHANGED-FILES.md
+R100	docs/v1.2.0/TEST-REPORT.md	docs/archive/acceptance/v1.2.0/TEST-REPORT.md
+R100	docs/v1.2.0/WINDOWS-ACCEPTANCE.md	docs/archive/acceptance/v1.2.0/WINDOWS-ACCEPTANCE.md
+R100	docs/v1.2.0/吃个糖Agent_标准ZIP任务包规范_v1.2.0.md	docs/archive/acceptance/v1.2.0/吃个糖Agent_标准ZIP任务包规范_v1.2.0.md
+R100	docs/v1.2.0/吃个糖Agent_第一阶段复刻指令_v1.2.0.md	docs/archive/acceptance/v1.2.0/吃个糖Agent_第一阶段复刻指令_v1.2.0.md
+R100	docs/v1.2.0/吃个糖Agent_第二阶段复刻指令_v1.2.0.md	docs/archive/acceptance/v1.2.0/吃个糖Agent_第二阶段复刻指令_v1.2.0.md
+R100	docs/v1.2.1/CHANGED-FILES.md	docs/archive/acceptance/v1.2.1/CHANGED-FILES.md
+R100	docs/v1.2.1/TEST-REPORT.md	docs/archive/acceptance/v1.2.1/TEST-REPORT.md
+R100	docs/v1.2.1/WINDOWS-ACCEPTANCE.md	docs/archive/acceptance/v1.2.1/WINDOWS-ACCEPTANCE.md
+R100	docs/v1.2.2/CHANGED-FILES.md	docs/archive/acceptance/v1.2.2/CHANGED-FILES.md
+R100	docs/v1.2.2/TEST-REPORT.md	docs/archive/acceptance/v1.2.2/TEST-REPORT.md
+R100	docs/v1.2.2/WINDOWS-ACCEPTANCE.md	docs/archive/acceptance/v1.2.2/WINDOWS-ACCEPTANCE.md
+R100	docs/v1.2.2/吃个糖Agent_标准ZIP任务包规范_v1.2.2.md	docs/archive/acceptance/v1.2.2/吃个糖Agent_标准ZIP任务包规范_v1.2.2.md
+R089	docs/v1.2.3/CHANGED-FILES.md	docs/archive/acceptance/v1.2.3/CHANGED-FILES.md
+R100	docs/v1.2.3/CORE-INTEGRITY.json	docs/archive/acceptance/v1.2.3/CORE-INTEGRITY.json
+R100	docs/v1.2.3/SOURCE-ANALYSIS.md	docs/archive/acceptance/v1.2.3/SOURCE-ANALYSIS.md
+R100	docs/v1.2.3/SOURCE-CHANGES.patch	docs/archive/acceptance/v1.2.3/SOURCE-CHANGES.patch
+R100	docs/v1.2.3/TEST-REPORT.md	docs/archive/acceptance/v1.2.3/TEST-REPORT.md
+R095	docs/v1.2.3/TRANSCRIPTION-UI-PATCH.md	docs/archive/acceptance/v1.2.3/TRANSCRIPTION-UI-PATCH.md
+R100	docs/v1.2.3/WINDOWS-ACCEPTANCE.md	docs/archive/acceptance/v1.2.3/WINDOWS-ACCEPTANCE.md
+R100	docs/v1.2.3/build.log	docs/archive/acceptance/v1.2.3/build.log
+R100	docs/v1.2.3/bundle-tests.log	docs/archive/acceptance/v1.2.3/bundle-tests.log
+R100	docs/v1.2.3/core-tests.log	docs/archive/acceptance/v1.2.3/core-tests.log
+R100	docs/v1.2.3/electron-runtime.log	docs/archive/acceptance/v1.2.3/electron-runtime.log
+R100	docs/v1.2.3/package-verification.log	docs/archive/acceptance/v1.2.3/package-verification.log
+R100	docs/v1.2.3/package.log	docs/archive/acceptance/v1.2.3/package.log
+R100	docs/v1.2.3/ui-tests.log	docs/archive/acceptance/v1.2.3/ui-tests.log
+R100	docs/v1.2.3/visual-results.json	docs/archive/acceptance/v1.2.3/visual-results.json
+R100	docs/v1.2.3/visual-tests.log	docs/archive/acceptance/v1.2.3/visual-tests.log
+R100	docs/v1.2.4-transcription/RUNTIME-PACKAGE-VERIFICATION.json	docs/archive/acceptance/v1.2.4-transcription/RUNTIME-PACKAGE-VERIFICATION.json
+R100	docs/v1.2.4-transcription/SCOPE-VERIFICATION.json	docs/archive/acceptance/v1.2.4-transcription/SCOPE-VERIFICATION.json
+R100	docs/v1.2.4-transcription/TEST-REPORT.md	docs/archive/acceptance/v1.2.4-transcription/TEST-REPORT.md
+R100	docs/v1.2.4-transcription/baseline-typecheck.log	docs/archive/acceptance/v1.2.4-transcription/baseline-typecheck.log
+R100	docs/v1.2.4-transcription/baseline-ui.log	docs/archive/acceptance/v1.2.4-transcription/baseline-ui.log
+R100	docs/v1.2.4-transcription/build.log	docs/archive/acceptance/v1.2.4-transcription/build.log
+R100	docs/v1.2.4-transcription/bundle.log	docs/archive/acceptance/v1.2.4-transcription/bundle.log
+R100	docs/v1.2.4-transcription/evidence.json	docs/archive/acceptance/v1.2.4-transcription/evidence.json
+R100	docs/v1.2.4-transcription/package-verification.log	docs/archive/acceptance/v1.2.4-transcription/package-verification.log
+R100	docs/v1.2.4-transcription/samples/real-long/01_完整逐字稿.txt	docs/archive/acceptance/v1.2.4-transcription/samples/real-long/01_完整逐字稿.txt
+R100	docs/v1.2.4-transcription/samples/real-long/02_时间帧逐字稿.txt	docs/archive/acceptance/v1.2.4-transcription/samples/real-long/02_时间帧逐字稿.txt
+R100	docs/v1.2.4-transcription/samples/real-long/internal-recognition-evidence.json	docs/archive/acceptance/v1.2.4-transcription/samples/real-long/internal-recognition-evidence.json
+R100	docs/v1.2.4-transcription/samples/real-mp4/01_完整逐字稿.txt	docs/archive/acceptance/v1.2.4-transcription/samples/real-mp4/01_完整逐字稿.txt
+R100	docs/v1.2.4-transcription/samples/real-mp4/02_时间帧逐字稿.txt	docs/archive/acceptance/v1.2.4-transcription/samples/real-mp4/02_时间帧逐字稿.txt
+R100	docs/v1.2.4-transcription/samples/real-mp4/internal-recognition-evidence.json	docs/archive/acceptance/v1.2.4-transcription/samples/real-mp4/internal-recognition-evidence.json
+R100	docs/v1.2.4-transcription/samples/real-wav/01_完整逐字稿.txt	docs/archive/acceptance/v1.2.4-transcription/samples/real-wav/01_完整逐字稿.txt
+R100	docs/v1.2.4-transcription/samples/real-wav/02_时间帧逐字稿.txt	docs/archive/acceptance/v1.2.4-transcription/samples/real-wav/02_时间帧逐字稿.txt
+R100	docs/v1.2.4-transcription/samples/real-wav/internal-recognition-evidence.json	docs/archive/acceptance/v1.2.4-transcription/samples/real-wav/internal-recognition-evidence.json
+R100	docs/v1.2.4-transcription/tests.log	docs/archive/acceptance/v1.2.4-transcription/tests.log
+R100	docs/v1.2.4-transcription/transcription-final.log	docs/archive/acceptance/v1.2.4-transcription/transcription-final.log
+R100	docs/v1.2.4-transcription/transcription-ui-final.log	docs/archive/acceptance/v1.2.4-transcription/transcription-ui-final.log
+R100	docs/v1.2.4-transcription/typecheck.log	docs/archive/acceptance/v1.2.4-transcription/typecheck.log
+R100	docs/v1.2.4-transcription/ui-corrected.log	docs/archive/acceptance/v1.2.4-transcription/ui-corrected.log
+R100	docs/v1.2.4-transcription/v124-final.log	docs/archive/acceptance/v1.2.4-transcription/v124-final.log
+R100	docs/v1.2.4/TRANSCRIPTION-CURRENT-STATUS.md	docs/archive/acceptance/v1.2.4/TRANSCRIPTION-CURRENT-STATUS.md
+R100	docs/v1.2.5/CHANGED-FILES.md	docs/archive/acceptance/v1.2.5/CHANGED-FILES.md
+R100	docs/v1.2.5/TEST-REPORT.md	docs/archive/acceptance/v1.2.5/TEST-REPORT.md
+R100	docs/v1.2.6/CHANGED-FILES.md	docs/archive/acceptance/v1.2.6/CHANGED-FILES.md
+R100	docs/v1.2.6/TEST-REPORT.md	docs/archive/acceptance/v1.2.6/TEST-REPORT.md
+R100	docs/v1.2.7/CHANGED-FILES.md	docs/archive/acceptance/v1.2.7/CHANGED-FILES.md
+R100	docs/v1.2.7/TEST-REPORT.md	docs/archive/acceptance/v1.2.7/TEST-REPORT.md
+R100	docs/v1.2.9_三篇置顶真人口播样片验收基准_V1.1.md	docs/archive/acceptance/v1.2.9_三篇置顶真人口播样片验收基准_V1.1.md
+R100	docs/v1.2.9_安全稳定发布检查清单_V1.0.md	docs/archive/acceptance/v1.2.9_安全稳定发布检查清单_V1.0.md
+R100	docs/v1.3.0-acceptance/README.md	docs/archive/acceptance/v1.3.0-acceptance/README.md
+R100	docs/v1.3.0-acceptance/document-runtime.png	docs/archive/acceptance/v1.3.0-acceptance/document-runtime.png
+R100	docs/v1.3.0-acceptance/original-assets.json	docs/archive/acceptance/v1.3.0-acceptance/original-assets.json
+R100	docs/v1.3.0-acceptance/plan-fields-runtime.png	docs/archive/acceptance/v1.3.0-acceptance/plan-fields-runtime.png
+R100	docs/v1.3.0-acceptance/plan-minimal-runtime.png	docs/archive/acceptance/v1.3.0-acceptance/plan-minimal-runtime.png
+R100	docs/v1.3.0-acceptance/runtime.json	docs/archive/acceptance/v1.3.0-acceptance/runtime.json
+R100	docs/v1.3.0-acceptance/tests.json	docs/archive/acceptance/v1.3.0-acceptance/tests.json
+R100	docs/v1.3.0-acceptance/validation/build-package.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/build-package.txt
+R100	docs/v1.3.0-acceptance/validation/bundle.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/bundle.txt
+R100	docs/v1.3.0-acceptance/validation/regression.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/regression.txt
+R100	docs/v1.3.0-acceptance/validation/targeted-and-native-documents.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/targeted-and-native-documents.txt
+R100	docs/v1.3.0-acceptance/validation/tests.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/tests.txt
+R100	docs/v1.3.0-acceptance/validation/typecheck.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/typecheck.txt
+R100	docs/v1.3.0-acceptance/validation/ui.txt	docs/archive/acceptance/v1.3.0-acceptance/validation/ui.txt
+R100	docs/v120/UPGRADE-ROLLBACK.md	docs/archive/acceptance/v120/UPGRADE-ROLLBACK.md
+R100	docs/v120/VALIDATION.md	docs/archive/acceptance/v120/VALIDATION.md
+R100	docs/v120/吃个糖Agent_完整复刻指令_v1.1.4.md	docs/archive/acceptance/v120/吃个糖Agent_完整复刻指令_v1.1.4.md
+R100	docs/v120/吃个糖Agent_标准ZIP任务包规范_v1.1.md	docs/archive/acceptance/v120/吃个糖Agent_标准ZIP任务包规范_v1.1.md
+R100	docs/v128/browser.log	docs/archive/acceptance/v128/browser.log
+R100	docs/v128/build.log	docs/archive/acceptance/v128/build.log
+R100	docs/v128/bundle.log	docs/archive/acceptance/v128/bundle.log
+R100	docs/v128/clean-ci.log	docs/archive/acceptance/v128/clean-ci.log
+R100	docs/v128/focused.log	docs/archive/acceptance/v128/focused.log
+R100	docs/v128/pdf.log	docs/archive/acceptance/v128/pdf.log
+R100	docs/v128/tests.log	docs/archive/acceptance/v128/tests.log
+R100	docs/v128/transcription.log	docs/archive/acceptance/v128/transcription.log
+R100	docs/v128/ui.log	docs/archive/acceptance/v128/ui.log
+R100	docs/v128/修改清单.txt	docs/archive/acceptance/v128/修改清单.txt
+R100	docs/v128/复刻任务包协议.md	docs/archive/acceptance/v128/复刻任务包协议.md
+R100	docs/v128/验收报告.md	docs/archive/acceptance/v128/验收报告.md
+R100	docs/v129-repair/v129-repair-build.log	docs/archive/acceptance/v129-repair/v129-repair-build.log
+R100	docs/v129-repair/v129-repair-bundle.log	docs/archive/acceptance/v129-repair/v129-repair-bundle.log
+R100	docs/v129-repair/v129-repair-pack.log	docs/archive/acceptance/v129-repair/v129-repair-pack.log
+R100	docs/v129-repair/v129-repair-real-speech.log	docs/archive/acceptance/v129-repair/v129-repair-real-speech.log
+R100	docs/v129-repair/v129-repair-regression.log	docs/archive/acceptance/v129-repair/v129-repair-regression.log
+R100	docs/v129-repair/v129-repair-targeted.log	docs/archive/acceptance/v129-repair/v129-repair-targeted.log
+R100	docs/v129-repair/v129-repair-ui-regression.log	docs/archive/acceptance/v129-repair/v129-repair-ui-regression.log
+R100	docs/v129-repair/开发需求.md	docs/archive/acceptance/v129-repair/开发需求.md
+R100	docs/v129-repair/测试报告.md	docs/archive/acceptance/v129-repair/测试报告.md
+R100	docs/v129-repair2/ACCEPTANCE-RESULTS-2026-10-01.md	docs/archive/acceptance/v129-repair2/ACCEPTANCE-RESULTS-2026-10-01.md
+R100	docs/v129-repair2/COSYVOICE-3.5-PLUS-CAPABILITY-LOCK.md	docs/archive/acceptance/v129-repair2/COSYVOICE-3.5-PLUS-CAPABILITY-LOCK.md
+R100	docs/v129-repair2/DEVELOPMENT-AND-RECOVERY.md	docs/archive/acceptance/v129-repair2/DEVELOPMENT-AND-RECOVERY.md
+R100	docs/v129-repair2/FINAL-REQUIREMENTS.md	docs/archive/acceptance/v129-repair2/FINAL-REQUIREMENTS.md
+R100	docs/v129-repair2/IMPLEMENTATION-STATUS.md	docs/archive/acceptance/v129-repair2/IMPLEMENTATION-STATUS.md
+R100	docs/v129-repair2/P0-WORKFLOW-ACCEPTANCE.md	docs/archive/acceptance/v129-repair2/P0-WORKFLOW-ACCEPTANCE.md
+R100	docs/v129-repair2/RUNTIME-RESOURCES.json	docs/archive/acceptance/v129-repair2/RUNTIME-RESOURCES.json
+R100	docs/v129-repair2/TAKEOVER-AUDIT-2026-10-01.md	docs/archive/acceptance/v129-repair2/TAKEOVER-AUDIT-2026-10-01.md
+R100	docs/v129-repair2/WINDOWS-PACKAGE-VERIFICATION.json	docs/archive/acceptance/v129-repair2/WINDOWS-PACKAGE-VERIFICATION.json
+R100	docs/v129-repair2/阶段1_真人带货口播导演对齐_V1.0.md	docs/archive/acceptance/v129-repair2/阶段1_真人带货口播导演对齐_V1.0.md
+R100	docs/v129-repair2/阶段2_真人口播执行编译_V1.0.md	docs/archive/acceptance/v129-repair2/阶段2_真人口播执行编译_V1.0.md
+R100	docs/v129/Windows打包.log	docs/archive/acceptance/v129/Windows打包.log
+R100	docs/v129/bundle测试.log	docs/archive/acceptance/v129/bundle测试.log
+R100	docs/v129/production-build.log	docs/archive/acceptance/v129/production-build.log
+R100	docs/v129/修改清单.md	docs/archive/acceptance/v129/修改清单.md
+R100	docs/v129/全部回归.log	docs/archive/acceptance/v129/全部回归.log
+R100	docs/v129/域与协议测试.log	docs/archive/acceptance/v129/域与协议测试.log
+R100	docs/v129/旧UI回归.log	docs/archive/acceptance/v129/旧UI回归.log
+R100	docs/v129/测试报告.md	docs/archive/acceptance/v129/测试报告.md
+R100	docs/v129/真人口播最终测试.log	docs/archive/acceptance/v129/真人口播最终测试.log
+R100	docs/v129/继续执行状态.json	docs/archive/acceptance/v129/继续执行状态.json
+A	docs/archive/legacy/ACCEPTANCE.md
+R100	docs/ADAPTER-GUIDE.md	docs/archive/legacy/ADAPTER-GUIDE.md
+R100	docs/API-RESEARCH.md	docs/archive/legacy/API-RESEARCH.md
+R100	docs/ARCHITECTURE.md	docs/archive/legacy/ARCHITECTURE.md
+R100	docs/DEVELOPMENT.md	docs/archive/legacy/DEVELOPMENT.md
+A	docs/archive/legacy/KNOWN-ISSUES.md
+R100	SOURCE-SHA256.json	docs/archive/legacy/SOURCE-SHA256.json
+R066	DELIVERY.md	docs/archive/readmes/DELIVERY.md
+R100	GIT-BASELINE.md	docs/archive/readmes/GIT-BASELINE.md
+R091	HANDOFF.md	docs/archive/readmes/HANDOFF.md
+R086	README-REPAIR2.md	docs/archive/readmes/README-REPAIR2.md
+R087	README-USER.md	docs/archive/readmes/README-USER.md
+R093	README-v1.2.8.md	docs/archive/readmes/README-v1.2.8.md
+R087	README-v1.2.9.md	docs/archive/readmes/README-v1.2.9.md
+R097	吃个糖Agent-v1.0.4-使用与升级说明.md	docs/archive/readmes/吃个糖Agent-v1.0.4-使用与升级说明.md
+R100	吃个糖Agent-v1.0.4-实际测试报告.md	docs/archive/readmes/吃个糖Agent-v1.0.4-实际测试报告.md
+R100	docs/real-speech-v2-design-r2/01-源码审计与重构边界.md	docs/archive/real-speech-design/real-speech-v2-design-r2/01-源码审计与重构边界.md
+R100	docs/real-speech-v2-design-r2/02-官方能力核验.md	docs/archive/real-speech-design/real-speech-v2-design-r2/02-官方能力核验.md
+R100	docs/real-speech-v2-design-r2/03-ChatGPT真人口播导演意图沟通手册.md	docs/archive/real-speech-design/real-speech-v2-design-r2/03-ChatGPT真人口播导演意图沟通手册.md
+R100	docs/real-speech-v2-design-r2/04-真人带货口播台词需求模板与示例.md	docs/archive/real-speech-design/real-speech-v2-design-r2/04-真人带货口播台词需求模板与示例.md
+R100	docs/real-speech-v2-design-r2/05-ChatGPT到CosyVoice执行协议编译规范.md	docs/archive/real-speech-design/real-speech-v2-design-r2/05-ChatGPT到CosyVoice执行协议编译规范.md
+R100	docs/real-speech-v2-design-r2/06-架构UI数据迁移与测试.md	docs/archive/real-speech-design/real-speech-v2-design-r2/06-架构UI数据迁移与测试.md
+R100	docs/real-speech-v2-design-r2/07-设计交付验证.md	docs/archive/real-speech-design/real-speech-v2-design-r2/07-设计交付验证.md
+R100	docs/real-speech-v2-design-r2/08-独立文档查看器设计.md	docs/archive/real-speech-design/real-speech-v2-design-r2/08-独立文档查看器设计.md
+R100	docs/real-speech-v2-design-r2/09-CosyVoice-3.5-Plus-Capability-Spike方案.md	docs/archive/real-speech-design/real-speech-v2-design-r2/09-CosyVoice-3.5-Plus-Capability-Spike方案.md
+R100	docs/real-speech-v2-design-r2/10-R1到R2修改清单.md	docs/archive/real-speech-design/real-speech-v2-design-r2/10-R1到R2修改清单.md
+R100	docs/real-speech-v2-design-r2/COSYVOICE_CAPABILITY_PROFILE.v1.json	docs/archive/real-speech-design/real-speech-v2-design-r2/COSYVOICE_CAPABILITY_PROFILE.v1.json
+R100	docs/real-speech-v2-design-r2/README.md	docs/archive/real-speech-design/real-speech-v2-design-r2/README.md
+R100	docs/real-speech-v2-design-r2/design-validation-results.json	docs/archive/real-speech-design/real-speech-v2-design-r2/design-validation-results.json
+R100	docs/real-speech-v2-design-r2/director-dictionary.json	docs/archive/real-speech-design/real-speech-v2-design-r2/director-dictionary.json
+R100	docs/real-speech-v2-design-r2/examples/bindings.json	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/bindings.json
+R100	docs/real-speech-v2-design-r2/examples/director-confirmed.txt	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/director-confirmed.txt
+R100	docs/real-speech-v2-design-r2/examples/patch.json	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/patch.json
+R100	docs/real-speech-v2-design-r2/examples/plan-with-optional-audit.json	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/plan-with-optional-audit.json
+R100	docs/real-speech-v2-design-r2/examples/plan-with-speak-candidates.json	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/plan-with-speak-candidates.json
+R100	docs/real-speech-v2-design-r2/examples/plan-with-sub-candidate.json	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/plan-with-sub-candidate.json
+R100	docs/real-speech-v2-design-r2/examples/plan.json	docs/archive/real-speech-design/real-speech-v2-design-r2/examples/plan.json
+R100	docs/real-speech-v2-design-r2/review/R1-to-R2.diff	docs/archive/real-speech-design/real-speech-v2-design-r2/review/R1-to-R2.diff
+R100	docs/real-speech-v2-design-r2/review/file-diff.json	docs/archive/real-speech-design/real-speech-v2-design-r2/review/file-diff.json
+R100	docs/real-speech-v2-design-r2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json	docs/archive/real-speech-design/real-speech-v2-design-r2/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
+R100	docs/real-speech-v2-design-r2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json	docs/archive/real-speech-design/real-speech-v2-design-r2/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
+R100	docs/real-speech-v2-design-r2/schemas/common.schema.json	docs/archive/real-speech-design/real-speech-v2-design-r2/schemas/common.schema.json
+R100	docs/real-speech-v2-design-r2/spike/result-report-template.json	docs/archive/real-speech-design/real-speech-v2-design-r2/spike/result-report-template.json
+R100	docs/real-speech-v2-design-r2/spike/test-matrix.json	docs/archive/real-speech-design/real-speech-v2-design-r2/spike/test-matrix.json
+R100	docs/real-speech-v2-design-r2/spike/付费调用批准单模板.md	docs/archive/real-speech-design/real-speech-v2-design-r2/spike/付费调用批准单模板.md
+R100	docs/real-speech-v2-design/01-源码审计与重构边界.md	docs/archive/real-speech-design/real-speech-v2-design/01-源码审计与重构边界.md
+R100	docs/real-speech-v2-design/02-官方能力核验.md	docs/archive/real-speech-design/real-speech-v2-design/02-官方能力核验.md
+R100	docs/real-speech-v2-design/03-ChatGPT真人口播导演意图沟通手册.md	docs/archive/real-speech-design/real-speech-v2-design/03-ChatGPT真人口播导演意图沟通手册.md
+R100	docs/real-speech-v2-design/04-真人带货口播台词需求模板与示例.md	docs/archive/real-speech-design/real-speech-v2-design/04-真人带货口播台词需求模板与示例.md
+R100	docs/real-speech-v2-design/05-ChatGPT到CosyVoice执行协议编译规范.md	docs/archive/real-speech-design/real-speech-v2-design/05-ChatGPT到CosyVoice执行协议编译规范.md
+R100	docs/real-speech-v2-design/06-架构UI数据迁移与测试.md	docs/archive/real-speech-design/real-speech-v2-design/06-架构UI数据迁移与测试.md
+R100	docs/real-speech-v2-design/07-设计交付验证.md	docs/archive/real-speech-design/real-speech-v2-design/07-设计交付验证.md
+R100	docs/real-speech-v2-design/08-独立文档查看器设计.md	docs/archive/real-speech-design/real-speech-v2-design/08-独立文档查看器设计.md
+R100	docs/real-speech-v2-design/COSYVOICE_CAPABILITY_PROFILE.v1.json	docs/archive/real-speech-design/real-speech-v2-design/COSYVOICE_CAPABILITY_PROFILE.v1.json
+R100	docs/real-speech-v2-design/README.md	docs/archive/real-speech-design/real-speech-v2-design/README.md
+R100	docs/real-speech-v2-design/design-validation-results.json	docs/archive/real-speech-design/real-speech-v2-design/design-validation-results.json
+R100	docs/real-speech-v2-design/examples/bindings.json	docs/archive/real-speech-design/real-speech-v2-design/examples/bindings.json
+R100	docs/real-speech-v2-design/examples/director-confirmed.txt	docs/archive/real-speech-design/real-speech-v2-design/examples/director-confirmed.txt
+R100	docs/real-speech-v2-design/examples/patch.json	docs/archive/real-speech-design/real-speech-v2-design/examples/patch.json
+R100	docs/real-speech-v2-design/examples/plan.json	docs/archive/real-speech-design/real-speech-v2-design/examples/plan.json
+R100	docs/real-speech-v2-design/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json	docs/archive/real-speech-design/real-speech-v2-design/schemas/REAL_SPEECH_EXECUTION_PATCH_V2.schema.json
+R100	docs/real-speech-v2-design/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json	docs/archive/real-speech-design/real-speech-v2-design/schemas/REAL_SPEECH_EXECUTION_PLAN_V2.schema.json
+R100	docs/real-speech-v2-design/schemas/common.schema.json	docs/archive/real-speech-design/real-speech-v2-design/schemas/common.schema.json
+R094	v1.0.4-Release-Notes.md	docs/archive/releases/v1.0.4-Release-Notes.md
+R100	v1.0.5-Release-Notes.md	docs/archive/releases/v1.0.5-Release-Notes.md
+R100	v1.0.6-Release-Notes.md	docs/archive/releases/v1.0.6-Release-Notes.md
+R100	v1.0.7-Release-Notes.md	docs/archive/releases/v1.0.7-Release-Notes.md
+R096	v1.0.8-Release-Notes.md	docs/archive/releases/v1.0.8-Release-Notes.md
+R095	v1.0.9-Release-Notes.md	docs/archive/releases/v1.0.9-Release-Notes.md
+R094	v1.1.0-Release-Notes.md	docs/archive/releases/v1.1.0-Release-Notes.md
+R090	v1.1.1-Release-Notes.md	docs/archive/releases/v1.1.1-Release-Notes.md
+R100	v1.1.2-Release-Notes.md	docs/archive/releases/v1.1.2-Release-Notes.md
+R092	v1.2.0-Release-Notes.md	docs/archive/releases/v1.2.0-Release-Notes.md
+R100	v1.2.1-Release-Notes.md	docs/archive/releases/v1.2.1-Release-Notes.md
+R100	v1.2.2-Release-Notes.md	docs/archive/releases/v1.2.2-Release-Notes.md
+R084	v1.2.3-Release-Notes.md	docs/archive/releases/v1.2.3-Release-Notes.md
+R091	v1.2.4-Release-Notes.md	docs/archive/releases/v1.2.4-Release-Notes.md
+R100	v1.2.5-Release-Notes.md	docs/archive/releases/v1.2.5-Release-Notes.md
+R100	v1.2.7-Release-Notes.md	docs/archive/releases/v1.2.7-Release-Notes.md
+R091	v1.2.9-Release-Notes.md	docs/archive/releases/v1.2.9-Release-Notes.md
+R100	v1.3.0-Release-Notes.md	docs/archive/releases/v1.3.0-Release-Notes.md
+R100	docs/R3-CHECKPOINT.md	docs/archive/repairs/R3-CHECKPOINT.md
+R100	docs/R4-TEST-REPORT.md	docs/archive/repairs/R4-TEST-REPORT.md
+R100	docs/TEST-RESULTS.md	docs/archive/repairs/TEST-RESULTS.md
+R100	v1.0.4-Upgrade-Guide.md	docs/archive/upgrades/v1.0.4-Upgrade-Guide.md
+R100	v1.0.5-Upgrade-Guide.md	docs/archive/upgrades/v1.0.5-Upgrade-Guide.md
+R100	v1.0.6-Upgrade-Guide.md	docs/archive/upgrades/v1.0.6-Upgrade-Guide.md
+R100	v1.0.7-Upgrade-Guide.md	docs/archive/upgrades/v1.0.7-Upgrade-Guide.md
+R100	v1.0.8-Upgrade-Guide.md	docs/archive/upgrades/v1.0.8-Upgrade-Guide.md
+R100	v1.0.9-Upgrade-Guide.md	docs/archive/upgrades/v1.0.9-Upgrade-Guide.md
+R100	v1.1.0-Upgrade-Guide.md	docs/archive/upgrades/v1.1.0-Upgrade-Guide.md
+R100	v1.1.1-Upgrade-Guide.md	docs/archive/upgrades/v1.1.1-Upgrade-Guide.md
+R100	v1.1.2-Upgrade-Guide.md	docs/archive/upgrades/v1.1.2-Upgrade-Guide.md
+R100	v1.2.0-Upgrade-Guide.md	docs/archive/upgrades/v1.2.0-Upgrade-Guide.md
+R100	v1.2.1-Upgrade-Guide.md	docs/archive/upgrades/v1.2.1-Upgrade-Guide.md
+R100	v1.2.2-Upgrade-Guide.md	docs/archive/upgrades/v1.2.2-Upgrade-Guide.md
+R100	v1.2.3-Upgrade-Guide.md	docs/archive/upgrades/v1.2.3-Upgrade-Guide.md
+R100	v1.2.4-Upgrade-Guide.md	docs/archive/upgrades/v1.2.4-Upgrade-Guide.md
+R100	v1.2.5-Upgrade-Guide.md	docs/archive/upgrades/v1.2.5-Upgrade-Guide.md
+R100	v1.2.7-Upgrade-Guide.md	docs/archive/upgrades/v1.2.7-Upgrade-Guide.md
+R100	v1.2.9-Upgrade-Guide.md	docs/archive/upgrades/v1.2.9-Upgrade-Guide.md
+R100	v1.3.0-Upgrade-Guide.md	docs/archive/upgrades/v1.3.0-Upgrade-Guide.md
+A	docs/current/ACCEPTANCE.md
+A	docs/current/CAPABILITY_RUNTIME.md
+A	docs/current/CURRENT_ARCHITECTURE.md
+A	docs/current/DEVELOPMENT.md
+A	docs/current/SCRIPT_INDEX.md
+A	docs/current/capabilities/API.md
+A	docs/current/capabilities/catalog.json
+A	docs/maintenance/PROTECTED_PATHS.md
+A	docs/maintenance/REPO_CLEANUP_REPORT.md
+A	docs/maintenance/cleanup-manifest.json
+A	docs/maintenance/development-scripts/archive-docs-residual-v142.py
+A	docs/maintenance/development-scripts/archive-docs-v142.py
+A	docs/maintenance/development-scripts/finalize-v142-edits.py
+A	docs/maintenance/development-scripts/finish-docs-v142.py
+A	docs/maintenance/development-scripts/polish-v142.py
+A	docs/maintenance/development-scripts/ui-v142.py
+A	docs/maintenance/development-scripts/update-v142.py
+A	docs/maintenance/document-archive-map.json
+A	docs/maintenance/document-link-check.json
+A	docs/maintenance/git-status-before.txt
+A	docs/maintenance/git-status-ignored-before.txt
+A	docs/maintenance/local-space-after.txt
+A	docs/maintenance/local-space-before.txt
+A	docs/maintenance/processes-before.txt
+M	package-lock.json
+M	package.json
+M	resources/docs/README_文档版本说明.md
+A	scripts/archive/make-delivery.py
+R100	scripts/package-source.py	scripts/archive/package-source.py
+A	scripts/archive/package-win.mjs
+M	scripts/check-real-speech-docs.ts
+A	scripts/cleanup-v142.py
+M	scripts/export-capability-docs.mjs
+A	scripts/maintenance-v142.py
+M	scripts/make-delivery.py
+M	scripts/package-agent-control-ipc.mjs
+M	scripts/package-win.mjs
+A	scripts/prepare-v142-acceptance.py
+M	scripts/rebase-win-runtime.mjs
+A	scripts/report-v142.py
+M	scripts/restore-repair2-runtime.mjs
+A	scripts/run-v142-ui.mjs
+M	scripts/test-browser.ts
+M	scripts/test-capability-runtime.mjs
+M	scripts/test-repair-ui.tsx
+M	scripts/test-ui.tsx
+A	scripts/test-v142-ui.tsx
+A	scripts/validate-doc-links-v142.py
+M	scripts/verify-package.mjs
+M	src/cli/capability.ts
+M	src/features/realSpeech/Page.tsx
+M	src/features/realSpeech/domain.ts
+M	src/main/capabilities/catalog.ts
+M	src/main/capabilities/jobs.ts
+M	src/main/capabilities/registry.ts
+A	src/main/capabilities/runtime.ts
+M	src/main/index.ts
+M	src/main/realSpeech/v2/controlPipe.ts
+M	src/main/services/assets.ts
+M	src/main/services/libraryView.ts
+M	src/main/services/thumbnails.ts
+M	src/renderer/components/VideoThumbnail.tsx
+M	src/renderer/main.tsx
+M	src/renderer/pages/Assets.tsx
+M	src/renderer/pages/Library.tsx
+M	src/renderer/store.ts
+M	src/shared/brand.ts
+M	tests/v102.test.ts
+M	tests/v110.test.ts
+M	tests/v120-final.test.ts
+M	tests/v128.test.ts
+A	tests/v142-runtime.test.ts
+M	tests/v2-real-speech.test.ts

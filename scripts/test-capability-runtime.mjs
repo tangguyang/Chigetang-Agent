@@ -65,7 +65,10 @@ const cli = (args) => {
 };
 function execute(capability, params = {}, confirm = false) {
   const path = join(root, "request.json");
-  writeFileSync(path, JSON.stringify({ capability, params, confirm }));
+  writeFileSync(
+    path,
+    JSON.stringify({ capability, params, confirm, responseMode: "debug" }),
+  );
   return cli(["capability", "execute", path]).data;
 }
 try {
@@ -253,7 +256,10 @@ try {
             jsonrpc: "2.0",
             id: 3,
             method: "tools/call",
-            params: { name: "runtime_status", arguments: {} },
+            params: {
+              name: "capability_search",
+              arguments: { params: { query: "runtime", limit: 2 } },
+            },
           },
         ]
           .map((x) => JSON.stringify(x))
@@ -264,10 +270,60 @@ try {
     .split(/\r?\n/)
     .map(JSON.parse);
   assert.equal(mcp.length, 3);
-  assert.ok(mcp[1].result.tools.length > 90);
-  assert.equal(mcp[2].result.structuredContent.result.windowCount, 0);
+  assert.equal(mcp[1].result.tools.length, 5);
+  assert.equal(mcp[2].result.structuredContent.result.length, 2);
+  const compactFile = join(root, "compact-request.json");
+  writeFileSync(
+    compactFile,
+    JSON.stringify({
+      capability: "assets.get",
+      params: { id: imported.result[0].asset.id },
+    }),
+  );
+  const compact = cli(["capability", "execute", compactFile]).data;
+  assert.equal(compact.result, undefined);
+  assert.ok(existsSync(compact.resultPath));
+  assert.equal(
+    JSON.parse(readFileSync(compact.resultPath, "utf8")).result.id,
+    imported.result[0].asset.id,
+  );
+  const awaited = execute("jobs.wait", {
+    jobId: submitted.result.jobId,
+    timeout: 30000,
+  });
+  assert.equal(awaited.result.status, "succeeded");
+  const thumb = execute("assets.thumbnail.ensure", {
+    id: imported.result[0].asset.id,
+  });
+  assert.ok(existsSync(thumb.result.thumbnailPath));
+  const fullTools = capabilities.map((e) => ({
+    name: e.id.replaceAll(".", "_"),
+    description: e.description,
+    inputSchema: {
+      type: "object",
+      properties: { params: e.inputSchema, confirm: { type: "boolean" } },
+      additionalProperties: false,
+    },
+    outputSchema: e.outputSchema,
+  }));
+  const metrics = {
+    capabilities: capabilities.length,
+    mcpTools: mcp[1].result.tools.length,
+    fullToolsBytes: Buffer.byteLength(JSON.stringify(fullTools)),
+    leanToolsBytes: Buffer.byteLength(JSON.stringify(mcp[1].result.tools)),
+    normalAssetBytes: Buffer.byteLength(
+      JSON.stringify(imported.result[0].asset),
+    ),
+    compactResponseBytes: Buffer.byteLength(JSON.stringify(compact)),
+    normalExecutionBytes: Buffer.byteLength(JSON.stringify(JSON.parse(readFileSync(compact.resultPath,'utf8')))),
+    compactIsDefault: true,
+  };
+  writeFileSync(
+    "tmp/v142-token-metrics.json",
+    JSON.stringify(metrics, null, 2),
+  );
   const report = {
-    schema: "V140_RUNTIME_ACCEPTANCE",
+    schema: "V142_RUNTIME_ACCEPTANCE",
     root,
     portable: portable || null,
     capabilities: capabilities.length,
@@ -284,11 +340,11 @@ try {
   };
   mkdirSync("tmp", { recursive: true });
   writeFileSync(
-    portable ? "tmp/v140-portable-report.json" : "tmp/v140-runtime-report.json",
+    portable ? "tmp/v142-portable-report.json" : "tmp/v142-runtime-report.json",
     JSON.stringify(report, null, 2),
   );
   writeFileSync(
-    "tmp/v140-capabilities.json",
+    "tmp/v142-capabilities.json",
     JSON.stringify(capabilities, null, 2),
   );
   console.log(JSON.stringify(report));

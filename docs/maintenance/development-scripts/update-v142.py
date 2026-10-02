@@ -1,0 +1,23 @@
+from pathlib import Path
+def edit(path,old,new):
+ p=Path(path);s=p.read_text(encoding='utf-8');assert old in s,(path,old[:100]);p.write_text(s.replace(old,new),encoding='utf-8')
+for path in ['package.json','package-lock.json','VERSION','src/shared/brand.ts','src/features/realSpeech/domain.ts','src/cli/capability.ts','scripts/package-agent-control-ipc.mjs']:
+ p=Path(path);p.write_text(p.read_text(encoding='utf-8').replace('1.4.1','1.4.2'),encoding='utf-8')
+edit('src/main/index.ts',"import {registerJobs}","import {registerDiscovery} from './capabilities/runtime.ts';\nimport {registerJobs}")
+edit('src/main/index.ts','capabilityRegistry.registerWorkflow();','capabilityRegistry.registerWorkflow();\n      registerDiscovery(capabilityRegistry);')
+edit('src/main/realSpeech/v2/controlPipe.ts',"import type { CapabilityRegistry }", "import { controlResponse } from '../../capabilities/runtime.ts';\nimport type { CapabilityRegistry }")
+edit('src/main/realSpeech/v2/controlPipe.ts',"const output=await capabilities.executeCapability(JSON.parse(request.argv[2]));", "const input=JSON.parse(request.argv[2]);\n           const output=controlResponse(root,input,await capabilities.executeCapability(input));")
+edit('src/features/realSpeech/Page.tsx','[text, setText] = useState(\n      () => localStorage.getItem("real-speech-v2-plan-draft") || "",\n    )','[text, setText] = useState("")')
+edit('src/features/realSpeech/Page.tsx','  useEffect(() => {\n    try {\n      localStorage.setItem("real-speech-v2-plan-draft", text);\n    } catch {\n      /* draft editing remains usable */\n    }\n  }, [text]);','')
+edit('src/features/realSpeech/Page.tsx','setOld(null);\n                  setPreview(null);','setOld(null);\n                  setText("");\n                  setAttested(false);\n                  setExperimentalConfirmed(false);\n                  setPreview(null);')
+edit('src/cli/capability.ts','import { createInterface }','import { brand } from "../shared/brand.ts";\nimport { createInterface }')
+edit('src/cli/capability.ts','version: "1.4.2"','version: brand.version')
+edit('src/cli/capability.ts','tools: entries.map((e: any)',"tools: entries.filter((e:any)=>['capability.search','capability.describe','jobs.submit','jobs.wait','jobs.status'].includes(e.id)).map((e: any)")
+edit('src/cli/capability.ts','confirm: { type: "boolean" },','confirm: { type: "boolean" },\n                responseMode: { enum: ["compact", "normal", "debug"], default: "compact" },')
+edit('src/cli/capability.ts','["params", "confirm"].includes(k)','["params", "confirm", "responseMode"].includes(k)')
+edit('src/cli/capability.ts','confirm: args.confirm ?? false,','confirm: args.confirm ?? false,\n            responseMode: args.responseMode ?? "compact",')
+edit('src/renderer/main.tsx','                    ["prompt", "Prompt"],\n','')
+edit('src/renderer/main.tsx','state.assetKind === "prompt" ? <PromptsPage /> : <LibraryPage />','<LibraryPage />')
+edit('src/renderer/pages/Assets.tsx','                ["prompt", "Prompt"],\n','')
+edit('src/renderer/pages/Assets.tsx','src={media("thumb", asset.id)}','src={media(asset.thumbnailPath ? "thumb" : "asset", asset.id)}')
+edit('src/renderer/pages/Assets.tsx','删除记录','隐藏')
