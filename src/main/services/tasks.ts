@@ -1,3 +1,4 @@
+import { productionContext } from './productionContext.ts';
 import { brand } from "../../shared/brand.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
@@ -662,6 +663,8 @@ export class TaskService {
       });
       recordBilling(this.d.db, t);
       this.d.db.set("request:" + requestId, id);
+      const context=productionContext.getStore();
+      if(context)this.d.db.set("production:task:"+id,context);
       this.d.db.set("recentModel:" + model.id, now);
       this.d.changed();
       return t;

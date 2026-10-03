@@ -43,9 +43,9 @@ let timer: ReturnType<typeof setTimeout>;
 let sequence = 0;
 export const useApp = create<Store>((set, get) => ({
   assetKind: ['video','image','audio','hidden'].includes(localStorage.getItem('library-kind')||'')?localStorage.getItem('library-kind')!:'video',
-  setAssetKind: (assetKind) => {localStorage.setItem("library-kind",assetKind);set({ assetKind, page: "资产库" });},
+  setAssetKind: (assetKind) => {localStorage.setItem("library-kind",assetKind);set({ assetKind, page: "上传素材" });},
   boot: null,
-  page: "一键生成",
+  page: "一键复刻",
   draft: null,
   drafts: [],
   draftSaveStatus: "saved",
@@ -222,6 +222,7 @@ export const labels: Record<string, string> = {
   Downloading: "下载中",
   Completed: "已完成",
   Failed: "失败",
+  unknown_result: "结果待核对（禁止自动重提）",
   Cancelled: "已取消",
   Paused: "待处理",
 };

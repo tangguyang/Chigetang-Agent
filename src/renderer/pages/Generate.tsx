@@ -384,6 +384,7 @@ export function GeneratePage() {
             <div>
               <h1>生成工作台</h1>
             </div>
+            <button onClick={()=>useApp.getState().setPage("一键生成")}>一键生成 · 任务包</button>
             <button
               className="icon-button"
               title="任务队列"

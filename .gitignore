@@ -92,3 +92,8 @@ scripts/.v2-doc-tests.cjs
 /poc-local/
 /.scratch/
 /tmp-repository-cleanup/
+
+# Explicit local-only long-term production materials
+/user-assets/
+
+/scripts/.v150-ui-tests.mjs

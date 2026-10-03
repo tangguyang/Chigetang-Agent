@@ -23,7 +23,7 @@ const root = () => mkdtempSync(join(tmpdir(), "ctg-v142-"));
 test("v142 all product version sources match the lockfile and source VERSION", () => {
   const pkg = JSON.parse(readFileSync("package.json", "utf8"));
   const lock = JSON.parse(readFileSync("package-lock.json", "utf8"));
-  assert.equal(pkg.version, "1.4.5");
+  assert.equal(pkg.version, "1.5.0");
   for (const value of [
     lock.version,
     lock.packages[""].version,

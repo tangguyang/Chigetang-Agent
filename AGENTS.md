@@ -1,8 +1,8 @@
 # 吃个糖Agent：开发入口
 
 ## 项目是什么
-Electron + React + TypeScript 的本地 AI 视频/音频生产工具，当前版本 v1.4.5。
-长期源码基线为 GitHub dev；未经授权不进入 v1.5.0。
+Electron + React + TypeScript 的本地 AI 视频/音频生产工具，当前功能版本 v1.5.0；v1.4.5 是稳定历史发布基线。
+长期源码基线为 GitHub dev；用户已授权本轮 v1.5.0 生产工作流产品化。
 默认中文沟通，称呼用户老唐。
 
 ## 默认阅读顺序
@@ -51,3 +51,6 @@ CosyVoice 保留；Seed-VC 路线已废弃，历史资料仅供参考。
 
 ## v1.4.5 正式环境
 唯一源码 D:\Codex\吃个糖Agent项目；唯一正式绿色软件 D:\吃个糖Agent；唯一生产数据 D:\吃个糖Agent软件数据库。dev 是开发分支，main 和 tag v1.4.5 是正式稳定基线。GUI 与 Agent Control 共用正式包与同一 writer，不使用 Temp Electron 生产宿主。旧数据库及 D:\吃个糖Agent迁移备份仅用于恢复，不得作为生产入口或自动删除。设置页与 runtime.status 提供版本、commit、branch、Build ID、时间、数据根和实际 EXE 路径。
+
+## v1.5.0 生产工作流
+产品入口及服务边界见 docs/current/PRODUCTION_WORKFLOW_V150.md。统一生成任务是读穿索引，不重写底层任务库；任务收藏/备注独立于素材收藏；本机 user-assets 仅登记用户明确指定的核心素材，禁止提交 Git。Codex 使用正式 MCP/Capability，不用临时脚本长期生产。一键复制复用 TaskService；收费提交继续需要人类授权，未知结果禁止自动重提。

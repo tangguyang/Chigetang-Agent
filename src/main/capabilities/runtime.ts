@@ -99,14 +99,32 @@ export function controlResponse(
   writeFileSync(resultPath, JSON.stringify(full, null, 2), { flag: "wx" });
   if (mode === "normal") return { ...full, logs: undefined, resultPath };
   const data: any = result.result;
+  const compactData = request.capability === 'production.list' && data?.items
+    ? {...data,items:data.items.map(({params,draft,...row}:any)=>row)}
+    : request.capability === 'production.update' && data
+      ? (({params,draft,...row}:any)=>row)(data)
+      : request.capability.startsWith('copy.') && data && !Array.isArray(data)
+        ? (({drafts,...workflow}:any)=>({...workflow,count:drafts?.length}))(data)
+        : request.capability === 'copy.list' && Array.isArray(data)
+          ? data.map(({drafts,...workflow}:any)=>({...workflow,count:drafts?.length})) : data;
   const small = [
     "capability.search",
     "capability.describe",
     "jobs.submit",
     "runtime.status",
     "logs.read",
+    "core-assets.list",
+    "core-assets.resolve",
+    "production.list",
+    "production.update",
+    "copy.list",
+    "copy.get",
+    "copy.preflight",
+    "copy.confirm",
+    "copy.create",
+    "copy.submit",
   ].includes(request.capability)
-    ? sanitize(data)
+    ? sanitize(compactData)
     : undefined;
   const task = data?.task || data?.result?.result || data;
   return {
@@ -118,6 +136,8 @@ export function controlResponse(
     taskId: task?.taskId || (task?.snapshot ? task.id : undefined),
     assetId: request.capability.startsWith("assets.") ? data?.id : undefined,
     sessionId: data?.sessionId,
+    workflowId: request.capability.startsWith('copy.') ? data?.id : undefined,
+    productionTaskId: data?.productionTaskId,
     jobId: data?.jobId,
     jobStatus: data?.jobId ? data.status : undefined,
     timedOut: data?.timedOut,

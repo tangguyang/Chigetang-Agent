@@ -8,6 +8,7 @@ import type { Application } from "./application.ts";
 import { normalizeWorkspace, validateWorkspace } from "../../shared/accounts.ts";
 import { HttpClient, object } from "../providers/http.ts";
 import { DownloadManager } from "./downloads.ts";
+import { AppError } from "./errors.ts";
 
 export const QWEN_AUDIO_MODEL = "qwen-audio-3.0-tts-plus";
 export type QwenAudioInput = {
@@ -130,7 +131,7 @@ export async function generateQwenAudio(app: Application, input: QwenAudioInput)
   ));
   if (response.code && response.code !== "Success") throw Error(`Qwen-Audio 拒绝请求：${String(response.code)} ${String(response.message || "")}`);
   const audio = object(object(response.output || {}).audio || {});
-  if (typeof audio.url !== "string" || !audio.url) throw Error("提交后未返回音频地址；禁止自动重试，请核对云端记录");
+  if (typeof audio.url !== "string" || !audio.url) throw new AppError("SubmissionUnknown", "提交后未返回音频地址；禁止自动重试，请核对云端记录");
   const path = await new DownloadManager(app.logger, app.settings().downloadTimeoutSeconds * 1000, app.fetcher)
     .download(audio.url.replace(/^http:/, "https:"), destination);
   const imported = await app.assets.import(path, false);

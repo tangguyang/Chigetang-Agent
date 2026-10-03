@@ -32,6 +32,23 @@ export function registerApplicationCapabilities(
       (p) => invoke(id, p),
     );
   add('library.hide',{id:s,hidden:b},['id'],'write');
+  add('production.list',{search:s,feature:s,workflowId:s,driver:{enum:['GUI','Codex','历史未知']},status:s,favorite:b,includeDeleted:b,page:{type:'integer',minimum:1},pageSize:{type:'integer',minimum:1,maximum:100}});
+  add('production.get',{id:s},['id']);
+  add('production.update',{id:s,note:{type:'string',maxLength:4000},favorite:b},['id'],'write');
+  add('production.reuse',{id:s},['id']);
+  add('production.references',{assetId:s},['assetId']);
+  add('production.open',{id:s,index:{type:'integer',minimum:0},folder:b},['id'],'write');
+  add('uploads.list',{search:s,kind:s,folder:s,project:s,from:s,favorite:b,hidden:b,page:{type:'integer',minimum:1}},[]);
+  add('core-assets.list');
+  add('core-assets.resolve',{alias:s},['alias']);
+  add('core-assets.register',{alias:s,type:{enum:['person','product','brand','voice','other']},path:s,description:s,designated:{const:true}},['alias','type','path','designated'],'write');
+  add('copy.create',{requestId:{type:'string',minLength:1,maxLength:100},name:s,draft:obj,sourceTaskId:s,count:{type:'integer',minimum:1,maximum:100},variants:{type:'array',items:obj,maxItems:100},bindings:{type:'array',items:objectSchema({alias:s,role:{enum:['reference_image','reference_video','reference_audio','first_frame','last_frame']}},['alias','role']),maxItems:100}},['requestId','count'],'write');
+  add('copy.list');
+  add('copy.get',{id:s},['id']);
+  add('copy.update',{id:s,revision:{type:'integer',minimum:1},drafts:{type:'array',items:obj,minItems:1,maxItems:100}},['id','revision','drafts'],'write');
+  add('copy.preflight',{id:s},['id'],'write');
+  add('copy.confirm',{id:s,revision:{type:'integer',minimum:1}},['id','revision'],'write');
+  add('copy.submit',{id:s},['id'],'paid');
   add("audio.qwen.generate", {
     model: { const: "qwen-audio-3.0-tts-plus" }, voice: s, text: s, instruction: s, outputPath: s, accountId: s,
     rate: { type: "number", minimum: 0.5, maximum: 2 },

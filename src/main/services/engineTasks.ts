@@ -1,3 +1,4 @@
+import { productionContext } from './productionContext.ts';
 import { TaskService } from './tasks.ts';
 import {brand} from '../../shared/brand.ts';
 import { randomUUID } from 'node:crypto';
@@ -195,6 +196,8 @@ export class EngineTaskService extends TaskService {
       });
       recordBilling(this.d.db, t);
       this.d.db.set("request:" + requestId, id);
+      const context=productionContext.getStore();
+      if(context)this.d.db.set("production:task:"+id,context);
       this.d.db.set("recentModel:" + model.id, now);
       this.d.changed();
       return t;

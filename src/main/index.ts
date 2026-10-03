@@ -1,3 +1,7 @@
+import { ProductionService, generatedAsset } from './services/production.ts';
+import { CoreAssetService } from './services/coreAssets.ts';
+import { CopyWorkflowService } from './services/copyWorkflow.ts';
+import { productionContext } from './services/productionContext.ts';
 import {PaidAcceptanceGate} from './realSpeech/v2/paidAcceptanceGate.ts';
 import {registerSpeechCapabilities} from './capabilities/speech.ts';
 import {CapabilityRegistry} from './capabilities/registry.ts';
@@ -276,7 +280,8 @@ else {
       protocol.handle("aivideo", async (request) => {
         try {
           const u = new URL(request.url);
-          const [kind, id] = u.pathname.split("/").filter(Boolean);
+          const [kind, encodedId] = u.pathname.split("/").filter(Boolean);
+          const id=decodeURIComponent(encodedId||"");
           let file: string;
           if (kind === "asset" || kind === "thumb") {
             const a = service.assets.get(id);
@@ -284,6 +289,8 @@ else {
               kind === "thumb" && a.thumbnailPath
                 ? a.thumbnailPath
                 : a.managedPath || a.originalPath;
+          } else if (kind === "production") {
+            file=(await production.output(id)).path;
           } else if (kind === "output") {
             file = service.tasks.get(id).outputPath || "";
           } else if (kind === "realSpeechV2" && realSpeechV2) {
@@ -373,6 +380,7 @@ else {
               case "export": {const out=await realSpeechV2.exportDiagnosis(p);if(!agent)await shell.openPath(out.path);result=out;break;}
               default:throw new Error("未知V2操作");
             }
+            if(action==="v2:import" && (result as any)?.taskId)production.mark("speech-v2:"+(result as any).taskId,agent?"Codex":"GUI","真人口播 V2");
             if (!["v2:list","v2:get","v2:preview","v2:patchPreview"].includes(action)) service.changed();return result;
           }
           if (!realSpeech) {
@@ -400,16 +408,44 @@ else {
             default: throw new Error("未知真人口播操作");
           }
 
+        if(action==="create" && (data as any)?.taskId)production.mark("speech:"+(data as any).taskId,agent?"Codex":"GUI","真人口播");
         return data;
       }
       ipcMain.handle("realSpeech:invoke", async(event,action:string,payload:unknown)=>{
         try{if(headless||event.sender!==window.webContents||event.senderFrame!==window.webContents.mainFrame)throw Error("不可信请求");return {ok:true,data:await invokeSpeech(action,payload)};}catch(error){return {ok:false,error:String(error)};}
       });
-      async function invokeOperation(action: string, payload: unknown, agent = false): Promise<unknown> {
+      const coreAssets = new CoreAssetService(service, process.env.AIVIDEO_TEST_ROOT ? join(root,'user-assets') : 'D:\\Codex\\吃个糖Agent项目\\user-assets');
+      const production = new ProductionService(service, async(v2)=>{
+        const data=await invokeSpeech(v2?'v2:list':'list',{},true) as any;
+        return v2?(data.tasks||[]):(realSpeech?.list(true)||[]);
+      },()=>[...copyWorkflows.list().map(w=>({...w,feature:'一键复制'})),...taskPackageService.list().map(w=>({id:w.sessionId,feature:'一键生成',taskIds:w.results.map(r=>r.taskId)}))]);
+      const copyWorkflows = new CopyWorkflowService(service,coreAssets,(id,driver,feature)=>production.mark(id,driver,feature));
+      async function invokeOperation(action:string,payload:unknown,agent=false):Promise<unknown>{
+        const feature=action.startsWith('replica.')?'一键复刻':action.startsWith('packages.')?'一键生成':action.startsWith('copy.')?'一键复制':undefined;
+        return productionContext.run({driver:agent?'Codex':'GUI',feature},()=>dispatchOperation(action,payload,agent));
+      }
+      async function dispatchOperation(action: string, payload: unknown, agent = false): Promise<unknown> {
         const confirm = agent ? async (_message: string) => true : globalConfirm;
             const p = (payload ?? {}) as Record<string, unknown>;
             let result: unknown;
             switch (action) {
+              case 'production.list': result=await production.list(p);break;
+              case 'production.get': result=await production.get(String(p.id));break;
+              case 'production.update': result=await production.update(String(p.id),p as any);break;
+              case 'production.reuse': result=await production.reuse(String(p.id));break;
+              case 'production.references': result=await production.references(String(p.assetId));break;
+              case 'production.open': {const out=await production.output(String(p.id),Number(p.index)||0);if(p.folder)shell.showItemInFolder(out.path);else{const error=await shell.openPath(out.path);if(error)throw Error(error);}result={path:out.path};break;}
+              case 'core-assets.list': result=coreAssets.list();break;
+              case 'core-assets.resolve': result=await coreAssets.resolve(String(p.alias));break;
+              case 'core-assets.register': result=await coreAssets.register(p as any);break;
+              case 'copy.create': result=await copyWorkflows.create(p as any,agent?'Codex':'GUI');break;
+              case 'copy.list': result=copyWorkflows.list();break;
+              case 'copy.get': result=copyWorkflows.get(String(p.id));break;
+              case 'copy.update': result=copyWorkflows.update(String(p.id),Number(p.revision),p.drafts as Draft[]);break;
+              case 'copy.preflight': result=await copyWorkflows.preflight(String(p.id));break;
+              case 'copy.confirm': result=await copyWorkflows.confirm(String(p.id),Number(p.revision));break;
+              case 'copy.submit': if(!agent&&!await confirm('正式提交复制批次将调用收费生成，是否执行？'))return null;result=await copyWorkflows.submit(String(p.id));break;
+              case 'uploads.list': result=production.uploads(p);break;
               case 'text.process':result=textService.process(String(p.text),String(p.operation));break;
               case 'text.subtitles':result=await textService.subtitles(p.segments as {startMs:number;endMs:number;text:string}[],String(p.output));break;
               case 'video.frames': result=await localTools.media('frames',p);break;
@@ -430,7 +466,8 @@ else {
                 if(!input)throw Error('没有可导出的本地文件');await copyFile(input,String(p.output),1);result={path:p.output};break;
               }
               case "audio.qwen.generate":
-                result = await (await import("./services/qwenAudio.ts")).generateQwenAudio(service, p as unknown as import("./services/qwenAudio.ts").QwenAudioInput);
+                result = await production.execute("Qwen",agent?"Codex":"GUI",p,async()=> (await import("./services/qwenAudio.ts")).generateQwenAudio(service, p as unknown as import("./services/qwenAudio.ts").QwenAudioInput));
+                production.mark("asset:"+(result as any).assetId,agent?"Codex":"GUI","Qwen");
                 break;
               case "audio.qwen.clone":
                 result = await (await import("./services/qwenAudio.ts")).cloneQwenAudio(service, p as unknown as Parameters<typeof import("./services/qwenAudio.ts").cloneQwenAudio>[1]);

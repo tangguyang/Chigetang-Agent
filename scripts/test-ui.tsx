@@ -1,3 +1,4 @@
+import { ProductionService } from '../src/main/services/production.ts';
 import {libraryView} from "../src/main/services/libraryView.ts";
 import { HttpClient } from "../src/main/providers/http.ts";
 import { testConnection } from "../src/main/providers/accounts.ts";
@@ -38,10 +39,16 @@ const app = new Application(
   () => {},
   () => {},
 );
+const productionIndex=new ProductionService(app,async()=>[],()=>[]);
 Object.assign(window, {
   aiVideo: {
     invoke: async (action: string, p: Record<string, unknown>) => {
       switch (action) {
+        case "replica.list": return [];
+        case "production.list": return productionIndex.list(p);
+        case "uploads.list": return productionIndex.uploads(p);
+        case "core-assets.list": return [];
+        case "copy.list": return [];
         case "transcription.progress":
           return { stage: "idle", busy: false };
         case "folders.list":
@@ -165,10 +172,11 @@ function check(name: string, fn: () => void) {
   checks.push(name);
   console.log("PASS " + name);
 }
-check("app opens on one-click generation by default", () => {
-  assert.equal(useApp.getState().page, "一键生成");
-  assert.equal(document.querySelector("h1")?.textContent?.includes("一键生成"), true);
+check("app opens on replica production by default", () => {
+  assert.equal(useApp.getState().page, "一键复刻");
+  assert.equal(document.querySelector("h1")?.textContent?.includes("复刻"), true);
 });
+await act(async()=>useApp.getState().setPage("一键生成"));
 check("旧一键生成只保留 v124 导入入口",()=>{
  const labels=[...document.querySelectorAll<HTMLButtonElement>('.oneclick-import-bar button')].map(b=>b.textContent?.trim());assert.deepEqual(labels,['导入 ZIP']);
 });
@@ -197,10 +205,10 @@ check("11k editor draft autosaves through application to SQLite", () => {
     11000,
   );
 });
-for (const page of ["任务", "资产库", "Prompt", "模型与 API", "设置"]) {
+for (const page of ["生成任务", "上传素材", "Prompt", "模型与 API", "设置"]) {
   await act(async () => useApp.getState().setPage(page));
   check(page + " page renders", () =>
-    assert.equal(document.querySelector("h1")?.textContent, page === "任务" ? "资产库" : page === "Prompt" ? "资产库 · 脚本／Prompt" : page),
+    assert.equal(document.querySelector("h1")?.textContent, page === "Prompt" ? "资产库 · 脚本／Prompt" : page),
   );
 }
 await act(async () => useApp.getState().setPage("统计"));
@@ -313,7 +321,7 @@ async function select(selector: string, value: string) {
   await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)); });
 }
 check("current version and New Task navigation", () => {
-  assert.equal(app.bootstrap().version, "1.4.5");
+  assert.equal(app.bootstrap().version, "1.5.0");
   assert(document.querySelector(".workspace-tab-new"));
   assert(!document.querySelector(".new-task"));
   assert.equal(useApp.getState().draft?.params.ratio, "9:16");
@@ -776,11 +784,11 @@ await act(async () => {
   useApp.getState().setAssetKind("audio");
 });
 check("v105 asset sidebar quick filters select one shared asset page", () =>
-  assert.equal(document.querySelector("h1")?.textContent, "资产库"),
+  assert.equal(document.querySelector("h1")?.textContent, "上传素材"),
 );
 await act(async () => useApp.getState().setPage("任务"));
 assert.equal(document.querySelectorAll(".asset-shortcuts button").length, 0);
-await clickText("资产库", ".sidebar nav > button");
+await clickText("上传素材", ".sidebar nav > button");
 check("修复版资产库统一入口，不再增加侧栏重复类型入口", () => {
   assert.equal(document.querySelectorAll(".asset-shortcuts button").length,0);
   assert.equal(useApp.getState().assetKind,"audio");
@@ -802,7 +810,7 @@ check("v106 asset page tab updates the sidebar selection", () => {
     "音频",
   );
 });
-await clickText("资产库", ".sidebar nav > button");
+await clickText("上传素材", ".sidebar nav > button");
 assert.equal(document.querySelectorAll(".asset-shortcuts button").length, 0);
 await act(async () => {
   useApp.getState().setPage("设置");
@@ -875,7 +883,7 @@ check("v109 can add an independent second config with a different seed", () => {
 window.aiVideo.invoke = originalInvoke;
 check("v123 navigation removes long video and keeps other menu ordering", () => {
   const names = [...document.querySelectorAll('.sidebar nav > button')].map(b=>b.textContent);
-  assert.deepEqual(names, ['一键生成','一键复刻','视频生成','真人口播','音频生成','复刻音色','转文字','资产库','小工具','设置']);
+  assert.deepEqual(names, ['一键复刻','一键复制','视频生成','真人口播','音频生成','复刻音色','转文字','小工具','生成任务','上传素材','设置']);
   assert.equal(document.querySelector('.studio-results h2')?.textContent, '任务列表');
 });
 await act(async () => useApp.getState().setPage("转文字"));

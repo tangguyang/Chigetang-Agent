@@ -1,3 +1,5 @@
+import { ProductionPage } from './pages/Production.tsx';
+import { CopyWorkflowPage } from './pages/CopyWorkflow.tsx';
 import { LibraryPage } from "./pages/Library.tsx";
 import { Copy, AudioLines, Mic, TextCursorInput, Wrench } from "lucide-react";
 import { ReplicaPage } from "./pages/Replica.tsx";
@@ -29,16 +31,10 @@ import { run, useApp } from "./store.ts";
 import "./style.css";
 const RealSpeechPage = React.lazy(() => import("../features/realSpeech/Page.tsx"));
 const nav = [
-  ["一键生成", Clapperboard],
-  ["一键复刻", Copy],
-  ["生成视频", Sparkles],
-  ["真人口播", Mic],
-  ["生成音频", AudioLines],
-  ["复刻音色", Mic],
-  ["转文字", TextCursorInput],
-  ["资产库", Images],
-  ["小工具", Wrench],
-  ["设置", Settings],
+  ["一键复刻", Copy], ["一键复制", Copy], ["生成视频", Sparkles],
+  ["真人口播", Mic], ["生成音频", AudioLines],
+  ["复刻音色", Mic], ["转文字", TextCursorInput], ["小工具", Wrench],
+  ["生成任务", Layers], ["上传素材", Images], ["设置", Settings],
 ] as const;
 function App() {
   const state = useApp();
@@ -135,9 +131,9 @@ function App() {
                 key={name}
                 className={state.page === name ? "active" : ""}
                 onClick={() => {
-                  if (name === "资产库") {
+                  if (name === "上传素材") {
                     setAssetExpanded((value) => !value);
-                    state.setPage("资产库");
+                    state.setPage("上传素材");
                   } else state.setPage(name);
                 }}
               >
@@ -145,7 +141,7 @@ function App() {
                 {name === "生成视频" ? "视频生成" : name === "生成音频" ? "音频生成" : name}
                 {state.page === name && <i />}
               </button>
-              {false && name === "资产库" && assetExpanded && (
+              {false && name === "上传素材" && assetExpanded && (
                 <div className="asset-shortcuts">
                   {[
                     ["image", "图片"],
@@ -156,7 +152,7 @@ function App() {
                     <button
                       key={k}
                       className={
-                        state.page === "资产库" && state.assetKind === k
+                        state.page === "上传素材" && state.assetKind === k
                           ? "active"
                           : ""
                       }
@@ -190,7 +186,7 @@ function App() {
               : "main"
           }
         >
-          {state.page === "生成视频" ? (
+          {state.page === "一键复制" ? (<CopyWorkflowPage />) : state.page === "生成任务" ? (<ProductionPage />) : state.page === "上传素材" ? (<AssetsPage />) : state.page === "生成视频" ? (
             <GeneratePage />
           ) : state.page === "一键生成" ? (
             <OneClickPage />
@@ -202,7 +198,7 @@ function App() {
             <TranscriptionPage />
           ) : state.page === "任务" ? (
             <LibraryPage />
-          ) : state.page === "资产库" ? (
+          ) : state.page === "上传素材" ? (
             <LibraryPage />
           ) : state.page === "Prompt" ? (
             <PromptsPage />

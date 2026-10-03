@@ -81,6 +81,7 @@ export function AssetsPage({
     }
     return names.join(" / ");
   };
+  const [references,setReferences]=useState<{id:string;name:string;feature:string}[]>([]),[coreAlias,setCoreAlias]=useState(""),[coreType,setCoreType]=useState("other"),[coreDescription,setCoreDescription]=useState("");
   const [search, setSearch] = useState(""),
     [kind, setKind] = useState(assetKind === "hidden" ? "" : assetKind),
     [project, setProject] = useState(""),
@@ -92,6 +93,8 @@ export function AssetsPage({
     [busy, setBusy] = useState(false),
     [detail, setDetail] = useState<Asset | null>(null),
     [selected, setSelected] = useState<string[]>([]);
+  useEffect(()=>{setReferences([]);if(detail)void api<typeof references>("production.references",{assetId:detail.id}).then(setReferences).catch(e=>message(String(e)));},[detail?.id]);
+
   useEffect(() => {
     setKind(assetKind === "hidden" ? "" : assetKind);
     setPage(1);
@@ -108,7 +111,7 @@ export function AssetsPage({
     hidden,
   };
   const refresh = () =>
-    run(async () => setData(await api<Page<Asset>>("assets.list", query)));
+    run(async () => setData(await api<Page<Asset>>(picker ? "assets.list" : "uploads.list", query)));
   useEffect(() => {
     const timer = setTimeout(() => void refresh(), 180);
     return () => clearTimeout(timer);
@@ -154,8 +157,8 @@ export function AssetsPage({
           <>
             <div className="page-title">
               <div>
-                <h1>资产库</h1>
-                <p>让产品、人物与品牌素材，成为可以反复使用的资产。</p>
+                <h1>上传素材</h1>
+                <p>用户提供的原材料。生产结果请在生成任务中查看。</p>
               </div>
               <div className="actions">
                 <button
@@ -526,6 +529,9 @@ export function AssetsPage({
       )}
       {detail && (
         <Modal title={detail.name} onClose={() => setDetail(null)}>
+          <h3>被哪些任务引用</h3>{references.length?references.map(r=><p key={r.id}>{r.name} · {r.feature}</p>):<p>暂无任务引用</p>}
+          {!picker&&<details><summary>指定为长期核心素材</summary><p>只有明确指定的素材会复制到本机核心目录，供 Codex 长期调用。</p><label>alias<input aria-label="核心素材alias" value={coreAlias} onChange={e=>setCoreAlias(e.target.value)}/></label><select aria-label="核心素材分类" value={coreType} onChange={e=>setCoreType(e.target.value)}>{[['person','人物'],['product','产品'],['brand','品牌'],['voice','声音'],['other','其他']].map(([v,n])=><option key={v} value={v}>{n}</option>)}</select><input aria-label="核心素材说明" placeholder="简短说明" value={coreDescription} onChange={e=>setCoreDescription(e.target.value)}/><button disabled={!coreAlias.trim()} onClick={()=>void run(async()=>{await api('core-assets.register',{alias:coreAlias,type:coreType,path:detail.managedPath||detail.originalPath,description:coreDescription,designated:true});message('已登记长期核心素材：'+coreAlias);})}>我明确指定此文件为长期核心素材</button></details>}
+
           <div
             className="large-preview"
             onClick={

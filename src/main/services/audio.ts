@@ -1,3 +1,4 @@
+import { productionContext } from './productionContext.ts';
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { copyFile, mkdir, stat, unlink } from "node:fs/promises";
@@ -871,6 +872,7 @@ export class AudioService {
         JSON.stringify(batchData),
       );
       for (const { task, job } of created) {
+        const context=productionContext.getStore();if(context)this.app.db.set("production:task:"+task.id,{...context,feature:"CosyVoice"});
         this.app.db.run("INSERT INTO tasks VALUES(?,?,?)", task.id, task.name, now);
         const { snapshot, ...mutable } = task;
         this.app.db.run(
