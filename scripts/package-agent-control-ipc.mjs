@@ -52,7 +52,11 @@ const dir = join(
 renameSync(packed, dir);
 writeFileSync(join(dir,'APP-VERSION.txt'),pkg.version+'\n');
 for (const folder of ["docs", "licenses"])
-  cpSync(folder, join(dir, folder), { recursive: true });
+  cpSync(folder, join(dir, folder), {
+    recursive: true,
+    // Preserve internal development history in Git, outside the user package.
+    filter: (source) => resolve(source) !== resolve("docs/maintenance/development-scripts"),
+  });
 writeFileSync(
   join(dir, "chigetang.cmd"),
   '@echo off\r\nsetlocal\r\nset "ELECTRON_RUN_AS_NODE=1"\r\nfor %%E in ("%~dp0*.exe") do set "AGENT_EXE=%%~fE"\r\n"%AGENT_EXE%" "%~dp0resources\\app\\dist\\cli\\launcher.cjs" %*\r\nexit /b %errorlevel%\r\n',

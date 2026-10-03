@@ -318,6 +318,7 @@ try {
     normalExecutionBytes: Buffer.byteLength(JSON.stringify(JSON.parse(readFileSync(compact.resultPath,'utf8')))),
     compactIsDefault: true,
   };
+  mkdirSync("tmp", { recursive: true });
   writeFileSync(
     "tmp/v142-token-metrics.json",
     JSON.stringify(metrics, null, 2),
@@ -338,7 +339,6 @@ try {
     productionDatabaseOpened: false,
     paidRequests: 0,
   };
-  mkdirSync("tmp", { recursive: true });
   writeFileSync(
     portable ? "tmp/v142-portable-report.json" : "tmp/v142-runtime-report.json",
     JSON.stringify(report, null, 2),
