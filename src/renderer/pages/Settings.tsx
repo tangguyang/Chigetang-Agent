@@ -43,6 +43,18 @@ function GeneralSettings() {
         </div>
       </div>
       <section className="settings-section">
+        <h3>软件与构建身份</h3>
+        {boot.identity && Object.entries({
+          'App Version': boot.identity.version,
+          'Git Commit': boot.identity.gitCommit,
+          'Git Branch': boot.identity.gitBranch,
+          'Build ID': boot.identity.buildId,
+          'Build Time': boot.identity.buildTime,
+          'Data Root': boot.identity.dataRoot,
+          'Executable Path': boot.identity.executablePath,
+        }).map(([label,value]) => <Field key={label} label={label}><small className="path">{value}</small></Field>)}
+      </section>
+      <section className="settings-section">
         <h3>外观与默认选项</h3>
         <div className="form-grid">
           <Field label="主题">

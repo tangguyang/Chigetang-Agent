@@ -63,7 +63,7 @@ writeFileSync(
 );
 writeFileSync(
   join(dir, "AGENT-CONTROL-README.txt"),
-  "v1.4.2 本地AI执行平台：双击 agent-start.cmd 无窗口启动，或运行GUI。\r\nchigetang.cmd capability execute request.json，优先 capability.search / describe 按需发现。\r\nchigetang.cmd mcp 提供低Token stdio MCP，默认compact。无需安装Node，不模拟鼠标键盘。\r\n付费/删除动作必须确认。详见docs/current/CAPABILITY_RUNTIME.md。\r\n",
+  "v" + pkg.version + " 本地AI执行平台：双击 agent-start.cmd 无窗口启动，或运行GUI。\r\nchigetang.cmd capability execute request.json，优先 capability.search / describe 按需发现。\r\nchigetang.cmd mcp 提供低Token stdio MCP，默认compact。无需安装Node，不模拟鼠标键盘。\r\n付费/删除动作必须确认。详见docs/current/CAPABILITY_RUNTIME.md。\r\n",
 );
 writeFileSync(join(dir,'agent-start.ps1'),"$ErrorActionPreference = 'Stop'\r\nStart-Process -FilePath (Join-Path $PSScriptRoot '吃个糖Agent.exe') -ArgumentList '--agent-headless' -WorkingDirectory $PSScriptRoot -WindowStyle Hidden\r\n");
 writeFileSync(join(dir,'agent-start.cmd'),'@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0agent-start.ps1"\r\n');

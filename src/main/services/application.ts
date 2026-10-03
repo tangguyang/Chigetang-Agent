@@ -1,3 +1,4 @@
+import { buildIdentity } from './buildIdentity.ts';
 import {
   existsSync,
   lstatSync,
@@ -515,6 +516,7 @@ export class Application {
       root: this.root,
       installPath: this.programPath,
       version: brand.version,
+      identity: buildIdentity(this.programPath, this.root),
     };
   }
   saveDraft(draft: Draft) {

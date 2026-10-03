@@ -1,3 +1,10 @@
+# v1.4.5
+
+- 统一正式 Windows 数据根至 `D:\吃个糖Agent软件数据库`，正式绿色软件部署至 `D:\吃个糖Agent`。
+- GUI 与 runtime.status 显示同一构建身份，包含版本、Git 提交/分支、Build ID、构建时间、数据根和实际 EXE 路径。
+- 增加备份后离线逐表对账迁移工具；同 ID 比较版本、SHA256 文件核对、冲突阻止写入目标。
+- 保留全部原有业务能力、Qwen 四参数、RealSpeech/V2 独立记录体系与 v1.4.2 视频验收结论。
+
 # v1.4.2（2026-10-02）
 
 新增控制面 Token Saver：capability.search / describe、jobs.wait、compact 默认结果与本地详细结果文件；MCP 默认仅公开5个发现/调度入口。生成输入、Provider adapter 和任务包业务语义不变。

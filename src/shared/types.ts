@@ -329,7 +329,19 @@ export interface Settings {
   lastOutputDir: string;
   lastImportDir?: string;
 }
+export interface BuildIdentity {
+  version: string;
+  gitCommit: string;
+  gitBranch: string;
+  buildId: string;
+  buildTime: string;
+  sourceTreeHash: string;
+  sourceDirty: boolean;
+  dataRoot: string;
+  executablePath: string;
+}
 export interface Bootstrap {
+  identity?: BuildIdentity;
   models: Model[];
   providers: Provider[];
   accounts: Account[];

@@ -313,7 +313,7 @@ async function select(selector: string, value: string) {
   await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)); });
 }
 check("current version and New Task navigation", () => {
-  assert.equal(app.bootstrap().version, "1.4.2");
+  assert.equal(app.bootstrap().version, "1.4.5");
   assert(document.querySelector(".workspace-tab-new"));
   assert(!document.querySelector(".new-task"));
   assert.equal(useApp.getState().draft?.params.ratio, "9:16");

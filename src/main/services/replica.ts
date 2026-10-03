@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
+import { brand } from '../../shared/brand.ts';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Application } from './application.ts';
@@ -43,7 +44,7 @@ export class ReplicaService {
  const account=d.accountId==='auto'?(accounts.find(a=>a.isDefault)||(accounts.length===1?accounts[0]:undefined)):accounts.find(a=>a.id===d.accountId);
  if(accounts.length>1&&!account)throw new Error('请选择明确的 API 账户');
  const assets=await Promise.all(d.assets.map(async b=>{const a=await this.app.assets.refreshMetadata(b.assetId);await this.app.assets.verify(a);return {...a,role:b.role};}));
- const draft=autoBindMentions(d,assets);const snapshot:Snapshot={draft,model,provider:this.app.providers().find(p=>p.id===model.providerId)!,account:account??{id:'offline',providerId:model.providerId,name:'离线预检',endpoint:'',workspaceId:'offline',region:'cn-beijing',notes:'',manualBalance:'',enabled:true,isDefault:false,maxConcurrent:1,createdAt:'',maskedKey:''},assets,price:model.price,estimatedCost:{amount:null,currency:model.price.currency,kind:'unknown',note:''},appVersion:'1.2.8',createdAt:''};
+ const draft=autoBindMentions(d,assets);const snapshot:Snapshot={draft,model,provider:this.app.providers().find(p=>p.id===model.providerId)!,account:account??{id:'offline',providerId:model.providerId,name:'离线预检',endpoint:'',workspaceId:'offline',region:'cn-beijing',notes:'',manualBalance:'',enabled:true,isDefault:false,maxConcurrent:1,createdAt:'',maskedKey:''},assets,price:model.price,estimatedCost:{amount:null,currency:model.price.currency,kind:'unknown',note:''},appVersion:brand.version,createdAt:''};
  this.app.tasks.d.adapter(model).validateInput(snapshot);segment.cost=this.app.tasks.estimate(d).cost;delete segment.issue;
  }catch(e){segment.issue=String(e);delete segment.cost;}}
  try{s.fingerprint=await this.fingerprint(s);}catch{delete s.fingerprint;}return this.save(s);}

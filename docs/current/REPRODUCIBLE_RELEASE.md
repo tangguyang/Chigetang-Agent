@@ -1,7 +1,7 @@
-# v1.4.2 可复现 Windows x64 发布
+# v1.4.5 可复现 Windows x64 发布
 
 ## 基线与环境
-源码权威基线是 GitHub tangguyang/Chigetang-Agent 的 dev；package.json、VERSION 均为1.4.2。
+源码权威基线是 GitHub tangguyang/Chigetang-Agent 的 dev；package.json、VERSION 均为1.4.5。
 要求 Windows x64、Git、Node >=24.19、npm、系统 tar.exe/curl.exe、.NET Framework 4.x 的 x64 csc.exe。
 构建 nativePipe 使用 Windows .NET 编译器；不需要 Python、额外 VC++ 安装或真实 API 账户。
 不要在正在运行本仓库 dist 的程序旁构建；使用独立源码目录，避免 local-pipe.exe 被占用。
@@ -44,7 +44,6 @@ Electron和npm依赖仍需相应下载源可用；锁定依赖不等于永久离
 静态包验证不能替代 GUI 人工体验、真实音色质量或付费服务验收。
 
 ## main / dev 同步
-本次核对时 main 是 v1.2.9（6492f2b），为 dev 的祖先，落后51个提交；dev 为v1.4.2。
-main 同步前重新 fetch 核实祖先关系，经 Review 后用 git merge --ff-only origin/dev 快进，再正常 push main。
-若 main 后续产生独立提交，停止快进方案，审查后正常 merge；禁止 rebase、force push、reset --hard。
-本任务仅维护 dev，未修改 main，也未自动推送。
+本轮正式任务授权将 dev、main 同步到同一个已验收提交并标记 v1.4.5。只做正常 push 和祖先关系下快进；禁止 force push、历史重写。
+开发、测试与迁移验收完成后统一提交，再从该提交重建正式包，使构建身份记录最终 commit 和 sourceDirty=false。最后校验包内容、启动身份与数据持久性。
+构建身份包含时间，因此 Build ID 每次重建不同；GUI 和 Agent 应读取同一正式包的身份。SenseVoice 生产模型由离线迁移恢复至正式数据根，不进入 Git 或绿色包。

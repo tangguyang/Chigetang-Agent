@@ -1,6 +1,6 @@
 export const brand = {
   name: "吃个糖Agent",
-  version: "1.4.2",
+  version: "1.4.5",
   accent: "#e76b37",
   accentDark: "#ed925c",
   tagline: "VIDEO AGENT",

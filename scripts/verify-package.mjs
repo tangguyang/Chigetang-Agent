@@ -17,6 +17,12 @@ await verifyRuntime(app);
 const manifest = JSON.parse(readFileSync(join(app, "package.json"), "utf8"));
 assert.equal(manifest.version, version);
 assert.equal(readFileSync(join(root, "APP-VERSION.txt"), "utf8").trim(), version);
+const identity = JSON.parse(readFileSync(join(app,'dist/build-identity.json'),'utf8'));
+assert.equal(identity.version,version);
+assert.match(identity.gitCommit,/^[a-f0-9]{40}$/);
+assert.match(identity.sourceTreeHash,/^[a-f0-9]{64}$/);
+assert(identity.buildId.startsWith(version+'-'));
+assert(!Number.isNaN(Date.parse(identity.buildTime)));
 const bytes = readFileSync(join(root, "吃个糖Agent.exe"));
 assert.equal(bytes.subarray(0, 2).toString(), "MZ");
 const peOffset = bytes.readUInt32LE(60);
@@ -80,6 +86,7 @@ assert.equal(readFileSync("scripts/create-shortcut.ps1").subarray(0,3).toString(
 const report = {
   verified_icon_sizes: expectedSizes,
   version,
+  build_identity: identity,
   platform: "win32",
   architecture: "x64",
   pe_strings: strings,

@@ -1,4 +1,5 @@
 import { build } from "esbuild";
+await import('./build-identity.mjs');
 await build({
   entryPoints: ["src/main/index.ts"],
   bundle: true,

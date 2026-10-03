@@ -1246,7 +1246,7 @@ else {
       capabilityRegistry.registerWorkflow();
       registerDiscovery(capabilityRegistry,root);
       registerJobs(capabilityRegistry,root);
-      capabilityRegistry.register({id:'runtime.status',description:'本机执行进程状态',service:'Application',effect:'read',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>({version:brand.version,pid:process.pid,headless,windowCount:BrowserWindow.getAllWindows().length,dataRoot:root,writerRecovery:releaseSpeechWriter?.recovered??null,queuePaused:service.settings().queuePaused}));
+      capabilityRegistry.register({id:'runtime.status',description:'本机执行进程状态',service:'Application',effect:'read',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>({...service.bootstrap().identity,version:brand.version,pid:process.pid,headless,windowCount:BrowserWindow.getAllWindows().length,dataRoot:root,writerRecovery:releaseSpeechWriter?.recovered??null,queuePaused:service.settings().queuePaused}));
       capabilityRegistry.register({id:'runtime.stop',description:'任务空闲时关闭本机执行进程，须 confirm:true',service:'Application',effect:'destructive',inputSchema:{type:'object',additionalProperties:false},outputSchema:{type:'object'}},()=>{
         const active=service.db.one<{n:number}>("SELECT count(*) n FROM task_versions WHERE status IN ('Queued','Uploading','Submitting','Processing','Downloading')")?.n;
         if(active||transcriptionService.progress().busy||service.audio.cloning||service.audio.active.size||realSpeech?.active.size||realSpeechV2?.active.size)throw Error('仍有任务执行，先等待完成或取消');

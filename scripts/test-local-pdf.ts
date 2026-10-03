@@ -1,5 +1,6 @@
 import { readFileSync,existsSync,mkdtempSync,copyFileSync } from 'node:fs';
 import { join,resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createRequire } from 'node:module';
 import assert from 'node:assert/strict';
 import { renderPdfPages,pageNumbers } from '../src/renderer/tools/pdf.ts';
@@ -9,7 +10,7 @@ const runtime=process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES;
 const require=createRequire(import.meta.url);const canvas=require(runtime?join(runtime,'@napi-rs/canvas'):'@napi-rs/canvas');
 Object.assign(globalThis,{DOMMatrix:canvas.DOMMatrix,ImageData:canvas.ImageData,Path2D:canvas.Path2D});
 const pdfjs=await import('pdfjs-dist/legacy/build/pdf.mjs');
-const tools=new LocalTools(()=>undefined);const input=join(mkdtempSync('/tmp/中文PDF测试-'),'多页中文.pdf');copyFileSync(process.argv[2]||'tests/fixtures/中文多页.pdf',input);
+const tools=new LocalTools(()=>undefined);const input=join(mkdtempSync(join(tmpdir(),'中文PDF测试-')),'多页中文.pdf');copyFileSync(process.argv[2]||'tests/fixtures/中文多页.pdf',input);
 const resources=resolve('node_modules/pdfjs-dist');
 for(const format of ['png','jpg'] as const){for(const range of ['', '2-3']){
  const pdf=await pdfjs.getDocument({data:await tools.pdfRead(input),cMapUrl:resources+'/cmaps/',cMapPacked:true,standardFontDataUrl:resources+'/standard_fonts/',wasmUrl:resources+'/wasm/',isEvalSupported:false}).promise;

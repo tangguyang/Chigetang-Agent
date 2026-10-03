@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.4.2",
+export const APP_VERSION = "1.4.5",
   MANUAL_VERSION = "5.0",
   PROTOCOL_VERSION = "1.2",
   CAPABILITIES_VERSION = 1;

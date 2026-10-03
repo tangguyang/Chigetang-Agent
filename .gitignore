@@ -48,6 +48,7 @@ resources/sherpa-onnx-offline.exe
 !resources/workflow/单任务测试模板_V2.2.zip
 !resources/workflow/多任务测试模板_V2.2.zip
 scripts/.*-tests.mjs
+scripts/.transcription-ui.mjs
 resources/MediaInfoModule.wasm
 tmp-*.txt
 tmp-*.json

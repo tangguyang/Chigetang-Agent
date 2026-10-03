@@ -1,7 +1,7 @@
 # 吃个糖Agent：开发入口
 
 ## 项目是什么
-Electron + React + TypeScript 的本地 AI 视频/音频生产工具，当前版本 v1.4.2。
+Electron + React + TypeScript 的本地 AI 视频/音频生产工具，当前版本 v1.4.5。
 长期源码基线为 GitHub dev；未经授权不进入 v1.5.0。
 默认中文沟通，称呼用户老唐。
 
@@ -22,7 +22,7 @@ docs/archive 是历史参考与证据，不能作为当前实现或重复验收�
 
 ## 数据原则
 源码与用户数据分离；API 凭证、用户数据库、素材、生成文件不得进入 Git。
-生产数据根目录 D:\吃个糖Agent数据库-v1.3.0 受保护，不删除或修改其中资料。
+生产数据根目录 D:\吃个糖Agent软件数据库 受保护，不删除或修改其中资料。
 测试使用隔离 AIVIDEO_TEST_ROOT 与 fake provider；测试 fixtures 不因忽略规则而删除。
 本地私人未跟踪目录不擅自读取、移动、修改、删除或提交。
 
@@ -48,3 +48,6 @@ v1.4.2 视频验收已结束：三项真实 WAN PASS，一键生成 ACCEPTED / W
 Qwen-Audio 为当前主要优化路线，保护 rate、pitch、volume、seed 四参数能力。
 CosyVoice 保留；Seed-VC 路线已废弃，历史资料仅供参考。
 真人口播生成、解码、GUI 播放、人工听感分别验收，不能相互替代。
+
+## v1.4.5 正式环境
+唯一源码 D:\Codex\吃个糖Agent项目；唯一正式绿色软件 D:\吃个糖Agent；唯一生产数据 D:\吃个糖Agent软件数据库。dev 是开发分支，main 和 tag v1.4.5 是正式稳定基线。GUI 与 Agent Control 共用正式包与同一 writer，不使用 Temp Electron 生产宿主。旧数据库及 D:\吃个糖Agent迁移备份仅用于恢复，不得作为生产入口或自动删除。设置页与 runtime.status 提供版本、commit、branch、Build ID、时间、数据根和实际 EXE 路径。

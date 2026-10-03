@@ -1,4 +1,4 @@
-# v1.4.2 当前架构
+# v1.4.5 当前架构
 
 Agent → CLI/MCP → Windows named pipe Agent Control → Capability Registry → GUI 共用 dispatcher → Existing Services → Provider / SQLite / 本地媒体工具。
 
@@ -10,4 +10,6 @@ Agent → CLI/MCP → Windows named pipe Agent Control → Capability Registry �
 
 真人口播 Page 的新 Plan 输入每次挂载为空；保存后清空输入/preview/attestation，仅清理编辑状态，不删除历史、音频或计划。
 
-运行手册镜像仍在 resources/real-speech-v2、resources/docs。历史源码设计在 docs/archive。付费端到端四项保持 PARTIAL PASS，见 docs/acceptance/v1.4.2-acceptance-report.md。
+运行手册镜像仍在 resources/real-speech-v2、resources/docs。历史源码设计在 docs/archive。v1.4.2 视频生产已 ACCEPTED：三项真实 WAN PASS，一键生成 ACCEPTED / WAIVED（未付费），见 PROJECT_STATUS.md 与 ../acceptance/v142-real-production-report.md。旧 PARTIAL 报告仅作为历史证据。
+
+正式进程统一来自 D:\吃个糖Agent，数据根固定 D:\吃个糖Agent软件数据库。GUI bootstrap.identity 与 Agent runtime.status 读取同一 dist/build-identity.json，并补入实际 process.execPath 和运行数据根。构建时记录 commit、branch、源文件 SHA256、dirty 状态、时间及 Build ID；版本不匹配则拒绝加载身份。主任务库、RealSpeech 与 V2 的独立表结构保持不变。

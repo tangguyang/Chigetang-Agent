@@ -19,7 +19,7 @@ export const directoryKeys = [
   "otherDir",
   "backupDir",
 ] as const;
-export const WINDOWS_DATA_ROOT = "D:\\吃个糖Agent数据库-v1.3.0";
+export const WINDOWS_DATA_ROOT = "D:\\吃个糖Agent软件数据库";
 export const managedDirectories = [
   "database",
   "config",

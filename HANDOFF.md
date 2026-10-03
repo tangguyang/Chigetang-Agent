@@ -1,6 +1,6 @@
-# 当前交接入口 / v1.4.2
+# 当前交接入口 / v1.4.5
 
-源码权威基线为 GitHub dev。Windows x64 运行时准备与包验证见[可复现发布](docs/current/REPRODUCIBLE_RELEASE.md)；版本保持1.4.2，发布治理不改变已验收业务逻辑。
+源码权威基线为 GitHub dev。Windows x64 运行时准备与包验证见[可复现发布](docs/current/REPRODUCIBLE_RELEASE.md)；当前版本1.4.5，正式路径与迁移说明见 docs/current/ENVIRONMENT_V145.md。环境统一不改变已验收视频业务逻辑。
 
 【v1.4.2 后台视频生产能力：ACCEPTED，按4/4验收完成】
 
