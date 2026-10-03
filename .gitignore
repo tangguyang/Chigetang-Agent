@@ -64,3 +64,16 @@ scripts/.v2-doc-tests.cjs
 
 # Local acceptance fixtures and private runtime metadata are not source.
 /acceptance/
+
+# Local databases (tracked migration SQL and test fixtures remain protected)
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Explicit local PoC / scratch directories; keep private folders untracked and visible
+/.poc/
+/poc-local/
+/.scratch/
+/tmp-repository-cleanup/

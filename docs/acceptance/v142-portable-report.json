@@ -1,6 +1,6 @@
 {
   "schema": "V142_RUNTIME_ACCEPTANCE",
-  "root": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\ctg-ipc-acceptance-v140-iltM2I",
+  "root": "C:\\Example\\AppData\\Local\\Temp\\ctg-ipc-acceptance-v140-iltM2I",
   "portable": "D:\\Codex\\吃个糖Agent项目\\release\\portable-acceptance\\v142-gqb213xp\\吃个糖Agent-v1.4.2-LocalAI-Windows-x64-绿色版",
   "capabilities": 148,
   "headless": true,
