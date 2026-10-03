@@ -25,6 +25,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck
+      - name: Prepare media tools (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version
+          ffprobe -version
+      - name: Prepare media tools (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          node --input-type=module -e "const { prepareRuntime } = await import('./scripts/prepare-windows-runtime.mjs'); await prepareRuntime({ only: 'ff' });"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Join-Path $env:GITHUB_WORKSPACE 'resources' | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Verify media tools on PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          ffmpeg.exe -version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ffprobe.exe -version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - run: npm test
 
   build-ui:
