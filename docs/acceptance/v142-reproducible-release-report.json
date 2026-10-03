@@ -1,0 +1,48 @@
+{
+  "schema": "V142_REPRODUCIBLE_RELEASE_CHECK",
+  "date": "2026-10-03",
+  "sourceBase": "ea914a7e9e5d3b6f51fcff2e0c6484fdd5612c96",
+  "version": "1.4.2",
+  "environment": { "platform": "win32", "arch": "x64", "node": "24.19.0" },
+  "cleanSourceSnapshot": true,
+  "freshNpmCi": true,
+  "originalNodeModulesOrDistReused": false,
+  "runtimeInputs": "Newly downloaded pinned upstream archives; verified archive and extracted EXE SHA256. Cache used for extraction; pinned Electron ZIP downloaded by preparation script.",
+  "runtimeLock": "scripts/windows-runtime-lock.json",
+  "checks": {
+    "npmCi": "PASS",
+    "prepareRuntime": "PASS",
+    "typecheck": "PASS",
+    "test": { "passed": 211, "failed": 0 },
+    "testUi": { "passed": 71, "failed": 0, "kind": "jsdom DOM checks" },
+    "testBundle": "PASS",
+    "releaseSafetyTests": { "passed": 3, "failed": 0 },
+    "build": "PASS",
+    "packWin": "PASS",
+    "verifyPackage": "PASS",
+    "portableHeadlessCliMcp": "PASS"
+  },
+  "portableRuntime": {
+    "capabilities": 150,
+    "media": true,
+    "image": true,
+    "export": true,
+    "subtitles": true,
+    "workflow": true,
+    "mcp": true,
+    "windowCount": 0,
+    "productionDatabaseOpened": false,
+    "paidRequests": 0
+  },
+  "businessSourceChanges": 0,
+  "acceptedRuntimeBinaryChanges": 0,
+  "existingDependencyVersionChanges": 0,
+  "historicalEvidenceEdited": false,
+  "limits": [
+    "Source snapshot plus fresh dependency installation, not a new remote clone of uncommitted changes.",
+    "GUI manual experience and real paid production services were not tested.",
+    "SenseVoice model files remain separate user installation inputs.",
+    "Long-term no-cache rebuild still requires a permanent mirror of the pinned BtbN daily archive.",
+    "Byte-identical archive and PE timestamps are not guaranteed."
+  ]
+}

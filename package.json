@@ -40,7 +40,11 @@
     "test:agent-control:portable": "node --experimental-strip-types scripts/test-agent-control-portable.ts",
     "test:capability:runtime": "node scripts/build.mjs && node scripts/test-capability-runtime.mjs",
     "pack:capability:win": "npm run build && node scripts/package-agent-control-ipc.mjs",
-    "test:v142:ui": "node scripts/run-v142-ui.mjs"
+    "test:v142:ui": "node scripts/run-v142-ui.mjs",
+    "prepare:runtime": "node scripts/prepare-windows-runtime.mjs",
+    "verify:runtime": "node scripts/prepare-windows-runtime.mjs --check",
+    "test:release": "node --test tests/windows-runtime.test.mjs",
+    "verify:package": "node scripts/verify-package.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -63,7 +67,8 @@
     "jsdom": "^30.0.1",
     "prettier": "3.6.2",
     "typescript": "5.9.3",
-    "vite": "7.3.1"
+    "vite": "7.3.1",
+    "resedit": "2.0.3"
   },
   "engines": {
     "node": ">=24.19.0"

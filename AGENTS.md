@@ -35,6 +35,7 @@ docs/archive 是历史参考与证据，不能作为当前实现或重复验收�
 清理先核实用途和引用；无法确认的文件保留，历史资料优先 git mv 归档。
 禁止 git clean -fdx、reset --hard、force push、历史重写。
 打包、push、合并及真实付费按当前任务授权；不自动制作源码 ZIP。
+发布重建先读 docs/current/REPRODUCIBLE_RELEASE.md；运行时仅用固定来源及 SHA256，不提交二进制。
 
 ## 高风险区域
 API 凭证、数据库迁移、付费 API、音色、任务恢复、文件删除。

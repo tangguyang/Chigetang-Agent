@@ -22,7 +22,7 @@
 2. [交接与验收边界](../HANDOFF.md)
 3. [当前架构](current/CURRENT_ARCHITECTURE.md)
 4. [运行控制与 CLI/MCP](current/CAPABILITY_RUNTIME.md)
-5. [开发与测试命令](current/DEVELOPMENT.md)
+5. [开发与测试命令](current/DEVELOPMENT.md) · [可复现发布](current/REPRODUCIBLE_RELEASE.md)
 6. [项目状态](current/PROJECT_STATUS.md)
 7. [脚本索引](current/SCRIPT_INDEX.md)
 8. [数据库](DATABASE.md)

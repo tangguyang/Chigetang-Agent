@@ -9,9 +9,11 @@ import {
 import { join, relative } from "node:path";
 import { createHash } from "node:crypto";
 import * as pe from "resedit";
+import { verifyRuntime, runtimeLock } from "./prepare-windows-runtime.mjs";
 const root = process.env.AIVIDEO_PACKAGE_ROOT || JSON.parse(readFileSync('tmp/agent-control-package.json','utf8')).directory,
   app = join(root, "resources/app");
 const version = JSON.parse(readFileSync("package.json", "utf8")).version;
+await verifyRuntime(app);
 const manifest = JSON.parse(readFileSync(join(app, "package.json"), "utf8"));
 assert.equal(manifest.version, version);
 assert.equal(readFileSync(join(root, "APP-VERSION.txt"), "utf8").trim(), version);
@@ -51,6 +53,8 @@ for (const f of [
   "dist/renderer/index.html",
   "resources/MediaInfoModule.wasm",
   "resources/ffmpeg.exe",
+  "resources/ffprobe.exe",
+  "resources/sherpa-onnx/sherpa-onnx-offline.exe",
 ])
   assert(existsSync(join(app, f)), f);
 for (const f of walk("resources/workflow"))
@@ -85,12 +89,13 @@ const report = {
   user_data_directories_absent_from_program: true,
   ffmpeg_x64_verified: true,
   ffmpeg_sha256: hash(ffmpeg),
+  pinned_runtime_files: runtimeLock.artifacts.map(a => ({ path: a.target, sha256: a.binarySHA256 })),
   windows_case_insensitive_names_verified: true,
   windows_native_launch: "静态检查不声明GUI人工验收；最终包后台验证见v142-portable-report.json",
   paid_api_tested: false,
 };
 writeFileSync(
-  "docs/acceptance/v142-package-verification.json",
+  process.env.AIVIDEO_PACKAGE_REPORT || "tmp/package-verification.json",
   JSON.stringify(report, null, 2) + "\n",
 );
 console.log(

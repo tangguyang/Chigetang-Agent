@@ -1,4 +1,5 @@
 import packager from "@electron/packager";
+import { verifyRuntime, verifyElectronArchive } from "./prepare-windows-runtime.mjs";
 import {
   mkdirSync,
   cpSync,
@@ -9,6 +10,8 @@ import {
 } from "node:fs";
 import { resolve, join } from "node:path";
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+await verifyRuntime();
+const electronZipDir = await verifyElectronArchive();
 const base = resolve("release/capability-platform-" + Date.now()),
   stage = join(base, "app-staging");
 // Unique output: preserve every previous green package. No recursive deletion.
@@ -39,9 +42,7 @@ const [packed] = await packager({
   prune: false,
   overwrite: false,
   icon: resolve("resources/brand.ico"),
-  ...(process.env.AIVIDEO_ELECTRON_ZIP_DIR
-    ? { electronZipDir: resolve(process.env.AIVIDEO_ELECTRON_ZIP_DIR) }
-    : {}),
+  electronZipDir,
   appVersion: pkg.version,
 });
 const dir = join(

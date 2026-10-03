@@ -40,6 +40,8 @@ desktop.ini
 resources/ffmpeg.exe
 resources/ffprobe.exe
 resources/sherpa-onnx/*.exe
+resources/sherpa-onnx/*.dll
+resources/sherpa-onnx-offline.exe
 
 # Generated packages and media
 *.zip
@@ -71,6 +73,18 @@ scripts/.v2-doc-tests.cjs
 *.db
 *.db-wal
 *.db-shm
+*.db-journal
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+/user-data/
+/user-assets/
+/backups/
+/models/
+*.onnx
+*.safetensors
 
 # Explicit local PoC / scratch directories; keep private folders untracked and visible
 /.poc/

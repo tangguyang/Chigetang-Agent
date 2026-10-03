@@ -2,6 +2,8 @@
 
 当前打包统一指向package-agent-control-ipc.mjs。旧源码ZIP/多份交付脚本仅历史归档，禁止执行。
 
+发布准备：`npm run prepare:runtime` 下载固定运行时，`npm run verify:runtime` 只校验；`npm run test:release` 验证缺失/损坏拒绝边界；`npm run verify:package` 验证最终包。旧 prepare-sherpa-runtime.mjs 转交统一准备脚本。详见 [可复现发布](REPRODUCIBLE_RELEASE.md)。
+
 |脚本|类别|入口|
 |---|---|---|
 | accept-v130-package.mjs | build | 间接引用或人工工具 |
